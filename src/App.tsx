@@ -10,7 +10,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Upload, BookOpen, Brain, FileText, Loader2, Settings } from 'lucide-react'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Upload, BookOpen, Brain, FileText, Loader2, Settings, Eye } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { EpubProcessor } from './services/epubProcessor'
@@ -66,6 +67,8 @@ function App() {
   const [error, setError] = useState('')
   const [useSmartDetection, setUseSmartDetection] = useState(false)
   const [skipNonEssentialChapters, setSkipNonEssentialChapters] = useState(true)
+  const [bookType, setBookType] = useState<'fiction' | 'non-fiction'>('non-fiction')
+
 
   // 从本地存储加载AI配置
   const loadAIConfig = useCallback(() => {
@@ -165,7 +168,7 @@ function App() {
 
         // 步骤2: 提取章节
         setCurrentStep('正在提取章节内容...')
-        chapters = await epubProcessor.extractChapters(epubData.book)
+        chapters = await epubProcessor.extractChapters(epubData.book, useSmartDetection, skipNonEssentialChapters)
         setProgress(20)
       } else if (isPdf) {
         const pdfProcessor = new PdfProcessor()
@@ -187,6 +190,15 @@ function App() {
       const totalChapters = chapters.length
       const processedChapters: Chapter[] = []
 
+      // 初始化书籍摘要状态，先显示基本信息
+      setBookSummary({
+        title: bookData.title,
+        author: bookData.author,
+        chapters: [],
+        connections: '',
+        overallSummary: ''
+      })
+
       debugger
 
       // 步骤3: 逐章处理
@@ -200,15 +212,23 @@ function App() {
         
         if (!summary) {
           // 使用AI服务总结章节
-          summary = await aiService.summarizeChapter(chapter.title, chapter.content)
+          summary = await aiService.summarizeChapter(chapter.title, chapter.content, bookType)
           cacheService.set(cacheKey, summary)
         }
         
-        processedChapters.push({
+        const processedChapter = {
           ...chapter,
           summary,
           processed: true
-        })
+        }
+        
+        processedChapters.push(processedChapter)
+        
+        // 每处理完一章就立即更新显示
+        setBookSummary(prevSummary => ({
+          ...prevSummary!,
+          chapters: [...processedChapters]
+        }))
         
         setProgress(20 + (i + 1) / totalChapters * 60)
       }
@@ -225,6 +245,12 @@ function App() {
       } else {
         console.log('✅ [DEBUG] 使用缓存的章节关联')
       }
+      
+      // 更新章节关联
+      setBookSummary(prevSummary => ({
+        ...prevSummary!,
+        connections
+      }))
       setProgress(85)
 
       // 步骤5: 生成全书总结
@@ -243,15 +269,13 @@ function App() {
       } else {
         console.log('✅ [DEBUG] 使用缓存的全书总结')
       }
-      setProgress(100)
-
-      setBookSummary({
-        title: bookData.title,
-        author: bookData.author,
-        chapters: processedChapters,
-        connections,
+      
+      // 更新全书总结
+      setBookSummary(prevSummary => ({
+        ...prevSummary!,
         overallSummary
-      })
+      }))
+      setProgress(100)
 
       setCurrentStep('处理完成！')
     } catch (err) {
@@ -383,43 +407,61 @@ function App() {
                   已选择: {file.name}
                 </div>
                 
-                {file.name.endsWith('.pdf') && (
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border">
-                      <div className="space-y-1">
-                        <Label htmlFor="smart-detection" className="text-sm font-medium">
-                          启用智能章节检测
-                        </Label>
-                        <p className="text-xs text-gray-600">
-                          当PDF没有目录时，尝试智能识别章节标题（如"第X章"、"Chapter X"等）
-                        </p>
-                      </div>
-                      <Switch
-                        id="smart-detection"
-                        checked={useSmartDetection}
-                        onCheckedChange={setUseSmartDetection}
-                        disabled={processing}
-                      />
-                    </div>
-                    
-                    <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border">
-                      <div className="space-y-1">
-                        <Label htmlFor="skip-non-essential" className="text-sm font-medium">
-                          跳过无关键内容章节
-                        </Label>
-                        <p className="text-xs text-gray-600">
-                          自动跳过致谢、推荐阅读、作者简介等非核心内容章节
-                        </p>
-                      </div>
-                      <Switch
-                        id="skip-non-essential"
-                        checked={skipNonEssentialChapters}
-                        onCheckedChange={setSkipNonEssentialChapters}
-                        disabled={processing}
-                      />
+                <div className="space-y-3">
+                  <div className="p-3 bg-purple-50 rounded-lg border">
+                    <div className="space-y-2">
+                      <Label htmlFor="book-type" className="text-sm font-medium">
+                        书籍类型
+                      </Label>
+                      <Select value={bookType} onValueChange={(value: 'fiction' | 'non-fiction') => setBookType(value)} disabled={processing}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="选择书籍类型" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="non-fiction">社科类</SelectItem>
+                          <SelectItem value="fiction">小说类</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-gray-600">
+                        选择书籍类型以获得更准确的章节总结。社科类适用于学术、商业、自助等非虚构类书籍；小说类适用于文学作品。
+                      </p>
                     </div>
                   </div>
-                )}
+                  
+                  <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border">
+                    <div className="space-y-1">
+                      <Label htmlFor="smart-detection" className="text-sm font-medium">
+                        启用智能章节检测
+                      </Label>
+                      <p className="text-xs text-gray-600">
+                        当文档没有目录时，尝试智能识别章节标题（如"第X章"、"Chapter X"等）
+                      </p>
+                    </div>
+                    <Switch
+                      id="smart-detection"
+                      checked={useSmartDetection}
+                      onCheckedChange={setUseSmartDetection}
+                      disabled={processing}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border">
+                    <div className="space-y-1">
+                      <Label htmlFor="skip-non-essential" className="text-sm font-medium">
+                        跳过无关键内容章节
+                      </Label>
+                      <p className="text-xs text-gray-600">
+                        自动跳过致谢、推荐阅读、作者简介等非核心内容章节
+                      </p>
+                    </div>
+                    <Switch
+                      id="skip-non-essential"
+                      checked={skipNonEssentialChapters}
+                      onCheckedChange={setSkipNonEssentialChapters}
+                      disabled={processing}
+                    />
+                  </div>
+                </div>
               </div>
             )}
             
@@ -486,13 +528,39 @@ function App() {
                 </TabsList>
                 
                 <TabsContent value="chapters" className="space-y-4">
-                  <ScrollArea className="h-96">
+                  <ScrollArea className="h-screen">
                     {bookSummary.chapters.map((chapter, index) => (
                       <Card key={chapter.id} className="mb-4">
                         <CardHeader className="pb-3">
-                          <CardTitle className="text-lg flex items-center gap-2">
-                            <Badge variant="outline">第{index + 1}章</Badge>
-                            {chapter.title}
+                          <CardTitle className="text-lg flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline"># {index + 1}</Badge>
+                              {chapter.title}
+                            </div>
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                >
+                                  <Eye className="h-4 w-4 mr-1" />
+                                  查看原文
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-4xl max-h-[80vh]">
+                                <DialogHeader>
+                                  <DialogTitle>{chapter.title} - 原文内容</DialogTitle>
+                                  <DialogDescription>
+                                    第 {index + 1} 章的完整原文内容
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <ScrollArea className="h-[60vh] w-full rounded-md border p-4">
+                                  <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                                    {chapter.content}
+                                  </div>
+                                </ScrollArea>
+                              </DialogContent>
+                            </Dialog>
                           </CardTitle>
                         </CardHeader>
                         <CardContent>

@@ -35,22 +35,33 @@ export class AIService {
     }
   }
 
-  async summarizeChapter(title: string, content: string): Promise<string> {
+  async summarizeChapter(title: string, content: string, bookType: 'fiction' | 'non-fiction' = 'non-fiction'): Promise<string> {
     try {
-      const prompt = `请为以下章节内容生成一个详细的中文总结：
+      let prompt: string
+      
+      if (bookType === 'fiction') {
+        prompt = `请为以下章节内容生成一个详细的中文总结：
 
 章节标题：${title}
 
 章节内容：
 ${content}
 
-请提供一个结构化的总结，包括：
-1. 主要内容概述
-2. 关键观点或情节
-3. 重要人物或概念
-4. 本章的意义或作用
+请用自然流畅的语言总结本章内容，包括主要情节发展、重要人物表现、关键观点或转折，以及本章在整个故事中的作用和意义。总结应该详细但简洁，大约200-300字。
 
-总结应该详细但简洁，大约200-300字。`
+注意：如果内容是致谢、目录、前言、序言等无实质故事内容的页面，请直接回复"无需总结"。`
+      } else {
+        prompt = `请为以下社科类书籍章节内容生成一个详细的中文总结：
+
+章节标题：${title}
+
+章节内容：
+${content}
+
+请用自然流畅的语言总结本章内容，重点阐述核心论点、主要观点、关键概念和理论框架，以及重要的数据、案例或研究发现。同时说明论证逻辑和实际应用价值。总结应该详细但简洁，大约200-300字，突出学术价值和实用性。
+
+注意：如果内容是致谢、目录、前言、序言、参考文献等无实质学术内容的页面，请直接回复"无需总结"。`
+      }
 
       const summary = await this.generateContent(prompt)
 

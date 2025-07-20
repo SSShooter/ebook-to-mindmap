@@ -48,7 +48,7 @@ export class EpubProcessor {
     }
   }
 
-  async extractChapters(book: Book): Promise<ChapterData[]> {
+  async extractChapters(book: Book, useSmartDetection: boolean = false, skipNonEssentialChapters: boolean = true): Promise<ChapterData[]> {
     try {
       const chapters: ChapterData[] = []
       
@@ -77,18 +77,17 @@ export class EpubProcessor {
           
           // section.load返回的是DOM元素，需要转换为字符串
           console.log(`📄 [DEBUG] 读取到内容长度: ${chapterHTML.length} 字符`)
-          console.log(`📄 [DEBUG] 内容预览 (前200字符):`, chapterHTML.substring(0, 200))
+          console.log(`📄 [DEBUG] 内容预览:`, chapterHTML)
           
           // 提取章节标题和纯文本内容
           const { title, textContent } = this.extractTextFromXHTML(chapterHTML)
           console.log(`📝 [DEBUG] 提取结果:`, {
             title: title,
             contentLength: textContent.trim().length,
-            contentPreview: textContent.trim().substring(0, 100)
           })
           
           // 检查是否应该跳过此章节
-          if (this.shouldSkipChapter(title)) {
+          if (skipNonEssentialChapters && this.shouldSkipChapter(title)) {
             console.log(`⚠️ [DEBUG] 跳过章节 "${title}" - 匹配跳过关键词`)
             continue
           }
@@ -111,15 +110,18 @@ export class EpubProcessor {
           continue
         }
       }
-      
-      console.log(`📊 [DEBUG] 最终提取到 ${chapters.length} 个有效章节`)
+      console.log(`📊 [DEBUG] 初步提取到 ${chapters.length} 个有效章节`)
       
       if (chapters.length === 0) {
         console.error(`❌ [DEBUG] 未找到有效章节内容，spine项目总数: ${spineItems.length}`)
         throw new Error('未找到有效的章节内容')
       }
       
-      return chapters
+      // 应用智能章节检测
+      const finalChapters = this.detectChapters(chapters, useSmartDetection)
+      console.log(`📊 [DEBUG] 最终提取到 ${finalChapters.length} 个章节`)
+      
+      return finalChapters
     } catch (error) {
       console.error(`❌ [DEBUG] 提取章节失败:`, error)
       throw new Error(`提取章节失败: ${error instanceof Error ? error.message : '未知错误'}`)
@@ -192,7 +194,7 @@ export class EpubProcessor {
         .trim()
       
       console.log(`✨ [DEBUG] 清理后文本长度: ${textContent.length}`)
-      console.log(`✨ [DEBUG] 清理后文本预览 (前100字符): "${textContent.substring(0, 100)}"`)
+      console.log(`✨ [DEBUG] 清理后文本预览 (前100字符): "${textContent}"`)
       
       return { title, textContent }
     } catch (error) {
@@ -241,8 +243,88 @@ export class EpubProcessor {
       .trim()
     
     console.log(`✨ [DEBUG] 正则方案最终文本长度: ${textContent.length}`)
-    console.log(`✨ [DEBUG] 正则方案文本预览 (前100字符): "${textContent.substring(0, 100)}"`)
+    console.log(`✨ [DEBUG] 正则方案文本预览 (前100字符): "${textContent}"`)
     
     return { title, textContent }
+  }
+
+  private detectChapters(chapters: ChapterData[], useSmartDetection: boolean): ChapterData[] {
+    if (!useSmartDetection) {
+      return chapters
+    }
+
+    console.log(`🧠 [DEBUG] 启用EPUB智能章节检测，原始章节数: ${chapters.length}`)
+    
+    const chapterPatterns = [
+      /^第[一二三四五六七八九十\d]+章[\s\S]*$/m,
+      /^Chapter\s+\d+[\s\S]*$/mi,
+      /^第[一二三四五六七八九十\d]+节[\s\S]*$/m,
+      /^\d+\.[\s\S]*$/m,
+      /^[一二三四五六七八九十]、[\s\S]*$/m
+    ]
+
+    const detectedChapters: ChapterData[] = []
+    let currentChapter: { id: string; title: string; content: string } | null = null
+    let chapterCount = 0
+
+    for (const chapter of chapters) {
+      const content = chapter.content.trim()
+      if (content.length < 100) continue // 跳过内容太少的章节
+
+      // 检查是否是新章节的开始
+      let isNewChapter = false
+      let chapterTitle = chapter.title
+
+      // 如果原标题不明确，尝试从内容中提取
+      if (!chapterTitle || chapterTitle.includes('章节') || chapterTitle.includes('Chapter')) {
+        for (const pattern of chapterPatterns) {
+          const match = content.match(pattern)
+          if (match) {
+            // 提取章节标题（取前100个字符作为标题）
+            const titleMatch = content.match(/^(.{1,100})/)
+            chapterTitle = titleMatch ? titleMatch[1].trim() : `章节 ${chapterCount + 1}`
+            isNewChapter = true
+            break
+          }
+        }
+      }
+
+      if (isNewChapter || !currentChapter) {
+        // 保存上一个章节
+        if (currentChapter && currentChapter.content.trim().length > 200) {
+          detectedChapters.push({
+            id: currentChapter.id,
+            title: currentChapter.title,
+            content: currentChapter.content.trim()
+          })
+        }
+
+        // 开始新章节
+        chapterCount++
+        currentChapter = {
+          id: chapter.id || `chapter-${chapterCount}`,
+          title: chapterTitle || `第 ${chapterCount} 章`,
+          content: content
+        }
+
+        console.log(`📖 [DEBUG] 检测到新章节: "${chapterTitle}"`)  
+      } else {
+        // 合并到当前章节
+        currentChapter.content += '\n\n' + content
+      }
+    }
+
+    // 保存最后一个章节
+    if (currentChapter && currentChapter.content.trim().length > 200) {
+      detectedChapters.push({
+        id: currentChapter.id,
+        title: currentChapter.title,
+        content: currentChapter.content.trim()
+      })
+    }
+
+    console.log(`🔍 [DEBUG] EPUB章节检测完成，找到 ${detectedChapters.length} 个章节`)
+    
+    return detectedChapters.length > 0 ? detectedChapters : chapters
   }
 }
