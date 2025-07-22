@@ -17,5 +17,6 @@ export {
 export const getTestConnectionPrompt = () => '请回复"连接成功"'
 
 export {
-  getMindMapPrompt
+  getChapterMindMapPrompt,
+  getMindMapArrowPrompt
 } from './mindmap'

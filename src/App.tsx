@@ -11,19 +11,23 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Upload, BookOpen, Brain, FileText, Loader2, Settings, Eye } from 'lucide-react'
+import { Upload, BookOpen, Brain, FileText, Loader2, Settings, Eye, Network } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { EpubProcessor } from './services/epubProcessor'
 import { PdfProcessor } from './services/pdfProcessor'
 import { AIService } from './services/geminiService'
 import { CacheService } from './services/cacheService'
+import MindElixirReact from './components/project/MindElixirReact'
+import type { MindElixirData } from 'mind-elixir'
+import type { Summary } from 'node_modules/mind-elixir/dist/types/summary'
 
 interface Chapter {
   id: string
   title: string
   content: string
   summary?: string
+  mindMap?: MindElixirData
   processed: boolean
 }
 
@@ -35,20 +39,19 @@ interface BookSummary {
   overallSummary: string
 }
 
+interface BookMindMap {
+  title: string
+  author: string
+  chapters: Chapter[]
+  combinedMindMap: MindElixirData | null
+}
+
 // AI配置接口
 interface AIConfig {
   provider: 'gemini' | 'openai'
   apiKey: string
   apiUrl: string
   model: string
-}
-
-// 默认配置
-const DEFAULT_CONFIG: AIConfig = {
-  provider: 'gemini',
-  apiKey: '',
-  apiUrl: 'https://api.openai.com/v1',
-  model: 'gemini-1.5-flash'
 }
 
 // 本地存储键名
@@ -64,6 +67,8 @@ function App() {
   const [progress, setProgress] = useState(0)
   const [currentStep, setCurrentStep] = useState('')
   const [bookSummary, setBookSummary] = useState<BookSummary | null>(null)
+  const [bookMindMap, setBookMindMap] = useState<BookMindMap | null>(null)
+  const [processingMode, setProcessingMode] = useState<'summary' | 'mindmap'>('summary')
   const [error, setError] = useState('')
   const [useSmartDetection, setUseSmartDetection] = useState(false)
   const [skipNonEssentialChapters, setSkipNonEssentialChapters] = useState(true)
@@ -112,7 +117,7 @@ function App() {
       apiUrl,
       model
     }
-    
+
     // 只有在配置有效时才保存（至少要有API Key）
     if (apiKey.trim()) {
       saveAIConfig(config)
@@ -131,17 +136,18 @@ function App() {
 
   const processEbook = useCallback(async () => {
     if (!file || !apiKey) {
-      setError('请选择文件并输入 Gemini API Key')
+      setError('请选择文件并输入 API Key')
       return
     }
 
     // 开始新任务时清空上次显示的内容
     setBookSummary(null)
+    setBookMindMap(null)
     setProcessing(true)
     setProgress(0)
     setError('')
     setCurrentStep('')
-    
+
     try {
       const aiService = new AIService({
         provider: aiProvider,
@@ -150,16 +156,16 @@ function App() {
         model: model || undefined
       })
       const cacheService = new CacheService()
-      
+
       let bookData: { title: string; author: string }
       let chapters: any[]
-      
+
       const isEpub = file.name.endsWith('.epub')
       const isPdf = file.name.endsWith('.pdf')
-      
+
       if (isEpub) {
         const epubProcessor = new EpubProcessor()
-        
+
         // 步骤1: 解析EPUB文件
         setCurrentStep('正在解析 EPUB 文件...')
         const epubData = await epubProcessor.parseEpub(file)
@@ -172,7 +178,7 @@ function App() {
         setProgress(20)
       } else if (isPdf) {
         const pdfProcessor = new PdfProcessor()
-        
+
         // 步骤1: 解析PDF文件
         setCurrentStep('正在解析 PDF 文件...')
         const pdfData = await pdfProcessor.parsePdf(file)
@@ -190,100 +196,191 @@ function App() {
       const totalChapters = chapters.length
       const processedChapters: Chapter[] = []
 
-      // 初始化书籍摘要状态，先显示基本信息
-      setBookSummary({
-        title: bookData.title,
-        author: bookData.author,
-        chapters: [],
-        connections: '',
-        overallSummary: ''
-      })
-
-      debugger
+      // 根据模式初始化状态
+      if (processingMode === 'summary') {
+        setBookSummary({
+          title: bookData.title,
+          author: bookData.author,
+          chapters: [],
+          connections: '',
+          overallSummary: ''
+        })
+      } else {
+        setBookMindMap({
+          title: bookData.title,
+          author: bookData.author,
+          chapters: [],
+          combinedMindMap: null
+        })
+      }
 
       // 步骤3: 逐章处理
       for (let i = 0; i < chapters.length; i++) {
         const chapter = chapters[i]
         setCurrentStep(`正在处理第 ${i + 1}/${totalChapters} 章: ${chapter.title}`)
-        
-        // 检查缓存
-        const cacheKey = `${file.name}_${chapter.id}`
-        let summary = cacheService.get(cacheKey)
-        
-        if (!summary) {
-          // 使用AI服务总结章节
-          summary = await aiService.summarizeChapter(chapter.title, chapter.content, bookType)
-          cacheService.set(cacheKey, summary)
+
+        let processedChapter: Chapter
+
+        if (processingMode === 'summary') {
+          // 文字总结模式
+          const cacheKey = `${file.name}_${chapter.id}_summary`
+          let summary = cacheService.get(cacheKey)
+
+          if (!summary) {
+            summary = await aiService.summarizeChapter(chapter.title, chapter.content, bookType)
+            cacheService.set(cacheKey, summary)
+          }
+
+          processedChapter = {
+            ...chapter,
+            summary,
+            processed: true
+          }
+
+          processedChapters.push(processedChapter)
+
+          setBookSummary(prevSummary => ({
+            ...prevSummary!,
+            chapters: [...processedChapters]
+          }))
+        } else {
+          // 思维导图模式
+          const cacheKey = `${file.name}_${chapter.id}_mindmap`
+          let mindMap: MindElixirData = cacheService.get(cacheKey)
+
+          if (!mindMap) {
+            mindMap = await aiService.generateChapterMindMap(chapter.title, chapter.content)
+            cacheService.set(cacheKey, mindMap)
+          }
+
+          if (!mindMap.nodeData) continue // 无需总结的章节
+          processedChapter = {
+            ...chapter,
+            mindMap,
+            processed: true
+          }
+
+          processedChapters.push(processedChapter)
+
+          setBookMindMap(prevMindMap => ({
+            ...prevMindMap!,
+            chapters: [...processedChapters]
+          }))
         }
-        
-        const processedChapter = {
-          ...chapter,
-          summary,
-          processed: true
-        }
-        
-        processedChapters.push(processedChapter)
-        
-        // 每处理完一章就立即更新显示
-        setBookSummary(prevSummary => ({
-          ...prevSummary!,
-          chapters: [...processedChapters]
-        }))
-        
+
         setProgress(20 + (i + 1) / totalChapters * 60)
       }
 
-      // 步骤4: 分析章节关联
-      setCurrentStep('正在分析章节关联...')
-      const connectionsCacheKey = CacheService.generateKey(file.name, 'connections', 'v1')
-      let connections = cacheService.get(connectionsCacheKey)
-      if (!connections) {
-        console.log('🔄 [DEBUG] 缓存未命中，开始分析章节关联')
-        connections = await aiService.analyzeConnections(processedChapters)
-        cacheService.set(connectionsCacheKey, connections)
-        console.log('💾 [DEBUG] 章节关联已缓存')
-      } else {
-        console.log('✅ [DEBUG] 使用缓存的章节关联')
-      }
-      
-      // 更新章节关联
-      setBookSummary(prevSummary => ({
-        ...prevSummary!,
-        connections
-      }))
-      setProgress(85)
+      if (processingMode === 'summary') {
+        // 文字总结模式的后续步骤
+        // 步骤4: 分析章节关联
+        setCurrentStep('正在分析章节关联...')
+        const connectionsCacheKey = CacheService.generateKey(file.name, 'connections', 'v1')
+        let connections = cacheService.get(connectionsCacheKey)
+        if (!connections) {
+          console.log('🔄 [DEBUG] 缓存未命中，开始分析章节关联')
+          connections = await aiService.analyzeConnections(processedChapters)
+          cacheService.set(connectionsCacheKey, connections)
+          console.log('💾 [DEBUG] 章节关联已缓存')
+        } else {
+          console.log('✅ [DEBUG] 使用缓存的章节关联')
+        }
 
-      // 步骤5: 生成全书总结
-      setCurrentStep('正在生成全书总结...')
-      const overallSummaryCacheKey = CacheService.generateKey(file.name, 'overall-summary', 'v1')
-      let overallSummary = cacheService.get(overallSummaryCacheKey)
-      if (!overallSummary) {
-        console.log('🔄 [DEBUG] 缓存未命中，开始生成全书总结')
-        overallSummary = await aiService.generateOverallSummary(
-          bookData.title,
-          processedChapters,
+        setBookSummary(prevSummary => ({
+          ...prevSummary!,
           connections
-        )
-        cacheService.set(overallSummaryCacheKey, overallSummary)
-        console.log('💾 [DEBUG] 全书总结已缓存')
-      } else {
-        console.log('✅ [DEBUG] 使用缓存的全书总结')
-      }
-      
-      // 更新全书总结
-      setBookSummary(prevSummary => ({
-        ...prevSummary!,
-        overallSummary
-      }))
-      setProgress(100)
+        }))
+        setProgress(85)
 
+        // 步骤5: 生成全书总结
+        setCurrentStep('正在生成全书总结...')
+        const overallSummaryCacheKey = CacheService.generateKey(file.name, 'overall-summary', 'v1')
+        let overallSummary = cacheService.get(overallSummaryCacheKey)
+        if (!overallSummary) {
+          console.log('🔄 [DEBUG] 缓存未命中，开始生成全书总结')
+          overallSummary = await aiService.generateOverallSummary(
+            bookData.title,
+            processedChapters,
+            connections
+          )
+          cacheService.set(overallSummaryCacheKey, overallSummary)
+          console.log('💾 [DEBUG] 全书总结已缓存')
+        } else {
+          console.log('✅ [DEBUG] 使用缓存的全书总结')
+        }
+
+        setBookSummary(prevSummary => ({
+          ...prevSummary!,
+          overallSummary
+        }))
+      } else {
+        // 思维导图模式的后续步骤
+        // 步骤4: 合并章节思维导图
+        setCurrentStep('正在合并章节思维导图...')
+        const combinedMindMapCacheKey = CacheService.generateKey(file.name, 'combined-mindmap', 'v1')
+        let combinedMindMap: MindElixirData = cacheService.get(combinedMindMapCacheKey)
+
+        if (!combinedMindMap) {
+          console.log('🔄 [DEBUG] 缓存未命中，开始合并思维导图')
+          // 创建根节点
+          const rootNode = {
+            topic: bookData.title,
+            id: '0',
+            tags: ['全书'],
+            children: processedChapters.map((chapter, index) => ({
+              topic: chapter.title,
+              id: `chapter_${index + 1}`,
+              children: chapter.mindMap?.nodeData?.children || []
+            }))
+          }
+
+          combinedMindMap = {
+            nodeData: rootNode,
+            arrows: [],
+            summaries: processedChapters.reduce((acc, chapter) => acc.concat(chapter.mindMap?.summaries || []), [] as Summary[])
+          }
+
+          cacheService.set(combinedMindMapCacheKey, combinedMindMap)
+          console.log('💾 [DEBUG] 合并思维导图已缓存')
+        } else {
+          console.log('✅ [DEBUG] 使用缓存的合并思维导图')
+        }
+
+        setProgress(85)
+
+        // 步骤5: 生成思维导图箭头和全书总结节点
+        setCurrentStep('正在生成思维导图连接和总结...')
+        const arrowsCacheKey = CacheService.generateKey(file.name, 'mindmap-arrows', 'v1')
+        let arrowsData = cacheService.get(arrowsCacheKey)
+
+        if (!arrowsData) {
+          console.log('🔄 [DEBUG] 缓存未命中，开始生成箭头')
+          arrowsData = await aiService.generateMindMapArrows(combinedMindMap)
+          cacheService.set(arrowsCacheKey, arrowsData)
+          console.log('💾 [DEBUG] 思维导图箭头已缓存', arrowsData)
+        } else {
+          console.log('✅ [DEBUG] 使用缓存的思维导图箭头', arrowsData)
+        }
+
+        // 合并箭头数据
+        if (arrowsData?.arrows) {
+          combinedMindMap.arrows = arrowsData.arrows
+        }
+
+        setBookMindMap(prevMindMap => ({
+          ...prevMindMap!,
+          combinedMindMap
+        }))
+      }
+
+      setProgress(100)
       setCurrentStep('处理完成！')
     } catch (err) {
       setError(err instanceof Error ? err.message : '处理过程中发生错误')
     } finally {
       setProcessing(false)
     }
-  }, [file, aiProvider, apiKey, apiUrl, model])
+  }, [file, aiProvider, apiKey, apiUrl, model, processingMode, bookType, useSmartDetection, skipNonEssentialChapters])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
@@ -319,14 +416,14 @@ function App() {
                   disabled={processing}
                 />
               </div>
-              
+
               {/* AI 服务配置 */}
               <div className="space-y-4 p-4 bg-gray-50 rounded-lg border">
                 <div className="flex items-center gap-2 mb-3">
                   <Settings className="h-4 w-4" />
                   <Label className="text-sm font-medium">AI 服务配置</Label>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="ai-provider">AI 提供商</Label>
@@ -340,7 +437,7 @@ function App() {
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="apikey">
                       {aiProvider === 'gemini' ? 'Gemini API Key' : 'API Token'}
@@ -355,7 +452,7 @@ function App() {
                     />
                   </div>
                 </div>
-                
+
                 {aiProvider === 'openai' && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -369,7 +466,7 @@ function App() {
                         disabled={processing}
                       />
                     </div>
-                    
+
                     <div className="space-y-2">
                       <Label htmlFor="model">模型名称（可选）</Label>
                       <Input
@@ -383,7 +480,7 @@ function App() {
                     </div>
                   </div>
                 )}
-                
+
                 {aiProvider === 'gemini' && (
                   <div className="space-y-2">
                     <Label htmlFor="gemini-model">模型名称（可选）</Label>
@@ -399,35 +496,55 @@ function App() {
                 )}
               </div>
             </div>
-            
+
             {file && (
               <div className="space-y-3">
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <FileText className="h-4 w-4" />
                   已选择: {file.name}
                 </div>
-                
+
                 <div className="space-y-3">
                   <div className="p-3 bg-purple-50 rounded-lg border">
-                    <div className="space-y-2">
-                      <Label htmlFor="book-type" className="text-sm font-medium">
-                        书籍类型
-                      </Label>
-                      <Select value={bookType} onValueChange={(value: 'fiction' | 'non-fiction') => setBookType(value)} disabled={processing}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="选择书籍类型" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="non-fiction">社科类</SelectItem>
-                          <SelectItem value="fiction">小说类</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <p className="text-xs text-gray-600">
-                        选择书籍类型以获得更准确的章节总结。社科类适用于学术、商业、自助等非虚构类书籍；小说类适用于文学作品。
-                      </p>
+                    <div className="space-y-3">
+                      <div className="space-y-2">
+                        <Label htmlFor="processing-mode" className="text-sm font-medium">
+                          处理模式
+                        </Label>
+                        <Select value={processingMode} onValueChange={(value: 'summary' | 'mindmap') => setProcessingMode(value)} disabled={processing}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="选择处理模式" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="summary">文字总结模式</SelectItem>
+                            <SelectItem value="mindmap">思维导图模式</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <p className="text-xs text-gray-600">
+                          文字总结模式生成章节文字总结和关联分析；思维导图模式生成可视化的思维导图结构。
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="book-type" className="text-sm font-medium">
+                          书籍类型
+                        </Label>
+                        <Select value={bookType} onValueChange={(value: 'fiction' | 'non-fiction') => setBookType(value)} disabled={processing}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="选择书籍类型" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="non-fiction">社科类</SelectItem>
+                            <SelectItem value="fiction">小说类</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <p className="text-xs text-gray-600">
+                          选择书籍类型以获得更准确的章节{processingMode === 'summary' ? '总结' : '思维导图'}。社科类适用于学术、商业、自助等非虚构类书籍；小说类适用于文学作品。
+                        </p>
+                      </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border">
                     <div className="space-y-1">
                       <Label htmlFor="smart-detection" className="text-sm font-medium">
@@ -444,7 +561,7 @@ function App() {
                       disabled={processing}
                     />
                   </div>
-                  
+
                   <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border">
                     <div className="space-y-1">
                       <Label htmlFor="skip-non-essential" className="text-sm font-medium">
@@ -464,9 +581,9 @@ function App() {
                 </div>
               </div>
             )}
-            
-            <Button 
-              onClick={processEbook} 
+
+            <Button
+              onClick={processEbook}
               disabled={!file || !apiKey || processing}
               className="w-full"
             >
@@ -508,97 +625,181 @@ function App() {
         )}
 
         {/* 结果展示 */}
-        {bookSummary && (
+        {(bookSummary || bookMindMap) && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <BookOpen className="h-5 w-5" />
-                《{bookSummary.title}》解析结果
+                {processingMode === 'summary' ? (
+                  <><BookOpen className="h-5 w-5" />《{bookSummary?.title}》解析结果</>
+                ) : (
+                  <><Network className="h-5 w-5" />《{bookMindMap?.title}》思维导图</>
+                )}
               </CardTitle>
               <CardDescription>
-                作者: {bookSummary.author} | 共 {bookSummary.chapters.length} 章
+                作者: {bookSummary?.author || bookMindMap?.author} | 共 {bookSummary?.chapters.length || bookMindMap?.chapters.length} 章
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Tabs defaultValue="chapters" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="chapters">章节总结</TabsTrigger>
-                  <TabsTrigger value="connections">章节关联</TabsTrigger>
-                  <TabsTrigger value="overall">全书总结</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="chapters" className="space-y-4">
-                  <ScrollArea className="h-screen">
-                    {bookSummary.chapters.map((chapter, index) => (
-                      <Card key={chapter.id} className="mb-4">
-                        <CardHeader className="pb-3">
-                          <CardTitle className="text-lg flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <Badge variant="outline"># {index + 1}</Badge>
-                              {chapter.title}
+              {processingMode === 'summary' && bookSummary ? (
+                <Tabs defaultValue="chapters" className="w-full">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="chapters">章节总结</TabsTrigger>
+                    <TabsTrigger value="connections">章节关联</TabsTrigger>
+                    <TabsTrigger value="overall">全书总结</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="chapters" className="space-y-4">
+                    <ScrollArea className="h-screen">
+                      {bookSummary.chapters.map((chapter, index) => (
+                        <Card key={chapter.id} className="mb-4">
+                          <CardHeader className="pb-3">
+                            <CardTitle className="text-lg flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline"># {index + 1}</Badge>
+                                {chapter.title}
+                              </div>
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                  >
+                                    <Eye className="h-4 w-4 mr-1" />
+                                    查看原文
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-4xl max-h-[80vh]">
+                                  <DialogHeader>
+                                    <DialogTitle>{chapter.title} - 原文内容</DialogTitle>
+                                    <DialogDescription>
+                                      第 {index + 1} 章的完整原文内容
+                                    </DialogDescription>
+                                  </DialogHeader>
+                                  <ScrollArea className="h-[60vh] w-full rounded-md border p-4">
+                                    <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                                      {chapter.content}
+                                    </div>
+                                  </ScrollArea>
+                                </DialogContent>
+                              </Dialog>
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="text-gray-700 leading-relaxed prose prose-sm max-w-none">
+                              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                {chapter.summary || ''}
+                              </ReactMarkdown>
                             </div>
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                >
-                                  <Eye className="h-4 w-4 mr-1" />
-                                  查看原文
-                                </Button>
-                              </DialogTrigger>
-                              <DialogContent className="max-w-4xl max-h-[80vh]">
-                                <DialogHeader>
-                                  <DialogTitle>{chapter.title} - 原文内容</DialogTitle>
-                                  <DialogDescription>
-                                    第 {index + 1} 章的完整原文内容
-                                  </DialogDescription>
-                                </DialogHeader>
-                                <ScrollArea className="h-[60vh] w-full rounded-md border p-4">
-                                  <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                                    {chapter.content}
-                                  </div>
-                                </ScrollArea>
-                              </DialogContent>
-                            </Dialog>
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-gray-700 leading-relaxed prose prose-sm max-w-none">
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                              {chapter.summary || ''}
-                            </ReactMarkdown>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </ScrollArea>
+                  </TabsContent>
+
+                  <TabsContent value="connections">
+                    <Card>
+                      <CardContent className="pt-6">
+                        <div className="prose max-w-none text-gray-700 leading-relaxed">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {bookSummary.connections}
+                          </ReactMarkdown>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  <TabsContent value="overall">
+                    <Card>
+                      <CardContent className="pt-6">
+                        <div className="prose max-w-none text-gray-700 leading-relaxed">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {bookSummary.overallSummary}
+                          </ReactMarkdown>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                </Tabs>
+              ) : processingMode === 'mindmap' && bookMindMap ? (
+                <Tabs defaultValue="chapters" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="chapters">章节思维导图</TabsTrigger>
+                    <TabsTrigger value="combined">整书思维导图</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="chapters" className="space-y-4">
+                    <ScrollArea className="h-screen">
+                      {bookMindMap.chapters.map((chapter, index) => (
+                        <Card key={chapter.id} className="mb-4">
+                          <CardHeader className="pb-3">
+                            <CardTitle className="text-lg flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline"># {index + 1}</Badge>
+                                {chapter.title}
+                              </div>
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                  >
+                                    <Eye className="h-4 w-4 mr-1" />
+                                    查看原文
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-4xl max-h-[80vh]">
+                                  <DialogHeader>
+                                    <DialogTitle>{chapter.title} - 原文内容</DialogTitle>
+                                    <DialogDescription>
+                                      第 {index + 1} 章的完整原文内容
+                                    </DialogDescription>
+                                  </DialogHeader>
+                                  <ScrollArea className="h-[60vh] w-full rounded-md border p-4">
+                                    <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                                      {chapter.content}
+                                    </div>
+                                  </ScrollArea>
+                                </DialogContent>
+                              </Dialog>
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            {chapter.mindMap && (
+                              <div className="border rounded-lg">
+                                <MindElixirReact
+                                  data={chapter.mindMap}
+                                  fitPage={false}
+                                  className="w-[400px] h-[400px]"
+                                />
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </ScrollArea>
+                  </TabsContent>
+
+                  <TabsContent value="combined">
+                    <Card>
+                      <CardContent className="pt-6">
+                        {bookMindMap.combinedMindMap ? (
+                          <div className="border rounded-lg" style={{ height: '600px' }}>
+                            <MindElixirReact
+                              data={bookMindMap.combinedMindMap}
+                              fitPage={false}
+                              className="w-full h-full"
+                            />
                           </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </ScrollArea>
-                </TabsContent>
-                
-                <TabsContent value="connections">
-                  <Card>
-                    <CardContent className="pt-6">
-                      <div className="prose max-w-none text-gray-700 leading-relaxed">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                          {bookSummary.connections}
-                        </ReactMarkdown>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-                
-                <TabsContent value="overall">
-                  <Card>
-                    <CardContent className="pt-6">
-                      <div className="prose max-w-none text-gray-700 leading-relaxed">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                          {bookSummary.overallSummary}
-                        </ReactMarkdown>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-              </Tabs>
+                        ) : (
+                          <div className="text-center text-gray-500 py-8">
+                            正在生成整书思维导图...
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                </Tabs>
+              ) : null}
             </CardContent>
           </Card>
         )}
