@@ -128,6 +128,9 @@ importers:
       lucide-react:
         specifier: ^0.525.0
         version: 0.525.0(react@19.1.0)
+      mind-elixir:
+        specifier: ^5.0.2
+        version: 5.0.2
       next-themes:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -2366,6 +2369,9 @@ packages:
   mimic-fn@3.1.0:
     resolution: {integrity: sha512-Ysbi9uYW9hFyfrThdDEQuykN4Ey6BuwPD2kpI5ES/nFTDn/98yxYNLZJcgUAKPT/mcrLLKaGzJR9YVxJrIdASQ==}
     engines: {node: '>=8'}
+
+  mind-elixir@5.0.2:
+    resolution: {integrity: sha512-ucSTSAT5y5bqDjf1dhlPCpPNQ1WBaaN2edvp2mFTmQgSWdusoRJIvZrnqNcoYAV3MZ6o/WtCfbG3hCbH6DrOgA==}
 
   minimatch@3.1.2:
     resolution: {integrity: sha512-J7p63hRiAjw1NDEww1W7i37+ByIrOWO5XQQAzZ3VOcL0PNybwpfmV/N05zFAzwQ9USyEcX6t3UO+K5aqBQOIHw==}
@@ -5125,6 +5131,8 @@ snapshots:
       mime-db: 1.52.0
 
   mimic-fn@3.1.0: {}
+
+  mind-elixir@5.0.2: {}
 
   minimatch@3.1.2:
     dependencies:

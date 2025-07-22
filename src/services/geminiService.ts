@@ -1,4 +1,11 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
+import {
+  getFictionChapterSummaryPrompt,
+  getNonFictionChapterSummaryPrompt,
+  getChapterConnectionsAnalysisPrompt,
+  getOverallSummaryPrompt,
+  getTestConnectionPrompt
+} from './prompts'
 
 interface Chapter {
   id: string
@@ -37,31 +44,9 @@ export class AIService {
 
   async summarizeChapter(title: string, content: string, bookType: 'fiction' | 'non-fiction' = 'non-fiction'): Promise<string> {
     try {
-      let prompt: string
-      
-      if (bookType === 'fiction') {
-        prompt = `请为以下章节内容生成一个详细的中文总结：
-
-章节标题：${title}
-
-章节内容：
-${content}
-
-请用自然流畅的语言总结本章内容，包括主要情节发展、重要人物表现、关键观点或转折，以及本章在整个故事中的作用和意义。总结应该详细但简洁，大约200-300字。
-
-注意：如果内容是致谢、目录、前言、序言等无实质故事内容的页面，请直接回复"无需总结"。`
-      } else {
-        prompt = `请为以下社科类书籍章节内容生成一个详细的中文总结：
-
-章节标题：${title}
-
-章节内容：
-${content}
-
-请用自然流畅的语言总结本章内容，重点阐述核心论点、主要观点、关键概念和理论框架，以及重要的数据、案例或研究发现。同时说明论证逻辑和实际应用价值。总结应该详细但简洁，大约200-300字，突出学术价值和实用性。
-
-注意：如果内容是致谢、目录、前言、序言、参考文献等无实质学术内容的页面，请直接回复"无需总结"。`
-      }
+      const prompt = bookType === 'fiction' 
+        ? getFictionChapterSummaryPrompt(title, content)
+        : getNonFictionChapterSummaryPrompt(title, content)
 
       const summary = await this.generateContent(prompt)
 
@@ -82,18 +67,7 @@ ${content}
         `第${index + 1}章 - ${chapter.title}:\n${chapter.summary || '无总结'}`
       ).join('\n\n')
 
-      const prompt = `请分析以下各章节之间的关联性和逻辑关系：
-
-${chapterSummaries}
-
-请从以下角度进行分析：
-1. 章节间的逻辑递进关系
-2. 主题和概念的发展脉络
-3. 人物或情节的连贯性
-4. 重要观点的呼应和深化
-5. 整体结构的安排意图
-
-请提供一个详细的关联性分析，帮助读者理解各章节如何共同构建整本书的主题。`
+      const prompt = getChapterConnectionsAnalysisPrompt(chapterSummaries)
 
       const connections = await this.generateContent(prompt)
 
@@ -118,23 +92,7 @@ ${chapterSummaries}
         `第${index + 1}章：${chapter.title}`
       ).join('\n')
 
-      const prompt = `请为《${bookTitle}》这本书生成一个全面的总结报告：
-
-书籍章节结构：
-${chapterInfo}
-
-章节关联分析：
-${connections}
-
-请生成一个包含以下内容的全书总结：
-
-1. **核心主题**：书籍的主要思想和核心观点
-2. **内容架构**：全书的逻辑结构和组织方式
-3. **关键洞察**：最重要的观点、发现或启示
-4. **实用价值**：对读者的意义和应用价值
-5. **阅读建议**：如何更好地理解和应用书中内容
-
-总结应该全面而深入，大约500-800字，帮助读者快速掌握全书精髓。`
+      const prompt = getOverallSummaryPrompt(bookTitle, chapterInfo, connections)
 
       const summary = await this.generateContent(prompt)
 
@@ -187,7 +145,7 @@ ${connections}
   // 辅助方法：检查API连接
   async testConnection(): Promise<boolean> {
     try {
-      const text = await this.generateContent('请回复"连接成功"')
+      const text = await this.generateContent(getTestConnectionPrompt())
       return text.includes('连接成功') || text.includes('成功')
     } catch (error) {
       return false
