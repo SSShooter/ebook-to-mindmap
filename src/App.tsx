@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Upload, BookOpen, Brain, FileText, Loader2, Settings, Eye, Network } from 'lucide-react'
+import { Upload, BookOpen, Brain, FileText, Loader2, Settings, Eye, Network, Trash2 } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { EpubProcessor } from './services/epubProcessor'
@@ -21,6 +21,8 @@ import { CacheService } from './services/cacheService'
 import MindElixirReact from './components/project/MindElixirReact'
 import type { MindElixirData } from 'mind-elixir'
 import type { Summary } from 'node_modules/mind-elixir/dist/types/summary'
+import { toast } from 'sonner'
+import { Toaster } from '@/components/ui/sonner'
 
 interface Chapter {
   id: string
@@ -73,7 +75,7 @@ function App() {
   const [useSmartDetection, setUseSmartDetection] = useState(false)
   const [skipNonEssentialChapters, setSkipNonEssentialChapters] = useState(true)
   const [bookType, setBookType] = useState<'fiction' | 'non-fiction'>('non-fiction')
-
+  const [cacheService] = useState(new CacheService())
 
   // 从本地存储加载AI配置
   const loadAIConfig = useCallback(() => {
@@ -134,6 +136,58 @@ function App() {
     }
   }, [])
 
+  // 清除章节缓存的函数
+  const clearChapterCache = useCallback((chapterId: string) => {
+    if (!file) return
+
+    // 根据处理模式确定缓存键
+    const cacheKey = processingMode === 'summary'
+      ? `${file.name}_${chapterId}_summary`
+      : `${file.name}_${chapterId}_mindmap`
+
+    // 删除缓存
+    if (cacheService.delete(cacheKey)) {
+      // 使用toast显示提示信息
+      toast.success('已清除缓存，下次处理将重新生成内容', {
+        duration: 3000,
+        position: 'top-center',
+      })
+    }
+  }, [file, processingMode, cacheService])
+
+  // 清除整本书缓存的函数
+  const clearBookCache = useCallback(() => {
+    if (!file) return
+
+    // 获取缓存统计信息
+    const stats = cacheService.getStats()
+    const bookPrefix = `${file.name}_`
+    
+    // 计数器，记录删除的缓存项数量
+    let deletedCount = 0
+    
+    // 遍历所有缓存键，删除与当前书籍相关的所有缓存
+    stats.keys.forEach(key => {
+      if (key.startsWith(bookPrefix)) {
+        cacheService.delete(key)
+        deletedCount++
+      }
+    })
+    
+    // 使用toast显示提示信息
+    if (deletedCount > 0) {
+      toast.success(`已清除${deletedCount}项缓存，下次处理将重新生成所有内容`, {
+        duration: 3000,
+        position: 'top-center',
+      })
+    } else {
+      toast.info('没有找到可清除的缓存', {
+        duration: 3000,
+        position: 'top-center',
+      })
+    }
+  }, [file, cacheService])
+
   const processEbook = useCallback(async () => {
     if (!file || !apiKey) {
       setError('请选择文件并输入 API Key')
@@ -155,7 +209,6 @@ function App() {
         apiUrl: aiProvider === 'openai' ? apiUrl : undefined,
         model: model || undefined
       })
-      const cacheService = new CacheService()
 
       let bookData: { title: string; author: string }
       let chapters: any[]
@@ -380,10 +433,11 @@ function App() {
     } finally {
       setProcessing(false)
     }
-  }, [file, aiProvider, apiKey, apiUrl, model, processingMode, bookType, useSmartDetection, skipNonEssentialChapters])
+  }, [file, aiProvider, apiKey, apiUrl, model, processingMode, bookType, useSmartDetection, skipNonEssentialChapters, cacheService])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+      <Toaster />
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold text-gray-900 flex items-center justify-center gap-2">
@@ -499,9 +553,21 @@ function App() {
 
             {file && (
               <div className="space-y-3">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <FileText className="h-4 w-4" />
-                  已选择: {file.name}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <FileText className="h-4 w-4" />
+                    已选择: {file.name}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={clearBookCache}
+                    disabled={processing}
+                    className="flex items-center gap-1 text-red-500 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    清除整书缓存
+                  </Button>
                 </div>
 
                 <div className="space-y-3">
@@ -658,30 +724,40 @@ function App() {
                                 <Badge variant="outline"># {index + 1}</Badge>
                                 {chapter.title}
                               </div>
-                              <Dialog>
-                                <DialogTrigger asChild>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                  >
-                                    <Eye className="h-4 w-4 mr-1" />
-                                    查看原文
-                                  </Button>
-                                </DialogTrigger>
-                                <DialogContent className="max-w-4xl max-h-[80vh]">
-                                  <DialogHeader>
-                                    <DialogTitle>{chapter.title} - 原文内容</DialogTitle>
-                                    <DialogDescription>
-                                      第 {index + 1} 章的完整原文内容
-                                    </DialogDescription>
-                                  </DialogHeader>
-                                  <ScrollArea className="h-[60vh] w-full rounded-md border p-4">
-                                    <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                                      {chapter.content}
-                                    </div>
-                                  </ScrollArea>
-                                </DialogContent>
-                              </Dialog>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => clearChapterCache(chapter.id)}
+                                >
+                                  <Trash2 className="h-4 w-4 mr-1" />
+                                  清除缓存
+                                </Button>
+                                <Dialog>
+                                  <DialogTrigger asChild>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                    >
+                                      <Eye className="h-4 w-4 mr-1" />
+                                      查看原文
+                                    </Button>
+                                  </DialogTrigger>
+                                  <DialogContent className="max-w-4xl max-h-[80vh]">
+                                    <DialogHeader>
+                                      <DialogTitle>{chapter.title} - 原文内容</DialogTitle>
+                                      <DialogDescription>
+                                        第 {index + 1} 章的完整原文内容
+                                      </DialogDescription>
+                                    </DialogHeader>
+                                    <ScrollArea className="h-[60vh] w-full rounded-md border p-4">
+                                      <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                                        {chapter.content}
+                                      </div>
+                                    </ScrollArea>
+                                  </DialogContent>
+                                </Dialog>
+                              </div>
                             </CardTitle>
                           </CardHeader>
                           <CardContent>
@@ -737,30 +813,40 @@ function App() {
                                 <Badge variant="outline"># {index + 1}</Badge>
                                 {chapter.title}
                               </div>
-                              <Dialog>
-                                <DialogTrigger asChild>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                  >
-                                    <Eye className="h-4 w-4 mr-1" />
-                                    查看原文
-                                  </Button>
-                                </DialogTrigger>
-                                <DialogContent className="max-w-4xl max-h-[80vh]">
-                                  <DialogHeader>
-                                    <DialogTitle>{chapter.title} - 原文内容</DialogTitle>
-                                    <DialogDescription>
-                                      第 {index + 1} 章的完整原文内容
-                                    </DialogDescription>
-                                  </DialogHeader>
-                                  <ScrollArea className="h-[60vh] w-full rounded-md border p-4">
-                                    <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                                      {chapter.content}
-                                    </div>
-                                  </ScrollArea>
-                                </DialogContent>
-                              </Dialog>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => clearChapterCache(chapter.id)}
+                                >
+                                  <Trash2 className="h-4 w-4 mr-1" />
+                                  清除缓存
+                                </Button>
+                                <Dialog>
+                                  <DialogTrigger asChild>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                    >
+                                      <Eye className="h-4 w-4 mr-1" />
+                                      查看原文
+                                    </Button>
+                                  </DialogTrigger>
+                                  <DialogContent className="max-w-4xl max-h-[80vh]">
+                                    <DialogHeader>
+                                      <DialogTitle>{chapter.title} - 原文内容</DialogTitle>
+                                      <DialogDescription>
+                                        第 {index + 1} 章的完整原文内容
+                                      </DialogDescription>
+                                    </DialogHeader>
+                                    <ScrollArea className="h-[60vh] w-full rounded-md border p-4">
+                                      <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                                        {chapter.content}
+                                      </div>
+                                    </ScrollArea>
+                                  </DialogContent>
+                                </Dialog>
+                              </div>
                             </CardTitle>
                           </CardHeader>
                           <CardContent>
