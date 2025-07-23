@@ -66,7 +66,8 @@
     "tailwindcss": "^4.1.11",
     "vaul": "^1.1.2",
     "xmldom": "^0.6.0",
-    "zod": "^4.0.5"
+    "zod": "^4.0.5",
+    "zustand": "^5.0.6"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.1",

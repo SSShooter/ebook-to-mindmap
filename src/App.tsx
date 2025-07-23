@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
@@ -48,83 +48,38 @@ interface BookMindMap {
   combinedMindMap: MindElixirData | null
 }
 
-// AI配置接口
-interface AIConfig {
-  provider: 'gemini' | 'openai'
-  apiKey: string
-  apiUrl: string
-  model: string
-}
-
-// 本地存储键名
-const AI_CONFIG_STORAGE_KEY = 'ebook-mindmap-ai-config'
+// 导入配置store
+import { useConfigStore, useAIConfig, useProcessingOptions } from './stores/configStore'
 
 function App() {
   const [file, setFile] = useState<File | null>(null)
-  const [aiProvider, setAiProvider] = useState<'gemini' | 'openai'>('gemini')
-  const [apiKey, setApiKey] = useState('')
-  const [apiUrl, setApiUrl] = useState('https://api.openai.com/v1')
-  const [model, setModel] = useState('gemini-1.5-flash')
   const [processing, setProcessing] = useState(false)
   const [progress, setProgress] = useState(0)
   const [currentStep, setCurrentStep] = useState('')
   const [bookSummary, setBookSummary] = useState<BookSummary | null>(null)
   const [bookMindMap, setBookMindMap] = useState<BookMindMap | null>(null)
-  const [processingMode, setProcessingMode] = useState<'summary' | 'mindmap'>('summary')
   const [error, setError] = useState('')
-  const [useSmartDetection, setUseSmartDetection] = useState(false)
-  const [skipNonEssentialChapters, setSkipNonEssentialChapters] = useState(true)
-  const [bookType, setBookType] = useState<'fiction' | 'non-fiction'>('non-fiction')
   const [cacheService] = useState(new CacheService())
 
-  // 从本地存储加载AI配置
-  const loadAIConfig = useCallback(() => {
-    try {
-      const savedConfig = localStorage.getItem(AI_CONFIG_STORAGE_KEY)
-      if (savedConfig) {
-        const config: AIConfig = JSON.parse(savedConfig)
-        setAiProvider(config.provider)
-        setApiKey(config.apiKey)
-        setApiUrl(config.apiUrl)
-        setModel(config.model)
-        console.log('✅ [DEBUG] 已加载保存的AI配置:', config.provider)
-      } else {
-        console.log('ℹ️ [DEBUG] 未找到保存的AI配置，使用默认配置')
-      }
-    } catch (error) {
-      console.error('❌ [DEBUG] 加载AI配置失败:', error)
-    }
-  }, [])
+  // 使用zustand store管理配置
+  const aiConfig = useAIConfig()
+  const processingOptions = useProcessingOptions()
+  const {
+    setAiProvider,
+    setApiKey,
+    setApiUrl,
+    setModel,
+    setProcessingMode,
+    setBookType,
+    setUseSmartDetection,
+    setSkipNonEssentialChapters
+  } = useConfigStore()
 
-  // 保存AI配置到本地存储
-  const saveAIConfig = useCallback((config: AIConfig) => {
-    try {
-      localStorage.setItem(AI_CONFIG_STORAGE_KEY, JSON.stringify(config))
-      console.log('💾 [DEBUG] AI配置已保存:', config.provider)
-    } catch (error) {
-      console.error('❌ [DEBUG] 保存AI配置失败:', error)
-    }
-  }, [])
+  // 从store中解构状态值
+  const { provider: aiProvider, apiKey, apiUrl, model } = aiConfig
+  const { processingMode, bookType, useSmartDetection, skipNonEssentialChapters } = processingOptions
 
-  // 组件挂载时加载配置
-  useEffect(() => {
-    loadAIConfig()
-  }, [])
-
-  // 监听AI配置变化并自动保存
-  useEffect(() => {
-    const config: AIConfig = {
-      provider: aiProvider,
-      apiKey,
-      apiUrl,
-      model
-    }
-
-    // 只有在配置有效时才保存（至少要有API Key）
-    if (apiKey.trim()) {
-      saveAIConfig(config)
-    }
-  }, [aiProvider, apiKey, apiUrl, model, saveAIConfig])
+  // zustand的persist中间件会自动处理配置的加载和保存
 
   const handleFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0]
@@ -162,10 +117,10 @@ function App() {
     // 获取缓存统计信息
     const stats = cacheService.getStats()
     const bookPrefix = `${file.name}_`
-    
+
     // 计数器，记录删除的缓存项数量
     let deletedCount = 0
-    
+
     // 遍历所有缓存键，删除与当前书籍相关的所有缓存
     stats.keys.forEach(key => {
       if (key.startsWith(bookPrefix)) {
@@ -173,7 +128,7 @@ function App() {
         deletedCount++
       }
     })
-    
+
     // 使用toast显示提示信息
     if (deletedCount > 0) {
       toast.success(`已清除${deletedCount}项缓存，下次处理将重新生成所有内容`, {
@@ -551,102 +506,100 @@ function App() {
               </div>
             </div>
 
-            {file && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <FileText className="h-4 w-4" />
+                  已选择: {file?.name || '未选择文件'}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearBookCache}
+                  disabled={processing}
+                  className="flex items-center gap-1 text-red-500 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  清除整书缓存
+                </Button>
+              </div>
+
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <FileText className="h-4 w-4" />
-                    已选择: {file.name}
+                <div className="p-3 bg-purple-50 rounded-lg border">
+                  <div className="space-y-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="processing-mode" className="text-sm font-medium">
+                        处理模式
+                      </Label>
+                      <Select value={processingMode} onValueChange={(value: 'summary' | 'mindmap') => setProcessingMode(value)} disabled={processing}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="选择处理模式" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="summary">文字总结模式</SelectItem>
+                          <SelectItem value="mindmap">思维导图模式</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-gray-600">
+                        文字总结模式生成章节文字总结和关联分析；思维导图模式生成可视化的思维导图结构。
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="book-type" className="text-sm font-medium">
+                        书籍类型
+                      </Label>
+                      <Select value={bookType} onValueChange={(value: 'fiction' | 'non-fiction') => setBookType(value)} disabled={processing}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="选择书籍类型" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="non-fiction">社科类</SelectItem>
+                          <SelectItem value="fiction">小说类</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-gray-600">
+                        选择书籍类型以获得更准确的章节{processingMode === 'summary' ? '总结' : '思维导图'}。社科类适用于学术、商业、自助等非虚构类书籍；小说类适用于文学作品。
+                      </p>
+                    </div>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={clearBookCache}
-                    disabled={processing}
-                    className="flex items-center gap-1 text-red-500 hover:text-red-700 hover:bg-red-50"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                    清除整书缓存
-                  </Button>
                 </div>
 
-                <div className="space-y-3">
-                  <div className="p-3 bg-purple-50 rounded-lg border">
-                    <div className="space-y-3">
-                      <div className="space-y-2">
-                        <Label htmlFor="processing-mode" className="text-sm font-medium">
-                          处理模式
-                        </Label>
-                        <Select value={processingMode} onValueChange={(value: 'summary' | 'mindmap') => setProcessingMode(value)} disabled={processing}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="选择处理模式" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="summary">文字总结模式</SelectItem>
-                            <SelectItem value="mindmap">思维导图模式</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <p className="text-xs text-gray-600">
-                          文字总结模式生成章节文字总结和关联分析；思维导图模式生成可视化的思维导图结构。
-                        </p>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="book-type" className="text-sm font-medium">
-                          书籍类型
-                        </Label>
-                        <Select value={bookType} onValueChange={(value: 'fiction' | 'non-fiction') => setBookType(value)} disabled={processing}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="选择书籍类型" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="non-fiction">社科类</SelectItem>
-                            <SelectItem value="fiction">小说类</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <p className="text-xs text-gray-600">
-                          选择书籍类型以获得更准确的章节{processingMode === 'summary' ? '总结' : '思维导图'}。社科类适用于学术、商业、自助等非虚构类书籍；小说类适用于文学作品。
-                        </p>
-                      </div>
-                    </div>
+                <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border">
+                  <div className="space-y-1">
+                    <Label htmlFor="smart-detection" className="text-sm font-medium">
+                      启用智能章节检测
+                    </Label>
+                    <p className="text-xs text-gray-600">
+                      当文档没有目录时，尝试智能识别章节标题（如"第X章"、"Chapter X"等）
+                    </p>
                   </div>
+                  <Switch
+                    id="smart-detection"
+                    checked={useSmartDetection}
+                    onCheckedChange={setUseSmartDetection}
+                    disabled={processing}
+                  />
+                </div>
 
-                  <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border">
-                    <div className="space-y-1">
-                      <Label htmlFor="smart-detection" className="text-sm font-medium">
-                        启用智能章节检测
-                      </Label>
-                      <p className="text-xs text-gray-600">
-                        当文档没有目录时，尝试智能识别章节标题（如"第X章"、"Chapter X"等）
-                      </p>
-                    </div>
-                    <Switch
-                      id="smart-detection"
-                      checked={useSmartDetection}
-                      onCheckedChange={setUseSmartDetection}
-                      disabled={processing}
-                    />
+                <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border">
+                  <div className="space-y-1">
+                    <Label htmlFor="skip-non-essential" className="text-sm font-medium">
+                      跳过无关键内容章节
+                    </Label>
+                    <p className="text-xs text-gray-600">
+                      自动跳过致谢、推荐阅读、作者简介等非核心内容章节
+                    </p>
                   </div>
-
-                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border">
-                    <div className="space-y-1">
-                      <Label htmlFor="skip-non-essential" className="text-sm font-medium">
-                        跳过无关键内容章节
-                      </Label>
-                      <p className="text-xs text-gray-600">
-                        自动跳过致谢、推荐阅读、作者简介等非核心内容章节
-                      </p>
-                    </div>
-                    <Switch
-                      id="skip-non-essential"
-                      checked={skipNonEssentialChapters}
-                      onCheckedChange={setSkipNonEssentialChapters}
-                      disabled={processing}
-                    />
-                  </div>
+                  <Switch
+                    id="skip-non-essential"
+                    checked={skipNonEssentialChapters}
+                    onCheckedChange={setSkipNonEssentialChapters}
+                    disabled={processing}
+                  />
                 </div>
               </div>
-            )}
+            </div>
 
             <Button
               onClick={processEbook}
@@ -714,62 +667,58 @@ function App() {
                     <TabsTrigger value="overall">全书总结</TabsTrigger>
                   </TabsList>
 
-                  <TabsContent value="chapters" className="space-y-4">
-                    <ScrollArea className="h-screen">
-                      {bookSummary.chapters.map((chapter, index) => (
-                        <Card key={chapter.id} className="mb-4">
-                          <CardHeader className="pb-3">
-                            <CardTitle className="text-lg flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <Badge variant="outline"># {index + 1}</Badge>
-                                {chapter.title}
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => clearChapterCache(chapter.id)}
-                                >
-                                  <Trash2 className="h-4 w-4 mr-1" />
-                                  清除缓存
-                                </Button>
-                                <Dialog>
-                                  <DialogTrigger asChild>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                    >
-                                      <Eye className="h-4 w-4 mr-1" />
-                                      查看原文
-                                    </Button>
-                                  </DialogTrigger>
-                                  <DialogContent className="max-w-4xl max-h-[80vh]">
-                                    <DialogHeader>
-                                      <DialogTitle>{chapter.title} - 原文内容</DialogTitle>
-                                      <DialogDescription>
-                                        第 {index + 1} 章的完整原文内容
-                                      </DialogDescription>
-                                    </DialogHeader>
-                                    <ScrollArea className="h-[60vh] w-full rounded-md border p-4">
-                                      <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                                        {chapter.content}
-                                      </div>
-                                    </ScrollArea>
-                                  </DialogContent>
-                                </Dialog>
-                              </div>
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="text-gray-700 leading-relaxed prose prose-sm max-w-none">
-                              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                {chapter.summary || ''}
-                              </ReactMarkdown>
+                  <TabsContent value="chapters" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {bookSummary.chapters.map((chapter, index) => (
+                      <Card key={chapter.id}>
+                        <CardHeader className="pb-3">
+                          <CardTitle className="text-lg flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline"># {index + 1}</Badge>
+                              {chapter.title}
                             </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </ScrollArea>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => clearChapterCache(chapter.id)}
+                              >
+                                <Trash2 className="h-4 w-4 mr-1" />
+                              </Button>
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                  >
+                                    <Eye className="h-4 w-4 mr-1" />
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-4xl max-h-[80vh]">
+                                  <DialogHeader>
+                                    <DialogTitle>{chapter.title} - 原文内容</DialogTitle>
+                                    <DialogDescription>
+                                      第 {index + 1} 章的完整原文内容
+                                    </DialogDescription>
+                                  </DialogHeader>
+                                  <ScrollArea className="h-[60vh] w-full rounded-md border p-4">
+                                    <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                                      {chapter.content}
+                                    </div>
+                                  </ScrollArea>
+                                </DialogContent>
+                              </Dialog>
+                            </div>
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-gray-700 leading-relaxed prose prose-sm max-w-none">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                              {chapter.summary || ''}
+                            </ReactMarkdown>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
                   </TabsContent>
 
                   <TabsContent value="connections">
@@ -803,77 +752,74 @@ function App() {
                     <TabsTrigger value="combined">整书思维导图</TabsTrigger>
                   </TabsList>
 
-                  <TabsContent value="chapters" className="space-y-4">
-                    <ScrollArea className="h-screen">
-                      {bookMindMap.chapters.map((chapter, index) => (
-                        <Card key={chapter.id} className="mb-4">
-                          <CardHeader className="pb-3">
-                            <CardTitle className="text-lg flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <Badge variant="outline"># {index + 1}</Badge>
-                                {chapter.title}
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => clearChapterCache(chapter.id)}
-                                >
-                                  <Trash2 className="h-4 w-4 mr-1" />
-                                  清除缓存
-                                </Button>
-                                <Dialog>
-                                  <DialogTrigger asChild>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                    >
-                                      <Eye className="h-4 w-4 mr-1" />
-                                      查看原文
-                                    </Button>
-                                  </DialogTrigger>
-                                  <DialogContent className="max-w-4xl max-h-[80vh]">
-                                    <DialogHeader>
-                                      <DialogTitle>{chapter.title} - 原文内容</DialogTitle>
-                                      <DialogDescription>
-                                        第 {index + 1} 章的完整原文内容
-                                      </DialogDescription>
-                                    </DialogHeader>
-                                    <ScrollArea className="h-[60vh] w-full rounded-md border p-4">
-                                      <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                                        {chapter.content}
-                                      </div>
-                                    </ScrollArea>
-                                  </DialogContent>
-                                </Dialog>
-                              </div>
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            {chapter.mindMap && (
-                              <div className="border rounded-lg">
-                                <MindElixirReact
-                                  data={chapter.mindMap}
-                                  fitPage={false}
-                                  className="w-[400px] h-[400px]"
-                                />
-                              </div>
-                            )}
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </ScrollArea>
+                  <TabsContent value="chapters" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {bookMindMap.chapters.map((chapter, index) => (
+                      <Card key={chapter.id}>
+                        <CardHeader className="pb-3">
+                          <CardTitle className="text-lg w-full overflow-hidden">
+                            <div className="truncate w-full">
+                              {chapter.title}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => clearChapterCache(chapter.id)}
+                              >
+                                <Trash2 className="h-4 w-4 mr-1" />
+                              </Button>
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                  >
+                                    <Eye className="h-4 w-4 mr-1" />
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-4xl max-h-[80vh]">
+                                  <DialogHeader>
+                                    <DialogTitle>{chapter.title} - 原文内容</DialogTitle>
+                                    <DialogDescription>
+                                      第 {index + 1} 章的完整原文内容
+                                    </DialogDescription>
+                                  </DialogHeader>
+                                  <ScrollArea className="h-[60vh] w-full rounded-md border p-4">
+                                    <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                                      {chapter.content}
+                                    </div>
+                                  </ScrollArea>
+                                </DialogContent>
+                              </Dialog>
+                            </div>
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          {chapter.mindMap && (
+                            <div className="border rounded-lg">
+                              <MindElixirReact
+                                data={chapter.mindMap}
+                                fitPage={false}
+                                options={{ direction: 2, handleWheel: () => { } }}
+                                className="aspect-square w-full max-w-[500px] mx-auto"
+                              />
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
                   </TabsContent>
 
                   <TabsContent value="combined">
                     <Card>
                       <CardContent className="pt-6">
                         {bookMindMap.combinedMindMap ? (
-                          <div className="border rounded-lg" style={{ height: '600px' }}>
+                          <div className="border rounded-lg">
                             <MindElixirReact
                               data={bookMindMap.combinedMindMap}
                               fitPage={false}
-                              className="w-full h-full"
+                              options={{ direction: 2, handleWheel: () => { } }}
+                              className="aspect-square w-full h-[600px] mx-auto"
                             />
                           </div>
                         ) : (
