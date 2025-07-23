@@ -54,7 +54,7 @@ export class EpubProcessor {
       
       // 获取spine（阅读顺序）
       const spineItems = book.spine.spineItems
-      console.log(`📚 [DEBUG] 找到 ${spineItems.length} 个spine项目`)
+      console.log(`📚 [DEBUG] 找到 ${spineItems.length} 个spine项目`, spineItems)
       
       for (let i = 0; i < spineItems.length; i++) {
         const spineItem = spineItems[i]
