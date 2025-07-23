@@ -15,6 +15,7 @@ interface ProcessingOptions {
   bookType: 'fiction' | 'non-fiction'
   useSmartDetection: boolean
   skipNonEssentialChapters: boolean
+  maxSubChapterDepth: number
 }
 
 // 配置store状态接口
@@ -32,6 +33,7 @@ interface ConfigState {
   setBookType: (type: 'fiction' | 'non-fiction') => void
   setUseSmartDetection: (enabled: boolean) => void
   setSkipNonEssentialChapters: (enabled: boolean) => void
+  setMaxSubChapterDepth: (depth: number) => void
 }
 
 // 默认配置
@@ -46,7 +48,8 @@ const defaultProcessingOptions: ProcessingOptions = {
   processingMode: 'summary',
   bookType: 'non-fiction',
   useSmartDetection: false,
-  skipNonEssentialChapters: true
+  skipNonEssentialChapters: true,
+  maxSubChapterDepth: 0
 }
 
 // 创建配置store
@@ -81,6 +84,9 @@ export const useConfigStore = create<ConfigState>()(
       })),
       setSkipNonEssentialChapters: (skipNonEssentialChapters) => set((state) => ({
         processingOptions: { ...state.processingOptions, skipNonEssentialChapters }
+      })),
+      setMaxSubChapterDepth: (maxSubChapterDepth) => set((state) => ({
+        processingOptions: { ...state.processingOptions, maxSubChapterDepth }
       }))
     }),
     {

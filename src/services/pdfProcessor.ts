@@ -25,7 +25,7 @@ export class PdfProcessor {
     'about the author', 'about author', 'author bio', 'biography',
     'praise for', 'reviews', 'testimonials', 'endorsements',
     'title page', 'copyright', 'dedication', 'contents', 'table of contents',
-    'index', 'glossary', 'appendix', 'notes', 'endnotes', 'footnotes'
+    'index', 'glossary', 'appendix','appendices','afterword', 'notes', 'endnotes', 'footnotes'
   ]
 
   async parsePdf(file: File): Promise<BookData> {
@@ -38,6 +38,7 @@ export class PdfProcessor {
       
       // 获取PDF元数据
       const metadata = await pdf.getMetadata()
+      console.log('metadata', metadata)
       const title = (metadata.info as any)?.Title || file.name.replace('.pdf', '') || '未知标题'
       const author = (metadata.info as any)?.Author || '未知作者'
       
@@ -57,7 +58,7 @@ export class PdfProcessor {
     }
   }
 
-  async extractChapters(file: File, useSmartDetection: boolean = false, skipNonEssentialChapters: boolean = true): Promise<ChapterData[]> {
+  async extractChapters(file: File, useSmartDetection: boolean = false, skipNonEssentialChapters: boolean = true, maxSubChapterDepth: number = 0): Promise<ChapterData[]> {
     try {
       const arrayBuffer = await file.arrayBuffer()
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
@@ -70,11 +71,12 @@ export class PdfProcessor {
       // 首先尝试使用PDF的outline（书签/目录）来获取章节
       try {
         const outline = await pdf.getOutline()
+        console.log('outline', outline)
         if (outline && outline.length > 0) {
           console.log(`📖 [DEBUG] 找到PDF目录，共 ${outline.length} 个条目`)
           
           // 获取章节信息
-          const chapterInfos = await this.extractChaptersFromOutline(pdf, outline)
+          const chapterInfos = await this.extractChaptersFromOutline(pdf, outline, 0, maxSubChapterDepth)
           
           if (chapterInfos.length > 0) {
             // 根据章节信息提取内容
@@ -184,7 +186,7 @@ export class PdfProcessor {
     }
   }
 
-  private async extractChaptersFromOutline(pdf: any, outline: any[]): Promise<{title: string, pageIndex: number}[]> {
+  private async extractChaptersFromOutline(pdf: any, outline: any[], currentDepth: number = 0, maxDepth: number = 0): Promise<{title: string, pageIndex: number}[]> {
     const chapterInfos: {title: string, pageIndex: number}[] = []
     
     for (const item of outline) {
@@ -213,8 +215,11 @@ export class PdfProcessor {
         
         // 递归处理子章节
         if (item.items && item.items.length > 0) {
-          const subChapters = await this.extractChaptersFromOutline(pdf, item.items)
-          chapterInfos.push(...subChapters)
+          // 只有当maxDepth大于0且当前深度小于最大深度时才递归处理子章节
+          if (maxDepth > 0 && currentDepth < maxDepth) {
+            const subChapters = await this.extractChaptersFromOutline(pdf, item.items, currentDepth + 1, maxDepth)
+            chapterInfos.push(...subChapters)
+          }
         }
       } catch (error) {
         console.warn(`⚠️ [DEBUG] 跳过章节 "${item.title}":`, error)

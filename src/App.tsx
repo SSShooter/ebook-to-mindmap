@@ -195,7 +195,7 @@ function App() {
 
         // 步骤2: 提取章节
         setCurrentStep('正在提取章节内容...')
-        chapters = await pdfProcessor.extractChapters(file, useSmartDetection, skipNonEssentialChapters)
+        chapters = await pdfProcessor.extractChapters(file, useSmartDetection, skipNonEssentialChapters, processingOptions.maxSubChapterDepth)
         setProgress(20)
       } else {
         throw new Error('不支持的文件格式')
@@ -388,7 +388,7 @@ function App() {
     } finally {
       setProcessing(false)
     }
-  }, [file, aiProvider, apiKey, apiUrl, model, processingMode, bookType, useSmartDetection, skipNonEssentialChapters, cacheService])
+  }, [file, aiProvider, apiKey, apiUrl, model, processingMode, bookType, useSmartDetection, skipNonEssentialChapters, processingOptions.maxSubChapterDepth, cacheService])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
@@ -598,6 +598,36 @@ function App() {
                     disabled={processing}
                   />
                 </div>
+
+                {file?.name.endsWith('.pdf') && (
+                  <div className="p-3 bg-amber-50 rounded-lg border">
+                    <div className="space-y-2">
+                      <Label htmlFor="max-sub-chapter-depth" className="text-sm font-medium">
+                        递归处理子章节层数
+                      </Label>
+                      <Select 
+                        value={processingOptions.maxSubChapterDepth?.toString()} 
+                        onValueChange={(value) => useConfigStore.getState().setMaxSubChapterDepth(parseInt(value))} 
+                        disabled={processing}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="选择递归层数" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="0">不递归处理子章节</SelectItem>
+                          <SelectItem value="1">递归1层子章节</SelectItem>
+                          <SelectItem value="2">递归2层子章节</SelectItem>
+                          <SelectItem value="3">递归3层子章节</SelectItem>
+                          <SelectItem value="4">递归4层子章节</SelectItem>
+                          <SelectItem value="5">递归5层子章节</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-gray-600">
+                        仅适用于PDF文件。设置为0表示不递归处理子章节，仅处理顶层章节；设置为大于0的值表示递归处理指定层数的子章节。
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
