@@ -1,4 +1,5 @@
 import ePub, { Book } from '@ssshooter/epubjs'
+import { SKIP_CHAPTER_KEYWORDS } from './constants'
 
 
 export interface ChapterData {
@@ -14,14 +15,6 @@ export interface BookData {
 }
 
 export class EpubProcessor {
-  private readonly skipChapterKeywords = [
-    'acknowledgments', 'acknowledgement', 'thanks', 'gratitude',
-    'recommended reading', 'further reading', 'bibliography', 'references',
-    'about the author', 'about author', 'author bio', 'biography',
-    'praise for', 'reviews', 'testimonials', 'endorsements',
-    'title page', 'copyright', 'dedication', 'contents', 'table of contents',
-    'index', 'glossary', 'appendix', 'notes', 'endnotes', 'footnotes'
-  ]
   async parseEpub(file: File): Promise<BookData> {
     try {
       // 将File转换为ArrayBuffer
@@ -131,7 +124,7 @@ export class EpubProcessor {
     if (!title) return false
     
     const normalizedTitle = title.toLowerCase().trim()
-    return this.skipChapterKeywords.some(keyword => 
+    return SKIP_CHAPTER_KEYWORDS.some(keyword => 
       normalizedTitle.includes(keyword.toLowerCase())
     )
   }

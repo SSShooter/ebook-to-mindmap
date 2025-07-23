@@ -1,4 +1,5 @@
 import * as pdfjsLib from 'pdfjs-dist'
+import { SKIP_CHAPTER_KEYWORDS } from './constants'
 
 // 设置 PDF.js worker - 使用本地文件
 if (typeof window !== 'undefined') {
@@ -18,15 +19,6 @@ export interface BookData {
 }
 
 export class PdfProcessor {
-  // 需要跳过的章节关键词（默认开启过滤）
-  private readonly skipChapterKeywords = [
-    'acknowledgments', 'acknowledgement', 'thanks', 'gratitude',
-    'recommended reading', 'further reading', 'bibliography', 'references',
-    'about the author', 'about author', 'author bio', 'biography',
-    'praise for', 'reviews', 'testimonials', 'endorsements',
-    'title page', 'copyright', 'dedication', 'contents', 'table of contents',
-    'index', 'glossary', 'appendix','appendices','afterword', 'notes', 'endnotes', 'footnotes'
-  ]
 
   async parsePdf(file: File): Promise<BookData> {
     try {
@@ -339,7 +331,7 @@ export class PdfProcessor {
   private shouldSkipChapter(title: string): boolean {
     const normalizedTitle = title.toLowerCase().trim()
     
-    return this.skipChapterKeywords.some(keyword => 
+    return SKIP_CHAPTER_KEYWORDS.some(keyword => 
       normalizedTitle.includes(keyword)
     )
   }
