@@ -77,7 +77,6 @@ export class EpubProcessor {
           
           // section.load返回的是DOM元素，需要转换为字符串
           console.log(`📄 [DEBUG] 读取到内容长度: ${chapterHTML.length} 字符`)
-          console.log(`📄 [DEBUG] 内容预览:`, chapterHTML)
           
           // 提取章节标题和纯文本内容
           const { title, textContent } = this.extractTextFromXHTML(chapterHTML)
