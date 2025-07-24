@@ -197,7 +197,7 @@ function App() {
 
         // 步骤2: 提取章节
         setCurrentStep('正在提取章节内容...')
-        chapters = await epubProcessor.extractChapters(epubData.book, useSmartDetection, skipNonEssentialChapters)
+        chapters = await epubProcessor.extractChapters(epubData.book, useSmartDetection, skipNonEssentialChapters, processingOptions.maxSubChapterDepth)
         setProgress(20)
       } else if (isPdf) {
         const pdfProcessor = new PdfProcessor()
@@ -215,7 +215,7 @@ function App() {
       } else {
         throw new Error('不支持的文件格式')
       }
-
+      debugger
       const totalChapters = chapters.length
       const processedChapters: Chapter[] = []
 

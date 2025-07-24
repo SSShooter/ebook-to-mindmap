@@ -209,35 +209,33 @@ export function ConfigDialog({ processing, file }: ConfigDialogProps) {
             />
           </div>
 
-          {file?.name.endsWith('.pdf') && (
-            <div className="p-3 bg-amber-50 rounded-lg border">
-              <div className="space-y-2">
-                <Label htmlFor="max-sub-chapter-depth" className="text-sm font-medium">
-                  递归处理子章节层数
-                </Label>
-                <Select
-                  value={processingOptions.maxSubChapterDepth?.toString()}
-                  onValueChange={(value) => useConfigStore.getState().setMaxSubChapterDepth(parseInt(value))}
-                  disabled={processing}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="选择递归层数" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="0">不递归处理子章节</SelectItem>
-                    <SelectItem value="1">递归1层子章节</SelectItem>
-                    <SelectItem value="2">递归2层子章节</SelectItem>
-                    <SelectItem value="3">递归3层子章节</SelectItem>
-                    <SelectItem value="4">递归4层子章节</SelectItem>
-                    <SelectItem value="5">递归5层子章节</SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-gray-600">
-                  仅适用于PDF文件。设置为0表示不递归处理子章节，仅处理顶层章节；设置为大于0的值表示递归处理指定层数的子章节。
-                </p>
-              </div>
+          <div className="p-3 bg-amber-50 rounded-lg border">
+            <div className="space-y-2">
+              <Label htmlFor="max-sub-chapter-depth" className="text-sm font-medium">
+                递归处理子章节层数
+              </Label>
+              <Select
+                value={processingOptions.maxSubChapterDepth?.toString()}
+                onValueChange={(value) => useConfigStore.getState().setMaxSubChapterDepth(parseInt(value))}
+                disabled={processing}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="选择递归层数" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">不递归处理子章节</SelectItem>
+                  <SelectItem value="1">递归1层子章节</SelectItem>
+                  <SelectItem value="2">递归2层子章节</SelectItem>
+                  <SelectItem value="3">递归3层子章节</SelectItem>
+                  <SelectItem value="4">递归4层子章节</SelectItem>
+                  <SelectItem value="5">递归5层子章节</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-gray-600">
+                仅适用于PDF文件。设置为0表示不递归处理子章节，仅处理顶层章节；设置为大于0的值表示递归处理指定层数的子章节。
+              </p>
             </div>
-          )}
+          </div>
         </div>
       </DialogContent>
     </Dialog>
