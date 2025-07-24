@@ -96,8 +96,8 @@ function App() {
     const cacheKey = processingMode === 'summary'
       ? `${file.name}_${chapterId}_summary`
       : processingMode === 'mindmap'
-      ? `${file.name}_${chapterId}_mindmap`
-      : `${file.name}_${chapterId}_combined`
+        ? `${file.name}_${chapterId}_mindmap`
+        : `${file.name}_${chapterId}_combined`
 
     // 删除缓存
     if (cacheService.delete(cacheKey)) {
@@ -119,7 +119,7 @@ function App() {
     // 定义所有可能的缓存键类型
     const cacheTypes = [
       'connections',
-      'overall-summary', 
+      'overall-summary',
       'combined-mindmap',
       'mindmap-arrows'
     ]
@@ -680,7 +680,7 @@ function App() {
                               <MindElixirReact
                                 data={chapter.mindMap}
                                 fitPage={false}
-                                options={{ direction: 2 }}
+                                options={{ direction: 1, alignment: 'nodes' }}
                                 className="aspect-square w-full max-w-[500px] mx-auto"
                               />
                             </div>
@@ -698,7 +698,7 @@ function App() {
                             <MindElixirReact
                               data={bookMindMap.combinedMindMap}
                               fitPage={false}
-                              options={{ direction: 2 }}
+                              options={{ direction: 1, alignment: 'nodes' }}
                               className="aspect-square w-full h-[600px] mx-auto"
                             />
                           </div>
@@ -719,7 +719,7 @@ function App() {
                         <MindElixirReact
                           data={bookMindMap.combinedMindMap}
                           fitPage={false}
-                          options={{ direction: 2 }}
+                          options={{ direction: 1, alignment: 'nodes' }}
                           className="w-full h-[600px] mx-auto"
                         />
                       </div>
