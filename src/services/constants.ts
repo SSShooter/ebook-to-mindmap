@@ -5,5 +5,6 @@ export const SKIP_CHAPTER_KEYWORDS = [
   'about the author', 'about author', 'author bio', 'biography',
   'praise for', 'reviews', 'testimonials', 'endorsements',
   'title page', 'copyright', 'dedication', 'contents', 'table of contents',
-  'index', 'glossary', 'appendix','appendices','afterword', 'notes', 'endnotes', 'footnotes'
+  'index', 'glossary', 'appendix','appendices','afterword', 'notes', 'endnotes', 'footnotes',
+  'Connect with HMH','Illustration Credits'
 ]

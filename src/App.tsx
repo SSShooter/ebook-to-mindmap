@@ -324,33 +324,22 @@ function App() {
         // 思维导图模式的后续步骤
         // 步骤4: 合并章节思维导图
         setCurrentStep('正在合并章节思维导图...')
-        const combinedMindMapCacheKey = CacheService.generateKey(file.name, 'combined-mindmap', 'v1')
-        let combinedMindMap: MindElixirData = cacheService.get(combinedMindMapCacheKey)
+        // 创建根节点
+        const rootNode = {
+          topic: bookData.title,
+          id: '0',
+          tags: ['全书'],
+          children: processedChapters.map((chapter, index) => ({
+            topic: chapter.title,
+            id: `chapter_${index + 1}`,
+            children: chapter.mindMap?.nodeData?.children || []
+          }))
+        }
 
-        if (!combinedMindMap) {
-          console.log('🔄 [DEBUG] 缓存未命中，开始合并思维导图')
-          // 创建根节点
-          const rootNode = {
-            topic: bookData.title,
-            id: '0',
-            tags: ['全书'],
-            children: processedChapters.map((chapter, index) => ({
-              topic: chapter.title,
-              id: `chapter_${index + 1}`,
-              children: chapter.mindMap?.nodeData?.children || []
-            }))
-          }
-
-          combinedMindMap = {
-            nodeData: rootNode,
-            arrows: [],
-            summaries: processedChapters.reduce((acc, chapter) => acc.concat(chapter.mindMap?.summaries || []), [] as Summary[])
-          }
-
-          cacheService.set(combinedMindMapCacheKey, combinedMindMap)
-          console.log('💾 [DEBUG] 合并思维导图已缓存')
-        } else {
-          console.log('✅ [DEBUG] 使用缓存的合并思维导图')
+        let combinedMindMap: MindElixirData = {
+          nodeData: rootNode,
+          arrows: [],
+          summaries: processedChapters.reduce((acc, chapter) => acc.concat(chapter.mindMap?.summaries || []), [] as Summary[])
         }
 
         setProgress(85)
@@ -358,7 +347,8 @@ function App() {
         // 步骤5: 生成思维导图箭头和全书总结节点
         setCurrentStep('正在生成思维导图连接和总结...')
         const arrowsCacheKey = CacheService.generateKey(file.name, 'mindmap-arrows', 'v1')
-        let arrowsData = cacheService.get(arrowsCacheKey)
+        let arrowsData = undefined
+        // let arrowsData = cacheService.get(arrowsCacheKey)
 
         if (!arrowsData) {
           console.log('🔄 [DEBUG] 缓存未命中，开始生成箭头')
@@ -416,36 +406,36 @@ function App() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="file">选择 EPUB 或 PDF 文件</Label>
-                <Input
-                  id="file"
-                  type="file"
-                  accept=".epub,.pdf"
-                  onChange={handleFileChange}
-                  disabled={processing}
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="file">选择 EPUB 或 PDF 文件</Label>
+              <Input
+                id="file"
+                type="file"
+                accept=".epub,.pdf"
+                onChange={handleFileChange}
+                disabled={processing}
+              />
+            </div>
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <FileText className="h-4 w-4" />
-                  已选择: {file?.name || '未选择文件'}
-                </div>
-                <div className="flex items-center gap-2">
-                  <ConfigDialog processing={processing} file={file} />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={clearBookCache}
-                    disabled={processing}
-                    className="flex items-center gap-1 text-red-500 hover:text-red-700 hover:bg-red-50"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                    清除整书缓存
-                  </Button>
-                </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <FileText className="h-4 w-4" />
+                已选择: {file?.name || '未选择文件'}
               </div>
+              <div className="flex items-center gap-2">
+                <ConfigDialog processing={processing} file={file} />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearBookCache}
+                  disabled={processing}
+                  className="flex items-center gap-1 text-red-500 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  清除整书缓存
+                </Button>
+              </div>
+            </div>
             <Button
               onClick={processEbook}
               disabled={!file || !apiKey || processing}
@@ -469,7 +459,7 @@ function App() {
         {/* 处理进度 */}
         {processing && (
           <Card>
-            <CardContent className="pt-6">
+            <CardContent>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span>{currentStep}</span>
@@ -562,7 +552,7 @@ function App() {
 
                   <TabsContent value="connections">
                     <Card>
-                      <CardContent className="pt-6">
+                      <CardContent>
                         <div className="prose max-w-none text-gray-700 leading-relaxed">
                           <ReactMarkdown remarkPlugins={[remarkGfm]}>
                             {bookSummary.connections}
@@ -574,7 +564,7 @@ function App() {
 
                   <TabsContent value="overall">
                     <Card>
-                      <CardContent className="pt-6">
+                      <CardContent>
                         <div className="prose max-w-none text-gray-700 leading-relaxed">
                           <ReactMarkdown remarkPlugins={[remarkGfm]}>
                             {bookSummary.overallSummary}
@@ -593,7 +583,7 @@ function App() {
 
                   <TabsContent value="chapters" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {bookMindMap.chapters.map((chapter, index) => (
-                      <Card key={chapter.id}>
+                      <Card key={chapter.id} className='gap-2'>
                         <CardHeader className="pb-3">
                           <CardTitle className="text-lg w-full overflow-hidden">
                             <div className="truncate w-full">
@@ -639,7 +629,7 @@ function App() {
                               <MindElixirReact
                                 data={chapter.mindMap}
                                 fitPage={false}
-                                options={{ direction: 2, handleWheel: () => { } }}
+                                options={{ direction: 2 }}
                                 className="aspect-square w-full max-w-[500px] mx-auto"
                               />
                             </div>
@@ -651,13 +641,13 @@ function App() {
 
                   <TabsContent value="combined">
                     <Card>
-                      <CardContent className="pt-6">
+                      <CardContent>
                         {bookMindMap.combinedMindMap ? (
                           <div className="border rounded-lg">
                             <MindElixirReact
                               data={bookMindMap.combinedMindMap}
                               fitPage={false}
-                              options={{ direction: 2, handleWheel: () => { } }}
+                              options={{ direction: 2 }}
                               className="aspect-square w-full h-[600px] mx-auto"
                             />
                           </div>

@@ -330,10 +330,8 @@ export class PdfProcessor {
   // 检查是否应该跳过某个章节
   private shouldSkipChapter(title: string): boolean {
     const normalizedTitle = title.toLowerCase().trim()
-    
     return SKIP_CHAPTER_KEYWORDS.some(keyword => 
-      normalizedTitle.includes(keyword)
+      normalizedTitle.includes(keyword.toLowerCase())
     )
   }
-
 }
