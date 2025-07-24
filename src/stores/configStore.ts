@@ -11,7 +11,7 @@ interface AIConfig {
 
 // 处理选项接口
 interface ProcessingOptions {
-  processingMode: 'summary' | 'mindmap'
+  processingMode: 'summary' | 'mindmap' | 'combined-mindmap'
   bookType: 'fiction' | 'non-fiction'
   useSmartDetection: boolean
   skipNonEssentialChapters: boolean
@@ -29,7 +29,7 @@ interface ConfigState {
   
   // 处理选项
   processingOptions: ProcessingOptions
-  setProcessingMode: (mode: 'summary' | 'mindmap') => void
+  setProcessingMode: (mode: 'summary' | 'mindmap' | 'combined-mindmap') => void
   setBookType: (type: 'fiction' | 'non-fiction') => void
   setUseSmartDetection: (enabled: boolean) => void
   setSkipNonEssentialChapters: (enabled: boolean) => void

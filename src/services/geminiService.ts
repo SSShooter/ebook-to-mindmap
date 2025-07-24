@@ -6,7 +6,7 @@ import {
   getOverallSummaryPrompt,
   getTestConnectionPrompt,
   getChapterMindMapPrompt,
-  getMindMapArrowPrompt
+  getMindMapArrowPrompt,
 } from './prompts'
 import type { MindElixirData } from 'mind-elixir'
 
@@ -166,6 +166,40 @@ export class AIService {
       }
     } catch (error) {
       throw new Error(`思维导图箭头生成失败: ${error instanceof Error ? error.message : '未知错误'}`)
+    }
+  }
+
+  async generateCombinedMindMap(bookTitle: string, chapters: Chapter[]): Promise<MindElixirData> {
+    try {
+      const prompt = getChapterMindMapPrompt()
+      const chaptersContent = chapters.map(item=>item.content).join('\n\n ------------- \n\n')
+      const mindMapJson = await this.generateContent(
+        `${prompt}
+        请为整本书《${bookTitle}》生成一个完整的思维导图，将所有章节的内容整合在一起。
+        章节内容：\n${chaptersContent}`
+      )
+
+      if (!mindMapJson || mindMapJson.trim().length === 0) {
+        throw new Error('AI返回了空的思维导图数据')
+      }
+      
+      // 尝试解析JSON
+      try {
+        return JSON.parse(mindMapJson.trim())
+      } catch (parseError) {
+        // 尝试从代码块中提取JSON
+        const jsonMatch = mindMapJson.match(/```(?:json)?\s*([\s\S]*?)```/)
+        if (jsonMatch && jsonMatch[1]) {
+          try {
+            return JSON.parse(jsonMatch[1].trim())
+          } catch (extractError) {
+            throw new Error('AI返回的思维导图数据格式不正确')
+          }
+        }
+        throw new Error('AI返回的思维导图数据格式不正确')
+      }
+    } catch (error) {
+      throw new Error(`整书思维导图生成失败: ${error instanceof Error ? error.message : '未知错误'}`)
     }
   }
 

@@ -95,7 +95,9 @@ function App() {
     // 根据处理模式确定缓存键
     const cacheKey = processingMode === 'summary'
       ? `${file.name}_${chapterId}_summary`
-      : `${file.name}_${chapterId}_mindmap`
+      : processingMode === 'mindmap'
+      ? `${file.name}_${chapterId}_mindmap`
+      : `${file.name}_${chapterId}_combined`
 
     // 删除缓存
     if (cacheService.delete(cacheKey)) {
@@ -111,14 +113,28 @@ function App() {
   const clearBookCache = useCallback(() => {
     if (!file) return
 
-    // 获取缓存统计信息
-    const stats = cacheService.getStats()
-    const bookPrefix = `${file.name}_`
-
     // 计数器，记录删除的缓存项数量
     let deletedCount = 0
 
-    // 遍历所有缓存键，删除与当前书籍相关的所有缓存
+    // 定义所有可能的缓存键类型
+    const cacheTypes = [
+      'connections',
+      'overall-summary', 
+      'combined-mindmap',
+      'mindmap-arrows'
+    ]
+
+    // 删除使用CacheService.generateKey生成的缓存
+    cacheTypes.forEach(type => {
+      const cacheKey = CacheService.generateKey(file.name, type, 'v1')
+      if (cacheService.delete(cacheKey)) {
+        deletedCount++
+      }
+    })
+
+    // 删除章节级别的缓存（使用旧的命名方式）
+    const stats = cacheService.getStats()
+    const bookPrefix = `${file.name}_`
     stats.keys.forEach(key => {
       if (key.startsWith(bookPrefix)) {
         cacheService.delete(key)
@@ -212,7 +228,7 @@ function App() {
           connections: '',
           overallSummary: ''
         })
-      } else {
+      } else if (processingMode === 'mindmap' || processingMode === 'combined-mindmap') {
         setBookMindMap({
           title: bookData.title,
           author: bookData.author,
@@ -250,8 +266,8 @@ function App() {
             ...prevSummary!,
             chapters: [...processedChapters]
           }))
-        } else {
-          // 思维导图模式
+        } else if (processingMode === 'mindmap') {
+          // 章节思维导图模式
           const cacheKey = `${file.name}_${chapter.id}_mindmap`
           let mindMap: MindElixirData = cacheService.get(cacheKey)
 
@@ -264,6 +280,19 @@ function App() {
           processedChapter = {
             ...chapter,
             mindMap,
+            processed: true
+          }
+
+          processedChapters.push(processedChapter)
+
+          setBookMindMap(prevMindMap => ({
+            ...prevMindMap!,
+            chapters: [...processedChapters]
+          }))
+        } else if (processingMode === 'combined-mindmap') {
+          // 整书思维导图模式 - 只收集章节内容，不生成单独的思维导图
+          processedChapter = {
+            ...chapter,
             processed: true
           }
 
@@ -320,8 +349,8 @@ function App() {
           ...prevSummary!,
           overallSummary
         }))
-      } else {
-        // 思维导图模式的后续步骤
+      } else if (processingMode === 'mindmap') {
+        // 章节思维导图模式的后续步骤
         // 步骤4: 合并章节思维导图
         setCurrentStep('正在合并章节思维导图...')
         // 创建根节点
@@ -368,6 +397,26 @@ function App() {
           ...prevMindMap!,
           combinedMindMap
         }))
+      } else if (processingMode === 'combined-mindmap') {
+        // 整书思维导图模式的后续步骤
+        // 步骤4: 生成整书思维导图
+        setCurrentStep('正在生成整书思维导图...')
+        const combinedMindMapCacheKey = CacheService.generateKey(file.name, 'combined-mindmap', 'v1')
+        let combinedMindMap = cacheService.get(combinedMindMapCacheKey)
+        if (!combinedMindMap) {
+          console.log('🔄 [DEBUG] 缓存未命中，开始生成整书思维导图')
+          combinedMindMap = await aiService.generateCombinedMindMap(bookData.title, processedChapters)
+          cacheService.set(combinedMindMapCacheKey, combinedMindMap)
+          console.log('💾 [DEBUG] 整书思维导图已缓存')
+        } else {
+          console.log('✅ [DEBUG] 使用缓存的整书思维导图')
+        }
+
+        setBookMindMap(prevMindMap => ({
+          ...prevMindMap!,
+          combinedMindMap
+        }))
+        setProgress(85)
       }
 
       setProgress(100)
@@ -479,8 +528,10 @@ function App() {
               <CardTitle className="flex items-center gap-2">
                 {processingMode === 'summary' ? (
                   <><BookOpen className="h-5 w-5" />《{bookSummary?.title}》解析结果</>
+                ) : processingMode === 'mindmap' ? (
+                  <><Network className="h-5 w-5" />《{bookMindMap?.title}》章节思维导图</>
                 ) : (
-                  <><Network className="h-5 w-5" />《{bookMindMap?.title}》思维导图</>
+                  <><Network className="h-5 w-5" />《{bookMindMap?.title}》整书思维导图</>
                 )}
               </CardTitle>
               <CardDescription>
@@ -660,6 +711,25 @@ function App() {
                     </Card>
                   </TabsContent>
                 </Tabs>
+              ) : processingMode === 'combined-mindmap' && bookMindMap ? (
+                <Card>
+                  <CardContent>
+                    {bookMindMap.combinedMindMap ? (
+                      <div className="border rounded-lg">
+                        <MindElixirReact
+                          data={bookMindMap.combinedMindMap}
+                          fitPage={false}
+                          options={{ direction: 2 }}
+                          className="w-full h-[600px] mx-auto"
+                        />
+                      </div>
+                    ) : (
+                      <div className="text-center text-gray-500 py-8">
+                        正在生成整书思维导图...
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
               ) : null}
             </CardContent>
           </Card>

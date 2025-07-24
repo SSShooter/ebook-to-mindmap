@@ -140,17 +140,18 @@ export function ConfigDialog({ processing, file }: ConfigDialogProps) {
                 <Label htmlFor="processing-mode" className="text-sm font-medium">
                   处理模式
                 </Label>
-                <Select value={processingMode} onValueChange={(value: 'summary' | 'mindmap') => setProcessingMode(value)} disabled={processing}>
+                <Select value={processingMode} onValueChange={(value: 'summary' | 'mindmap' | 'combined-mindmap') => setProcessingMode(value)} disabled={processing}>
                   <SelectTrigger>
                     <SelectValue placeholder="选择处理模式" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="summary">文字总结模式</SelectItem>
-                    <SelectItem value="mindmap">思维导图模式</SelectItem>
+                    <SelectItem value="mindmap">章节思维导图模式</SelectItem>
+                    <SelectItem value="combined-mindmap">整书思维导图模式</SelectItem>
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-gray-600">
-                  文字总结模式生成章节文字总结和关联分析；思维导图模式生成可视化的思维导图结构。
+                  文字总结模式生成章节文字总结和关联分析；章节思维导图模式为每章生成独立思维导图；整书思维导图模式将全书内容整合为一个完整的思维导图。
                 </p>
               </div>
 
