@@ -94,9 +94,6 @@ export class EpubProcessor {
 
     for (const item of toc) {
       try {
-
-        // 递归处理子章节
-        // 只有当maxDepth大于0且当前深度小于最大深度时才递归处理子章节
         if (item.subitems && item.subitems.length > 0 && maxDepth > 0 && currentDepth < maxDepth) {
           const subChapters = await this.extractChaptersFromToc(book, item.subitems, currentDepth + 1, maxDepth)
           chapterInfos.push(...subChapters)

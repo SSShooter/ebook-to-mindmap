@@ -124,6 +124,7 @@ const MindElixirReact = forwardRef<MindElixirReactRef, MindElixirReactProps>(
 
     // 使用dataHash作为依赖项，只有当数据真正变化时才刷新
     useEffect(() => {
+      console.log('变了吗？',dataHash, fitPage)
       if (!data || !meInstance.current || !isInitialized.current || !dataHash)
         return
 

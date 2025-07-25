@@ -15,7 +15,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Upload, BookOpen, Brain, FileText, Loader2, Eye, Network, Trash2 } from 'lucide-react'
+import { Upload, BookOpen, Brain, FileText, Loader2, Network, Trash2 } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { EpubProcessor } from './services/epubProcessor'
@@ -24,6 +24,7 @@ import { AIService } from './services/geminiService'
 import { CacheService } from './services/cacheService'
 import MindElixirReact from './components/project/MindElixirReact'
 import { ConfigDialog } from './components/project/ConfigDialog'
+import { ViewContentDialog } from './components/ViewContentDialog'
 import type { MindElixirData } from 'mind-elixir'
 import type { Summary } from 'node_modules/mind-elixir/dist/types/summary'
 import { toast } from 'sonner'
@@ -374,24 +375,23 @@ function App() {
         setProgress(85)
 
         // 步骤5: 生成思维导图箭头和全书总结节点
-        setCurrentStep('正在生成思维导图连接和总结...')
-        const arrowsCacheKey = CacheService.generateKey(file.name, 'mindmap-arrows', 'v1')
-        let arrowsData = undefined
+        // setCurrentStep('正在生成思维导图连接和总结...')
+        // const arrowsCacheKey = CacheService.generateKey(file.name, 'mindmap-arrows', 'v1')
         // let arrowsData = cacheService.get(arrowsCacheKey)
 
-        if (!arrowsData) {
-          console.log('🔄 [DEBUG] 缓存未命中，开始生成箭头')
-          arrowsData = await aiService.generateMindMapArrows(combinedMindMap)
-          cacheService.set(arrowsCacheKey, arrowsData)
-          console.log('💾 [DEBUG] 思维导图箭头已缓存', arrowsData)
-        } else {
-          console.log('✅ [DEBUG] 使用缓存的思维导图箭头', arrowsData)
-        }
+        // if (!arrowsData) {
+        //   console.log('🔄 [DEBUG] 缓存未命中，开始生成箭头')
+        //   arrowsData = await aiService.generateMindMapArrows(combinedMindMap)
+        //   cacheService.set(arrowsCacheKey, arrowsData)
+        //   console.log('💾 [DEBUG] 思维导图箭头已缓存', arrowsData)
+        // } else {
+        //   console.log('✅ [DEBUG] 使用缓存的思维导图箭头', arrowsData)
+        // }
 
-        // 合并箭头数据
-        if (arrowsData?.arrows) {
-          combinedMindMap.arrows = arrowsData.arrows
-        }
+        // // 合并箭头数据
+        // if (arrowsData?.arrows) {
+        //   combinedMindMap.arrows = arrowsData.arrows
+        // }
 
         setBookMindMap(prevMindMap => ({
           ...prevMindMap!,
@@ -564,29 +564,11 @@ function App() {
                               >
                                 <Trash2 className="h-4 w-4 mr-1" />
                               </Button>
-                              <Dialog>
-                                <DialogTrigger asChild>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                  >
-                                    <Eye className="h-4 w-4 mr-1" />
-                                  </Button>
-                                </DialogTrigger>
-                                <DialogContent className="max-w-4xl max-h-[80vh]">
-                                  <DialogHeader>
-                                    <DialogTitle>{chapter.title} - 原文内容</DialogTitle>
-                                    <DialogDescription>
-                                      第 {index + 1} 章的完整原文内容
-                                    </DialogDescription>
-                                  </DialogHeader>
-                                  <ScrollArea className="h-[60vh] w-full rounded-md border p-4">
-                                    <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                                      {chapter.content}
-                                    </div>
-                                  </ScrollArea>
-                                </DialogContent>
-                              </Dialog>
+                              <ViewContentDialog
+                                title={chapter.title}
+                                content={chapter.content}
+                                chapterIndex={index}
+                              />
                             </div>
                           </CardTitle>
                         </CardHeader>
@@ -648,29 +630,11 @@ function App() {
                               >
                                 <Trash2 className="h-4 w-4 mr-1" />
                               </Button>
-                              <Dialog>
-                                <DialogTrigger asChild>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                  >
-                                    <Eye className="h-4 w-4 mr-1" />
-                                  </Button>
-                                </DialogTrigger>
-                                <DialogContent className="max-w-4xl max-h-[80vh]">
-                                  <DialogHeader>
-                                    <DialogTitle>{chapter.title} - 原文内容</DialogTitle>
-                                    <DialogDescription>
-                                      第 {index + 1} 章的完整原文内容
-                                    </DialogDescription>
-                                  </DialogHeader>
-                                  <ScrollArea className="h-[60vh] w-full rounded-md border p-4">
-                                    <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                                      {chapter.content}
-                                    </div>
-                                  </ScrollArea>
-                                </DialogContent>
-                              </Dialog>
+                              <ViewContentDialog
+                                title={chapter.title}
+                                content={chapter.content}
+                                chapterIndex={index}
+                              />
                             </div>
                           </CardTitle>
                         </CardHeader>
