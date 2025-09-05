@@ -4,7 +4,7 @@ import type { SupportedLanguage } from '../services/prompts/utils'
 
 // AI配置接口
 interface AIConfig {
-  provider: 'gemini' | 'openai'
+  provider: 'gemini' | 'openai' | 'dashscope'
   apiKey: string
   apiUrl: string
   model: string
@@ -25,7 +25,7 @@ interface ProcessingOptions {
 interface ConfigState {
   // AI配置
   aiConfig: AIConfig
-  setAiProvider: (provider: 'gemini' | 'openai') => void
+  setAiProvider: (provider: 'gemini' | 'openai' | 'dashscope') => void
   setApiKey: (apiKey: string) => void
   setApiUrl: (apiUrl: string) => void
   setModel: (model: string) => void
@@ -65,9 +65,32 @@ export const useConfigStore = create<ConfigState>()(
     (set) => ({
       // AI配置
       aiConfig: defaultAIConfig,
-      setAiProvider: (provider) => set((state) => ({
-        aiConfig: { ...state.aiConfig, provider }
-      })),
+      setAiProvider: (provider) => set((state) => {
+        // 根据提供商设置默认的API URL和模型
+        let updatedConfig = { ...state.aiConfig, provider };
+        
+        if (provider === 'dashscope') {
+          updatedConfig = {
+            ...updatedConfig,
+            apiUrl: 'https://dashscope.aliyuncs.com/api/v1',
+            model: 'qwen-max'
+          };
+        } else if (provider === 'openai') {
+          updatedConfig = {
+            ...updatedConfig,
+            apiUrl: 'https://api.openai.com/v1',
+            model: 'gpt-3.5-turbo'
+          };
+        } else if (provider === 'gemini') {
+          updatedConfig = {
+            ...updatedConfig,
+            apiUrl: '', // Gemini不需要API URL
+            model: 'gemini-1.5-flash'
+          };
+        }
+        
+        return { aiConfig: updatedConfig };
+      }),
       setApiKey: (apiKey) => set((state) => ({
         aiConfig: { ...state.aiConfig, apiKey }
       })),

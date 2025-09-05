@@ -9,7 +9,7 @@
 - **PDF 文件**：智能解析 PDF 文档，支持基于目录和智能检测的章节提取
 
 ### 🤖 AI 驱动的内容处理
-- **多种 AI 服务**：支持 Google Gemini 和 OpenAI GPT 模型
+- **多种 AI 服务**：支持 Google Gemini、OpenAI GPT 模型和阿里百炼平台
 - **三种处理模式**：
   - 📝 **文字总结模式**：生成章节总结、分析章节关联、输出全书总结
   - 🧠 **章节思维导图模式**：为每个章节生成独立的思维导图
@@ -86,6 +86,12 @@ npm run dev
 3. 创建新的 API Key
 4. 复制 API Key 到配置中
 
+**阿里百炼平台 API Key**：
+1. 访问 [阿里百炼平台](https://dashscope.console.aliyun.com/)
+2. 登录阿里云账号
+3. 创建新的 API Key
+4. 复制 API Key 到配置中
+
 ### 2. 上传电子书文件
 
 1. 点击「选择 EPUB 或 PDF 文件」按钮
@@ -152,6 +158,7 @@ npm run dev
 - **AI 服务**：
   - Google Gemini：@google/generative-ai
   - OpenAI：自定义实现
+  - 阿里百炼平台：自定义实现
 
 ### 项目结构
 ```

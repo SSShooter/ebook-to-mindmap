@@ -19,7 +19,7 @@ interface Chapter {
 }
 
 interface AIConfig {
-  provider: 'gemini' | 'openai'
+  provider: 'gemini' | 'openai' | 'dashscope'
   apiKey: string
   apiUrl?: string // 用于OpenAI兼容的API地址
   model?: string
@@ -47,6 +47,13 @@ export class AIService {
         apiUrl: currentConfig.apiUrl || 'https://api.openai.com/v1',
         apiKey: currentConfig.apiKey,
         model: currentConfig.model || 'gpt-3.5-turbo'
+      }
+    } else if (currentConfig.provider === 'dashscope') {
+      // 阿里百炼平台配置
+      this.model = {
+        apiUrl: currentConfig.apiUrl || 'https://dashscope.aliyuncs.com/api/v1',
+        apiKey: currentConfig.apiKey,
+        model: currentConfig.model || 'qwen-plus-latest'
       }
     }
   }
@@ -274,6 +281,45 @@ export class AIService {
 
       const data = await response.json()
       return data.choices[0]?.message?.content || ''
+    } else if (config.provider === 'dashscope') {
+      // 阿里百炼平台API调用（通过代理解决CORS问题）
+      const messages: Array<{role: 'system' | 'user', content: string}> = [
+        {
+          role: 'system',
+          content: systemPrompt
+        },
+        {
+          role: 'user',
+          content: prompt
+        }
+      ]
+      
+      // 使用代理端点而不是直接调用阿里百炼平台API
+      const response = await fetch('/api/dashscope/services/aigc/text-generation/generation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.model.apiKey}`,
+          'X-DashScope-SSE': 'disable' // 禁用SSE流式响应，获取标准JSON响应
+        },
+        body: JSON.stringify({
+          model: this.model.model,
+          input: {
+            messages
+          },
+          parameters: {
+            temperature: config.temperature || 0.7
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error(`阿里百炼平台API请求失败: ${response.status} ${response.statusText}`)
+      }
+
+      const data = await response.json()
+      // 阿里百炼平台的响应结构可能与OpenAI不同，需要适配
+      return data.output?.text || data.choices?.[0]?.message?.content || ''
     }
     
     throw new Error('不支持的AI提供商')

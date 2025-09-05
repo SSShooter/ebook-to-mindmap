@@ -7,7 +7,7 @@
 ## 技术栈
 
 - **PDF解析**: PDF.js (v5.3.93)
-- **AI服务**: Google Gemini 1.5 Flash
+- **AI服务**: Google Gemini 1.5 Flash、OpenAI GPT模型、阿里百炼平台
 - **缓存**: LocalStorage + 自定义缓存服务
 - **前端**: React + TypeScript
 
@@ -75,7 +75,7 @@ const pageText = textContent.items
 **文件**: `src/services/geminiService.ts` - `summarizeChapter()` 方法
 
 **处理流程**:
-- 逐章节调用Gemini API
+- 逐章节调用AI API（支持Google Gemini、OpenAI GPT模型和阿里百炼平台）
 - 使用结构化提示词生成详细总结
 - 每个总结包含：主要内容概述、关键观点、重要概念、章节意义
 - 总结长度控制在200-300字
@@ -155,8 +155,11 @@ const pageText = textContent.items
 
 ## 用户界面流程
 
-1. **文件上传**: 支持.pdf格式文件
-2. **API配置**: 输入Gemini API Key
+1. **文件上传**: 支持.epub和.pdf格式文件
+2. **API配置**: 选择AI提供商并输入相应的API Key
+   - Google Gemini：需要Gemini API Key
+   - OpenAI GPT：需要OpenAI API Key和API地址
+   - 阿里百炼平台：需要DashScope API Key和API地址
 3. **PDF选项配置**: 当选择PDF文件时，显示"启用智能章节检测"开关
    - 默认关闭，因为大多数PDF都有目录
    - 开启后会在没有目录时尝试智能识别章节标题
@@ -178,6 +181,7 @@ const pageText = textContent.items
 - **接口抽象**: 易于替换不同的AI服务提供商
 - **配置化**: 支持调整章节检测规则和总结模板
 - **多格式支持**: 架构支持扩展到其他文档格式
+- **多AI提供商**: 支持Google Gemini、OpenAI GPT模型和阿里百炼平台
 
 ## 注意事项
 
