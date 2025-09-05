@@ -199,7 +199,7 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
                       <Input
                         id="dashscope-model"
                         type="text"
-                        placeholder={t('config.dashscopeModelPlaceholder') || 'qwen-max'}
+                        placeholder={t('config.dashscopeModelPlaceholder') || 'qwen-plus-latest'}
                         value={model}
                         onChange={(e) => setModel(e.target.value)}
                         disabled={processing}

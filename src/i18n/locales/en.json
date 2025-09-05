@@ -146,7 +146,7 @@
     "modelName": "Model Name (Optional)",
     "modelPlaceholder": "gpt-3.5-turbo, gpt-4, etc.",
     "geminiModelPlaceholder": "gemini-1.5-flash, gemini-1.5-pro, etc.",
-    "dashscopeModelPlaceholder": "qwen-max, qwen-plus, etc.",
+    "dashscopeModelPlaceholder": "qwen-plus-latest, qwen-plus, etc.",
     "temperature": "Temperature (Optional)",
     "temperatureDescription": "Controls AI response randomness, range 0-2, higher values are more random, recommended 0.7",
     "processingMode": "Processing Mode",

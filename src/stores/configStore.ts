@@ -73,7 +73,7 @@ export const useConfigStore = create<ConfigState>()(
           updatedConfig = {
             ...updatedConfig,
             apiUrl: 'https://dashscope.aliyuncs.com/api/v1',
-            model: 'qwen-max'
+            model: 'qwen-plus-latest'
           };
         } else if (provider === 'openai') {
           updatedConfig = {
