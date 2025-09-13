@@ -19,7 +19,7 @@ interface Chapter {
 }
 
 interface AIConfig {
-  provider: 'gemini' | 'openai'
+  provider: 'gemini' | 'openai' | 'ollama'
   apiKey: string
   apiUrl?: string // 用于OpenAI兼容的API地址
   model?: string
@@ -47,6 +47,13 @@ export class AIService {
         apiUrl: currentConfig.apiUrl || 'https://api.openai.com/v1',
         apiKey: currentConfig.apiKey,
         model: currentConfig.model || 'gpt-3.5-turbo'
+      }
+    } else if (currentConfig.provider === 'ollama') {
+      // Ollama配置
+      this.model = {
+        apiUrl: currentConfig.apiUrl || 'http://localhost:11434',
+        apiKey: currentConfig.apiKey, // 可选
+        model: currentConfig.model || 'llama2'
       }
     }
   }
@@ -135,7 +142,7 @@ export class AIService {
         prompt += `\n\n补充要求：${customPrompt.trim()}`
       }
 
-      const mindMapJson = await this.generateContent(prompt, outputLanguage)
+      const mindMapJson = await this.generateMindMapContent(prompt, outputLanguage)
 
       if (!mindMapJson || mindMapJson.trim().length === 0) {
         throw new Error('AI返回了空的思维导图数据')
@@ -205,7 +212,7 @@ export class AIService {
         prompt += `\n\n补充要求：${customPrompt.trim()}`
       }
 
-      const mindMapJson = await this.generateContent(prompt, 'en')
+      const mindMapJson = await this.generateMindMapContent(prompt, 'en')
 
       if (!mindMapJson || mindMapJson.trim().length === 0) {
         throw new Error('AI返回了空的思维导图数据')
@@ -229,6 +236,84 @@ export class AIService {
     } catch (error) {
       throw new Error(`整书思维导图生成失败: ${error instanceof Error ? error.message : '未知错误'}`)
     }
+  }
+
+  // 专门用于生成思维导图的函数，强制JSON格式
+  private async generateMindMapContent(prompt: string, outputLanguage?: SupportedLanguage): Promise<string> {
+    const config = this.getCurrentConfig()
+    const language = outputLanguage || 'en'
+    const systemPrompt = getLanguageInstruction(language)
+    
+    if (config.provider === 'gemini') {
+      const finalPrompt = `${prompt}\n\n**${systemPrompt}**`
+      const result = await this.model.generateContent(finalPrompt, {
+        generationConfig: {
+          temperature: config.temperature || 0.7
+        }
+      })
+      const response = await result.response
+      return response.text()
+    } else if (config.provider === 'openai') {
+      const messages: Array<{role: 'user', content: string}> = [
+        {
+          role: 'user',
+          content: prompt + '\n\n' + systemPrompt
+        }
+      ]
+      
+      const response = await fetch(`${this.model.apiUrl}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.model.apiKey}`
+        },
+        body: JSON.stringify({
+          model: this.model.model,
+          messages,
+          temperature: config.temperature || 0.7,
+          response_format: { type: "json_object" }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error(`OpenAI API请求失败: ${response.status} ${response.statusText}`)
+      }
+
+      const data = await response.json()
+      return data.choices[0]?.message?.content || ''
+    } else if (config.provider === 'ollama') {
+      const messages: Array<{role: 'user', content: string}> = [
+        {
+          role: 'user',
+          content: prompt + '\n\n' + systemPrompt
+        }
+      ]
+      
+      const response = await fetch(`${this.model.apiUrl}/api/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: this.model.model,
+          messages,
+          stream: false,
+          format: "json",
+          options: {
+            temperature: config.temperature || 0.7
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error(`Ollama API请求失败: ${response.status} ${response.statusText}`)
+      }
+
+      const data = await response.json()
+      return data.message?.content || ''
+    }
+    
+    throw new Error('不支持的AI提供商')
   }
 
   // 统一的内容生成方法
@@ -274,6 +359,35 @@ export class AIService {
 
       const data = await response.json()
       return data.choices[0]?.message?.content || ''
+    } else if (config.provider === 'ollama') {
+      const messages: Array<{role: 'user', content: string}> = [
+        {
+          role: 'user',
+          content: prompt + '\n\n' + systemPrompt
+        }
+      ]
+      
+      const response = await fetch(`${this.model.apiUrl}/api/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: this.model.model,
+          messages,
+          stream: false,
+          options: {
+            temperature: config.temperature || 0.7
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error(`Ollama API请求失败: ${response.status} ${response.statusText}`)
+      }
+
+      const data = await response.json()
+      return data.message?.content || ''
     }
     
     throw new Error('不支持的AI提供商')

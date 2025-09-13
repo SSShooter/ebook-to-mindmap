@@ -140,6 +140,8 @@
     "openaiCompatible": "OpenAI Compatible",
     "enterGeminiApiKey": "Enter your Gemini API Key",
     "enterApiToken": "Enter your API Token",
+    "apiKeyOptional": "API Key (Optional)",
+    "enterOptionalApiKey": "Leave empty for default",
     "apiUrl": "API URL",
     "modelName": "Model Name (Optional)",
     "modelPlaceholder": "gpt-3.5-turbo, gpt-4, etc.",

@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Upload, BookOpen, Brain, FileText, Loader2, Network, Trash2, List, ChevronUp } from 'lucide-react'
 import { EpubProcessor, type ChapterData } from './services/epubProcessor'
 import { PdfProcessor } from './services/pdfProcessor'
-import { AIService } from './services/geminiService'
+import { createAIService } from './services/unifiedAIService'
 import { CacheService } from './services/cacheService'
 import { ConfigDialog } from './components/project/ConfigDialog'
 import type { MindElixirData } from 'mind-elixir'
@@ -51,7 +51,7 @@ interface BookMindMap {
 }
 
 // 导入配置store
-import { useAIConfig, useProcessingOptions, useConfigStore } from './stores/configStore'
+import { useAIConfig, useProcessingOptions } from './stores/configStore'
 const cacheService = new CacheService()
 
 function App() {
@@ -76,7 +76,7 @@ function App() {
   const processingOptions = useProcessingOptions()
 
   // 从store中解构状态值
-  const { apiKey } = aiConfig
+  const { apiKey, provider } = aiConfig
   const { processingMode, bookType, useSmartDetection, skipNonEssentialChapters } = processingOptions
 
   // zustand的persist中间件会自动处理配置的加载和保存
@@ -263,7 +263,7 @@ function App() {
   }, [file, useSmartDetection, skipNonEssentialChapters, processingOptions.maxSubChapterDepth, t])
 
   const processEbook = useCallback(async () => {
-    if (!extractedChapters || !bookData || !apiKey) {
+    if (!extractedChapters || !bookData || (provider !== 'ollama' && !apiKey)) {
       toast.error(t('chapters.extractAndApiKey'), {
         duration: 3000,
         position: 'top-center',
@@ -288,17 +288,7 @@ function App() {
     setCurrentStep('')
 
     try {
-      const aiService = new AIService(() => {
-        const currentState = useConfigStore.getState()
-        const currentAiConfig = currentState.aiConfig
-        return {
-          provider: currentAiConfig.provider,
-          apiKey: currentAiConfig.apiKey,
-          apiUrl: currentAiConfig.provider === 'openai' ? currentAiConfig.apiUrl : undefined,
-          model: currentAiConfig.model || undefined,
-          temperature: currentAiConfig.temperature
-        }
-      })
+      const aiService = createAIService()
 
       // 只处理选中的章节
       const chapters = extractedChapters.filter(chapter => selectedChapters.has(chapter.id))
@@ -501,7 +491,7 @@ function App() {
     } finally {
       setProcessing(false)
     }
-  }, [extractedChapters, bookData, apiKey, file, selectedChapters, processingMode, bookType, customPrompt, processingOptions.outputLanguage, t])
+  }, [extractedChapters, bookData, apiKey, provider, file, selectedChapters, processingMode, bookType, customPrompt, processingOptions.outputLanguage, t])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
@@ -644,7 +634,7 @@ function App() {
 
               <Button
                 onClick={() => {
-                  if (!apiKey) {
+                  if (provider !== 'ollama' && !apiKey) {
                     toast.error(t('chapters.apiKeyRequired'), {
                       duration: 3000,
                       position: 'top-center',
