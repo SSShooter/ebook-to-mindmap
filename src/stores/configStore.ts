@@ -4,7 +4,7 @@ import type { SupportedLanguage } from '../services/prompts/utils'
 
 // AI配置接口
 interface AIConfig {
-  provider: 'gemini' | 'openai'
+  provider: 'gemini' | 'openai' | 'ollama'
   apiKey: string
   apiUrl: string
   model: string
@@ -25,7 +25,7 @@ interface ProcessingOptions {
 interface ConfigState {
   // AI配置
   aiConfig: AIConfig
-  setAiProvider: (provider: 'gemini' | 'openai') => void
+  setAiProvider: (provider: 'gemini' | 'openai' | 'ollama') => void
   setApiKey: (apiKey: string) => void
   setApiUrl: (apiUrl: string) => void
   setModel: (model: string) => void

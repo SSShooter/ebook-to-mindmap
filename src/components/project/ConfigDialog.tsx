@@ -72,25 +72,26 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="ai-provider">{t('config.aiProvider')}</Label>
-                  <Select value={aiProvider} onValueChange={(value: 'gemini' | 'openai') => setAiProvider(value)} disabled={processing}>
+                  <Select value={aiProvider} onValueChange={(value: 'gemini' | 'openai' | 'ollama') => setAiProvider(value)} disabled={processing}>
                     <SelectTrigger>
                       <SelectValue placeholder={t('config.selectAiProvider')} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="gemini">Google Gemini</SelectItem>
                       <SelectItem value="openai">{t('config.openaiCompatible')}</SelectItem>
+                      <SelectItem value="ollama">Ollama (Local)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="apikey">
-                    {aiProvider === 'gemini' ? 'Gemini API Key' : 'API Token'}
+                    {aiProvider === 'gemini' ? 'Gemini API Key' : aiProvider === 'ollama' ? t('config.apiKeyOptional') : 'API Token'}
                   </Label>
                   <Input
                     id="apikey"
                     type="password"
-                    placeholder={aiProvider === 'gemini' ? t('config.enterGeminiApiKey') : t('config.enterApiToken')}
+                    placeholder={aiProvider === 'gemini' ? t('config.enterGeminiApiKey') : aiProvider === 'ollama' ? t('config.enterOptionalApiKey') : t('config.enterApiToken')}
                     value={apiKey}
                     onChange={(e) => setApiKey(e.target.value)}
                     disabled={processing}
@@ -176,6 +177,53 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
                     </p>
                   </div>
                 </div>
+              )}
+
+              {aiProvider === 'ollama' && (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="ollama-url">{t('config.apiUrl')}</Label>
+                      <Input
+                        id="ollama-url"
+                        type="url"
+                        placeholder="http://localhost:11434"
+                        value={apiUrl}
+                        onChange={(e) => setApiUrl(e.target.value)}
+                        disabled={processing}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="ollama-model">{t('config.modelName')}</Label>
+                      <Input
+                        id="ollama-model"
+                        type="text"
+                        placeholder="llama2, mistral, etc."
+                        value={model}
+                        onChange={(e) => setModel(e.target.value)}
+                        disabled={processing}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="ollama-temperature">{t('config.temperature')}</Label>
+                    <Input
+                      id="ollama-temperature"
+                      type="number"
+                      min="0"
+                      max="2"
+                      step="0.1"
+                      placeholder="0.7"
+                      value={temperature}
+                      onChange={(e) => setTemperature(parseFloat(e.target.value))}
+                      disabled={processing}
+                    />
+                    <p className="text-xs text-gray-600">
+                      {t('config.temperatureDescription')}
+                    </p>
+                  </div>
+                </>
               )}
             </div>
 

@@ -102,6 +102,8 @@
     "openaiCompatible": "OpenAI 兼容",
     "enterGeminiApiKey": "输入您的 Gemini API Key",
     "enterApiToken": "输入您的 API Token",
+    "apiKeyOptional": "API Key（可选）",
+    "enterOptionalApiKey": "留空使用默认设置",
     "apiUrl": "API 地址",
     "modelName": "模型名称（可选）",
     "modelPlaceholder": "gpt-3.5-turbo, gpt-4 等",
