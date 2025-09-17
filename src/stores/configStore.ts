@@ -4,7 +4,7 @@ import type { SupportedLanguage } from '../services/prompts/utils'
 
 // AI配置接口
 interface AIConfig {
-  provider: 'gemini' | 'openai' | 'dashscope'
+  provider: 'gemini' | 'openai' | 'dashscope' | 'deepseek' | 'ollama'
   apiKey: string
   apiUrl: string
   model: string
@@ -25,7 +25,7 @@ interface ProcessingOptions {
 interface ConfigState {
   // AI配置
   aiConfig: AIConfig
-  setAiProvider: (provider: 'gemini' | 'openai' | 'dashscope') => void
+  setAiProvider: (provider: 'gemini' | 'openai' | 'dashscope' | 'deepseek' | 'ollama') => void
   setApiKey: (apiKey: string) => void
   setApiUrl: (apiUrl: string) => void
   setModel: (model: string) => void
@@ -80,6 +80,18 @@ export const useConfigStore = create<ConfigState>()(
             ...updatedConfig,
             apiUrl: 'https://api.openai.com/v1',
             model: 'gpt-3.5-turbo'
+          };
+        } else if (provider === 'deepseek') {
+          updatedConfig = {
+            ...updatedConfig,
+            apiUrl: 'https://api.deepseek.com/v1',
+            model: 'deepseek-chat'
+          };
+        } else if (provider === 'ollama') {
+          updatedConfig = {
+            ...updatedConfig,
+            apiUrl: 'http://localhost:11434/v1',
+            model: 'llama2'
           };
         } else if (provider === 'gemini') {
           updatedConfig = {

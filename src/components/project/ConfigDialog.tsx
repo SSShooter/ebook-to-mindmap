@@ -72,7 +72,7 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="ai-provider">{t('config.aiProvider')}</Label>
-                  <Select value={aiProvider} onValueChange={(value: 'gemini' | 'openai' | 'dashscope') => setAiProvider(value)} disabled={processing}>
+                  <Select value={aiProvider} onValueChange={(value: 'gemini' | 'openai' | 'dashscope' | 'deepseek' | 'ollama') => setAiProvider(value)} disabled={processing}>
                     <SelectTrigger>
                       <SelectValue placeholder={t('config.selectAiProvider')} />
                     </SelectTrigger>
@@ -80,18 +80,20 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
                       <SelectItem value="gemini">Google Gemini</SelectItem>
                       <SelectItem value="openai">{t('config.openaiCompatible')}</SelectItem>
                       <SelectItem value="dashscope">阿里百炼平台</SelectItem>
+                      <SelectItem value="deepseek">DeepSeek</SelectItem>
+                      <SelectItem value="ollama">Ollama</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="apikey">
-                    {aiProvider === 'gemini' ? 'Gemini API Key' : aiProvider === 'dashscope' ? 'DashScope API Key' : 'API Token'}
+                    {aiProvider === 'gemini' ? 'Gemini API Key' : aiProvider === 'dashscope' ? 'DashScope API Key' : aiProvider === 'deepseek' ? 'DeepSeek API Key' : aiProvider === 'ollama' ? 'Ollama API Key' : 'API Token'}
                   </Label>
                   <Input
                     id="apikey"
                     type="password"
-                    placeholder={aiProvider === 'gemini' ? t('config.enterGeminiApiKey') : aiProvider === 'dashscope' ? '请输入DashScope API Key' : t('config.enterApiToken')}
+                    placeholder={aiProvider === 'gemini' ? t('config.enterGeminiApiKey') : aiProvider === 'dashscope' ? t('config.enterDashScopeApiKey') : aiProvider === 'deepseek' ? t('config.enterDeepSeekApiKey') : aiProvider === 'ollama' ? t('config.enterOllamaApiKey') : t('config.enterApiToken')}
                     value={apiKey}
                     onChange={(e) => setApiKey(e.target.value)}
                     disabled={processing}
@@ -210,6 +212,100 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
                     <Label htmlFor="dashscope-temperature">{t('config.temperature')}</Label>
                     <Input
                       id="dashscope-temperature"
+                      type="number"
+                      min="0"
+                      max="2"
+                      step="0.1"
+                      placeholder="0.7"
+                      value={temperature}
+                      onChange={(e) => setTemperature(parseFloat(e.target.value))}
+                      disabled={processing}
+                    />
+                    <p className="text-xs text-gray-600">
+                      {t('config.temperatureDescription')}
+                    </p>
+                  </div>
+                </>
+              )}
+
+              {aiProvider === 'deepseek' && (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="deepseek-api-url">{t('config.apiUrl')}</Label>
+                      <Input
+                        id="deepseek-api-url"
+                        type="url"
+                        placeholder="https://api.deepseek.com/v1"
+                        value={apiUrl}
+                        onChange={(e) => setApiUrl(e.target.value)}
+                        disabled={processing}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="deepseek-model">{t('config.modelName')}</Label>
+                      <Input
+                        id="deepseek-model"
+                        type="text"
+                        placeholder={t('config.deepseekModelPlaceholder') || 'deepseek-chat'}
+                        value={model}
+                        onChange={(e) => setModel(e.target.value)}
+                        disabled={processing}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="deepseek-temperature">{t('config.temperature')}</Label>
+                    <Input
+                      id="deepseek-temperature"
+                      type="number"
+                      min="0"
+                      max="2"
+                      step="0.1"
+                      placeholder="0.7"
+                      value={temperature}
+                      onChange={(e) => setTemperature(parseFloat(e.target.value))}
+                      disabled={processing}
+                    />
+                    <p className="text-xs text-gray-600">
+                      {t('config.temperatureDescription')}
+                    </p>
+                  </div>
+                </>
+              )}
+
+              {aiProvider === 'ollama' && (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="ollama-api-url">{t('config.apiUrl')}</Label>
+                      <Input
+                        id="ollama-api-url"
+                        type="url"
+                        placeholder="http://localhost:11434/v1"
+                        value={apiUrl}
+                        onChange={(e) => setApiUrl(e.target.value)}
+                        disabled={processing}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="ollama-model">{t('config.modelName')}</Label>
+                      <Input
+                        id="ollama-model"
+                        type="text"
+                        placeholder={t('config.ollamaModelPlaceholder') || 'llama2'}
+                        value={model}
+                        onChange={(e) => setModel(e.target.value)}
+                        disabled={processing}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="ollama-temperature">{t('config.temperature')}</Label>
+                    <Input
+                      id="ollama-temperature"
                       type="number"
                       min="0"
                       max="2"
@@ -347,6 +443,7 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
                     <SelectItem value="fr">Français</SelectItem>
                     <SelectItem value="de">Deutsch</SelectItem>
                     <SelectItem value="es">Español</SelectItem>
+                    <SelectItem value="pt">Português</SelectItem>
                     <SelectItem value="ru">Русский</SelectItem>
                   </SelectContent>
                 </Select>

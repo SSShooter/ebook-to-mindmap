@@ -10,7 +10,9 @@ import { Languages } from 'lucide-react'
 
 const languages = [
   { code: 'zh', name: '中文', flag: '🇨🇳' },
-  { code: 'en', name: 'English', flag: '🇺🇸' }
+  { code: 'en', name: 'English', flag: '🇺🇸' },
+  { code: 'es', name: 'Español', flag: '🇪🇸' },
+  { code: 'pt', name: 'Português', flag: '🇵🇹' }
 ]
 
 export function LanguageSwitcher() {

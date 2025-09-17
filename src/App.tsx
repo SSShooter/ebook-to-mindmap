@@ -113,12 +113,32 @@ function App() {
 
   // 清除章节缓存的函数
   const clearChapterCache = (chapterId: string) => {
-    if (!file) return
-
-    const type = processingMode === 'summary' ? 'summary' : 'mindmap'
-    if (cacheService.clearChapterCache(file.name, chapterId, type)) {
-      toast.success('已清除缓存，下次处理将重新生成内容', {
+    if (!file) {
+      toast.error('请先选择文件', {
         duration: 3000,
+        position: 'top-center',
+      })
+      return
+    }
+
+    try {
+      const type = processingMode === 'summary' ? 'summary' : 'mindmap'
+      const success = cacheService.clearChapterCache(file.name, chapterId, type)
+      if (success) {
+        toast.success('已清除缓存，下次处理将重新生成内容', {
+          duration: 3000,
+          position: 'top-center',
+        })
+      } else {
+        toast.info('该章节没有可清除的缓存', {
+          duration: 3000,
+          position: 'top-center',
+        })
+      }
+    } catch (error) {
+      console.error('清除章节缓存失败:', error)
+      toast.error('清除章节缓存失败，请查看控制台错误信息', {
+        duration: 5000,
         position: 'top-center',
       })
     }
@@ -126,23 +146,38 @@ function App() {
 
   // 清除特定类型缓存的函数
   const clearSpecificCache = (cacheType: 'connections' | 'overall_summary' | 'combined_mindmap' | 'merged_mindmap') => {
-    if (!file) return
-
-    const displayNames = {
-      connections: '章节关联',
-      overall_summary: '全书总结',
-      combined_mindmap: '整书思维导图',
-      merged_mindmap: '章节思维导图整合'
-    }
-
-    if (cacheService.clearSpecificCache(file.name, cacheType)) {
-      toast.success(`已清除${displayNames[cacheType]}缓存，下次处理将重新生成内容`, {
+    if (!file) {
+      toast.error('请先选择文件', {
         duration: 3000,
         position: 'top-center',
       })
-    } else {
-      toast.info(`没有找到可清除的${displayNames[cacheType]}缓存`, {
-        duration: 3000,
+      return
+    }
+
+    try {
+      const displayNames = {
+        connections: '章节关联',
+        overall_summary: '全书总结',
+        combined_mindmap: '整书思维导图',
+        merged_mindmap: '章节思维导图整合'
+      }
+
+      const success = cacheService.clearSpecificCache(file.name, cacheType)
+      if (success) {
+        toast.success(`已清除${displayNames[cacheType]}缓存，下次处理将重新生成内容`, {
+          duration: 3000,
+          position: 'top-center',
+        })
+      } else {
+        toast.info(`没有找到可清除的${displayNames[cacheType]}缓存`, {
+          duration: 3000,
+          position: 'top-center',
+        })
+      }
+    } catch (error) {
+      console.error(`清除${cacheType}缓存失败:`, error)
+      toast.error('清除缓存失败，请查看控制台错误信息', {
+        duration: 5000,
         position: 'top-center',
       })
     }
@@ -174,25 +209,51 @@ function App() {
 
   // 清除整本书缓存的函数
   const clearBookCache = () => {
-    if (!file) return
-
-    const mode = processingMode === 'combined-mindmap' ? 'combined_mindmap' : processingMode as 'summary' | 'mindmap'
-    const deletedCount = cacheService.clearBookCache(file.name, mode)
-
-    const modeNames = {
-      'summary': '文字总结',
-      'mindmap': '章节思维导图',
-      'combined-mindmap': '整书思维导图'
-    }
-
-    if (deletedCount > 0) {
-      toast.success(`已清除${deletedCount}项${modeNames[processingMode]}缓存，下次处理将重新生成内容`, {
+    if (!file) {
+      toast.error('请先选择文件', {
         duration: 3000,
         position: 'top-center',
       })
-    } else {
-      toast.info(`没有找到可清除的${modeNames[processingMode]}缓存`, {
-        duration: 3000,
+      return
+    }
+
+    try {
+      // 先检查缓存状态
+      const mode = processingMode === 'combined-mindmap' ? 'combined_mindmap' : processingMode as 'summary' | 'mindmap'
+      const stats = cacheService.getFileCacheStats(file.name, mode)
+      
+      const modeNames = {
+        'summary': '文字总结',
+        'mindmap': '章节思维导图',
+        'combined-mindmap': '整书思维导图'
+      }
+
+      if (stats.modeSpecificKeys === 0) {
+        toast.info(`当前没有可清除的${modeNames[processingMode]}缓存`, {
+          duration: 3000,
+          position: 'top-center',
+        })
+        return
+      }
+
+      console.log(`准备清除缓存 - 文件: ${file.name}, 模式: ${mode}, 预计清除: ${stats.modeSpecificKeys} 项`)
+      const deletedCount = cacheService.clearBookCache(file.name, mode)
+
+      if (deletedCount > 0) {
+        toast.success(`已清除${deletedCount}项${modeNames[processingMode]}缓存，下次处理将重新生成内容`, {
+          duration: 3000,
+          position: 'top-center',
+        })
+      } else {
+        toast.info(`没有找到可清除的${modeNames[processingMode]}缓存`, {
+          duration: 3000,
+          position: 'top-center',
+        })
+      }
+    } catch (error) {
+      console.error('清除缓存失败:', error)
+      toast.error('清除缓存失败，请查看控制台错误信息', {
+        duration: 5000,
         position: 'top-center',
       })
     }

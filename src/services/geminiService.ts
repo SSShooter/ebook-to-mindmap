@@ -19,7 +19,7 @@ interface Chapter {
 }
 
 interface AIConfig {
-  provider: 'gemini' | 'openai' | 'dashscope'
+  provider: 'gemini' | 'openai' | 'dashscope' | 'deepseek' | 'ollama'
   apiKey: string
   apiUrl?: string // 用于OpenAI兼容的API地址
   model?: string
@@ -54,6 +54,20 @@ export class AIService {
         apiUrl: currentConfig.apiUrl || 'https://dashscope.aliyuncs.com/api/v1',
         apiKey: currentConfig.apiKey,
         model: currentConfig.model || 'qwen-plus-latest'
+      }
+    } else if (currentConfig.provider === 'deepseek') {
+      // DeepSeek配置
+      this.model = {
+        apiUrl: currentConfig.apiUrl || 'https://api.deepseek.com/v1',
+        apiKey: currentConfig.apiKey,
+        model: currentConfig.model || 'deepseek-chat'
+      }
+    } else if (currentConfig.provider === 'ollama') {
+      // Ollama配置（本地运行，OpenAI兼容格式）
+      this.model = {
+        apiUrl: currentConfig.apiUrl || 'http://localhost:11434/v1',
+        apiKey: currentConfig.apiKey || 'ollama', // Ollama通常不需要API密钥
+        model: currentConfig.model || 'llama2'
       }
     }
   }
@@ -320,6 +334,70 @@ export class AIService {
       const data = await response.json()
       // 阿里百炼平台的响应结构可能与OpenAI不同，需要适配
       return data.output?.text || data.choices?.[0]?.message?.content || ''
+    } else if (config.provider === 'deepseek') {
+      // DeepSeek API调用（兼容OpenAI格式）
+      const messages: Array<{role: 'system' | 'user', content: string}> = [
+        {
+          role: 'system',
+          content: systemPrompt
+        },
+        {
+          role: 'user',
+          content: prompt
+        }
+      ]
+      
+      const response = await fetch(`${this.model.apiUrl}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.model.apiKey}`
+        },
+        body: JSON.stringify({
+          model: this.model.model,
+          messages,
+          temperature: config.temperature || 0.7
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error(`DeepSeek API请求失败: ${response.status} ${response.statusText}`)
+      }
+
+      const data = await response.json()
+      return data.choices[0]?.message?.content || ''
+    } else if (config.provider === 'ollama') {
+      // Ollama API调用（兼容OpenAI格式）
+      const messages: Array<{role: 'system' | 'user', content: string}> = [
+        {
+          role: 'system',
+          content: systemPrompt
+        },
+        {
+          role: 'user', 
+          content: prompt
+        }
+      ]
+      
+      const response = await fetch(`${this.model.apiUrl}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.model.apiKey}`
+        },
+        body: JSON.stringify({
+          model: this.model.model,
+          messages,
+          temperature: config.temperature || 0.7
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error(`Ollama API请求失败: ${response.status} ${response.statusText}`)
+      }
+
+      const data = await response.json()
+      return data.choices[0]?.message?.content || ''
     }
     
     throw new Error('不支持的AI提供商')
