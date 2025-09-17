@@ -25,7 +25,3 @@ dist-ssr
 
 #pnpm files
 pnpm-lock.yaml
-gitpull.md
-PULL_REQUEST_TEMPLATE.md
-git-feat.md
-.claude/
