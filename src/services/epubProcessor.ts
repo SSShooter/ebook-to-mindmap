@@ -51,61 +51,61 @@ export class EpubProcessor {
       const chapters: ChapterData[] = []
 
       try {
-        const toc = book.navigation.toc.filter(item=>!item.href.includes('#'))
-          // 获取章节信息（先按原始 TOC）
-          let chapterInfos = await this.extractChaptersFromToc(book, toc, 0, maxSubChapterDepth)
-          console.log(`📚 [DEBUG] 找到 ${chapterInfos.length} 个章节信息`, chapterInfos)
+        const toc = book.navigation.toc.filter(item => !item.href.includes('#'))
+        // 获取章节信息（先按原始 TOC）
+        let chapterInfos = await this.extractChaptersFromToc(book, toc, 0, maxSubChapterDepth)
+        console.log(`📚 [DEBUG] 找到 ${chapterInfos.length} 个章节信息`, chapterInfos)
 
-          // 回退：当 TOC 长度≤3 时，直接用 spineItems 生成章节信息
-          if (toc.length <= 3) {
-            const fallbackChapterInfos = book.spine.spineItems
-              .map((spineItem: Section, idx: number) => {
-                const navItem: NavItem = {
-                  id: spineItem.idref || `spine-${idx + 1}`,
-                  href: spineItem.href,
-                  label: spineItem.idref || `章节 ${idx + 1}`,
-                  subitems: []
-                }
-                return {
-                  title: navItem.label || `章节 ${idx + 1}`,
-                  href: navItem.href!,
-                  subitems: [],
-                  tocItem: navItem,
-                  depth: 0
-                }
+        // 回退：当 TOC 长度≤3 时，直接用 spineItems 生成章节信息
+        if (toc.length <= 3) {
+          const fallbackChapterInfos = book.spine.spineItems
+            .map((spineItem: Section, idx: number) => {
+              const navItem: NavItem = {
+                id: spineItem.idref || `spine-${idx + 1}`,
+                href: spineItem.href,
+                label: spineItem.idref || `章节 ${idx + 1}`,
+                subitems: []
+              }
+              return {
+                title: navItem.label || `章节 ${idx + 1}`,
+                href: navItem.href!,
+                subitems: [],
+                tocItem: navItem,
+                depth: 0
+              }
+            })
+            .filter(item => !!item.href)
+          console.log('🔁 [DEBUG] TOC长度≤3，直接用 spineItems 生成章节信息，fallback 章节数:', fallbackChapterInfos.length)
+
+          if (fallbackChapterInfos.length >= chapterInfos.length) {
+            chapterInfos = fallbackChapterInfos
+          }
+        }
+        if (chapterInfos.length > 0) {
+          // 根据章节信息提取内容
+          for (const chapterInfo of chapterInfos) {
+            // 检查是否需要跳过此章节
+            if (skipNonEssentialChapters && this.shouldSkipChapter(chapterInfo.title)) {
+              console.log(`⏭️ [DEBUG] 跳过无关键内容章节: "${chapterInfo.title}"`)
+              continue
+            }
+
+            console.log(`📄 [DEBUG] 提取章节 "${chapterInfo.title}" (href: ${chapterInfo.href})`)
+
+            const chapterContent = await this.extractContentFromHref(book, chapterInfo.href, chapterInfo.subitems)
+
+            if (chapterContent.trim().length > 100) {
+              chapters.push({
+                id: `chapter-${chapters.length + 1}`,
+                title: chapterInfo.title,
+                content: chapterContent,
+                href: chapterInfo.href,
+                tocItem: chapterInfo.tocItem,
+                depth: chapterInfo.depth
               })
-              .filter(item => !!item.href)
-            console.log('🔁 [DEBUG] TOC长度≤3，直接用 spineItems 生成章节信息，fallback 章节数:', fallbackChapterInfos.length)
-
-            if (fallbackChapterInfos.length >= chapterInfos.length) {
-              chapterInfos = fallbackChapterInfos
             }
           }
-          if (chapterInfos.length > 0) {
-            // 根据章节信息提取内容
-            for (const chapterInfo of chapterInfos) {
-              // 检查是否需要跳过此章节
-              if (skipNonEssentialChapters && this.shouldSkipChapter(chapterInfo.title)) {
-                console.log(`⏭️ [DEBUG] 跳过无关键内容章节: "${chapterInfo.title}"`)
-                continue
-              }
-
-              console.log(`📄 [DEBUG] 提取章节 "${chapterInfo.title}" (href: ${chapterInfo.href})`)
-
-              const chapterContent = await this.extractContentFromHref(book, chapterInfo.href, chapterInfo.subitems)
-
-              if (chapterContent.trim().length > 100) {
-                chapters.push({
-                  id: `chapter-${chapters.length + 1}`,
-                  title: chapterInfo.title,
-                  content: chapterContent,
-                  href: chapterInfo.href,
-                  tocItem: chapterInfo.tocItem,
-                  depth: chapterInfo.depth
-                })
-              }
-            }
-          }
+        }
       } catch (tocError) {
         console.warn(`⚠️ [DEBUG] 无法获取EPUB目录:`, tocError)
       }
@@ -121,7 +121,7 @@ export class EpubProcessor {
   }
 
   private async extractChaptersFromToc(book: Book, toc: NavItem[], currentDepth: number = 0, maxDepth: number = 0): Promise<{ title: string, href: string, subitems?: NavItem[], tocItem: NavItem, depth: number }[]> {
-    const chapterInfos: { title: string, href: string, subitems?: NavItem[], tocItem: NavItem, depth: number }[] = []   
+    const chapterInfos: { title: string, href: string, subitems?: NavItem[], tocItem: NavItem, depth: number }[] = []
 
     for (const item of toc) {
       try {
@@ -166,6 +166,9 @@ export class EpubProcessor {
 
         for (const subitem of subitems) {
           if (subitem.href) {
+            if (cleanHref === subitem.href.split('#')[0]) {
+              continue
+            }
             const subContent = await this.getSingleChapterContent(book, subitem.href.split('#')[0])
             if (subContent) {
               allContent += '\n\n' + subContent
@@ -219,8 +222,8 @@ export class EpubProcessor {
 
   private shouldSkipChapter(title: string): boolean {
     if (!title) return false
-    
-    return SKIP_CHAPTER_KEYWORDS.some(keyword => 
+
+    return SKIP_CHAPTER_KEYWORDS.some(keyword =>
       title.toLowerCase().includes(keyword.toLowerCase())
     )
   }
@@ -253,11 +256,7 @@ export class EpubProcessor {
       // 获取纯文本内容
       let textContent = body.textContent || ''
 
-      // 清理文本：移除多余的空白字符
-      textContent = textContent
-        .replace(/\s+/g, '\n')
-        .replace(/\n\s*\n/g, '\n')
-        .trim()
+      textContent = textContent.trim()
 
       console.log(`✨ [DEBUG] 清理后文本长度: ${textContent.length}`)
 
