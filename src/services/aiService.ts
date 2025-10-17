@@ -19,7 +19,7 @@ interface Chapter {
 }
 
 interface AIConfig {
-  provider: 'gemini' | 'openai' | 'ollama'
+  provider: 'gemini' | 'openai' | 'ollama' | '302.ai'
   apiKey: string
   apiUrl?: string // 用于OpenAI兼容的API地址
   model?: string
@@ -41,7 +41,7 @@ export class AIService {
       this.model = this.genAI.getGenerativeModel({ 
         model: currentConfig.model || 'gemini-1.5-flash'
       })
-    } else if (currentConfig.provider === 'openai') {
+    } else if (currentConfig.provider === 'openai' || currentConfig.provider === '302.ai') {
       // OpenAI兼容的配置
       this.model = {
         apiUrl: currentConfig.apiUrl || 'https://api.openai.com/v1',
@@ -254,7 +254,7 @@ export class AIService {
       })
       const response = await result.response
       return response.text()
-    } else if (config.provider === 'openai') {
+    } else if (config.provider === 'openai' || config.provider === '302.ai') {
       const messages: Array<{role: 'system' | 'user', content: string}> = [
         {
           role: 'user',
@@ -276,7 +276,8 @@ export class AIService {
       })
 
       if (!response.ok) {
-        throw new Error(`OpenAI API请求失败: ${response.status} ${response.statusText}`)
+        const errorBody = await response.text()
+        throw new Error(`OpenAI API请求失败: ${response.status} ${response.statusText} - ${errorBody}`)
       }
 
       const data = await response.json()

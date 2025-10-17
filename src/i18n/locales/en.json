@@ -180,7 +180,8 @@
     "outputLanguageAuto": "Auto (Follow Interface Language)",
     "outputLanguageEn": "English",
     "outputLanguageZh": "Chinese",
-    "outputLanguageDescription": "Control the language of AI-generated content. Auto mode will follow the current interface language."
+    "outputLanguageDescription": "Control the language of AI-generated content. Auto mode will follow the current interface language.",
+    "visitSite": "Visit Website"
   },
   "download": {
     "title": "Download Mind Map",

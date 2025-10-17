@@ -142,7 +142,8 @@
     "outputLanguageAuto": "自动（跟随界面语言）",
     "outputLanguageEn": "英文",
     "outputLanguageZh": "中文",
-    "outputLanguageDescription": "控制AI生成内容的语言。自动模式将跟随当前界面语言。"
+    "outputLanguageDescription": "控制AI生成内容的语言。自动模式将跟随当前界面语言。",
+    "visitSite": "访问官网"
   },
   "download": {
     "title": "下载思维导图",

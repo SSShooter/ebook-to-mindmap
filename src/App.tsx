@@ -365,7 +365,7 @@ ${bookSummary.overallSummary}
         return {
           provider: currentAiConfig.provider,
           apiKey: currentAiConfig.apiKey,
-          apiUrl: currentAiConfig.provider === 'openai' ? currentAiConfig.apiUrl : undefined,
+          apiUrl: currentAiConfig.apiUrl,
           model: currentAiConfig.model || undefined,
           temperature: currentAiConfig.temperature
         }

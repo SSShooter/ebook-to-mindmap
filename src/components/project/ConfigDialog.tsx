@@ -5,7 +5,7 @@ import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Settings } from 'lucide-react'
+import { Settings, ExternalLink } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useConfigStore, useAIConfig, useProcessingOptions } from '../../stores/configStore'
 import type { SupportedLanguage } from '../../services/prompts/utils'
@@ -36,6 +36,37 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
   // 从store中解构状态值
   const { provider: aiProvider, apiKey, apiUrl, model, temperature } = aiConfig
   const { processingMode, bookType, useSmartDetection, skipNonEssentialChapters, outputLanguage } = processingOptions
+
+  const providerSettings = {
+    gemini: {
+      apiKeyLabel: 'Gemini API Key',
+      apiKeyPlaceholder: t('config.enterGeminiApiKey'),
+      modelPlaceholder: t('config.geminiModelPlaceholder'),
+      apiUrlPlaceholder: '', // Gemini does not use a separate API URL input in this UI
+      url: 'https://ai.google.dev/',
+    },
+    openai: {
+      apiKeyLabel: 'API Token',
+      apiKeyPlaceholder: t('config.enterApiToken'),
+      apiUrlPlaceholder: 'https://api.openai.com/v1',
+      modelPlaceholder: t('config.modelPlaceholder'),
+      url: 'https://platform.openai.com/',
+    },
+    ollama: {
+      apiKeyLabel: 'API Token',
+      apiKeyPlaceholder: 'API Token',
+      apiUrlPlaceholder: 'http://localhost:11434',
+      modelPlaceholder: 'llama2, mistral, codellama...',
+      url: 'https://ollama.com/',
+    },
+    '302.ai': {
+      apiKeyLabel: 'API Token',
+      apiKeyPlaceholder: t('config.enterApiToken'),
+      apiUrlPlaceholder: 'https://api.302.ai/v1',
+      modelPlaceholder: t('config.modelPlaceholder'),
+      url: 'https://share.302.ai/BJ7iSL',
+    },
+  }
 
   return (
     <Dialog>
@@ -72,32 +103,44 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="ai-provider">{t('config.aiProvider')}</Label>
-                  <Select value={aiProvider} onValueChange={(value: 'gemini' | 'openai' | 'ollama') => setAiProvider(value)} disabled={processing}>
-                    <SelectTrigger>
-                      <SelectValue placeholder={t('config.selectAiProvider')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="gemini">Google Gemini</SelectItem>
-                      <SelectItem value="openai">{t('config.openaiCompatible')}</SelectItem>
-                      <SelectItem value="ollama">Ollama</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <div className="flex flex-col items-start gap-2">
+                    <Select
+                      value={aiProvider}
+                      onValueChange={(value: 'gemini' | 'openai' | 'ollama' | '302.ai') => {
+                        setAiProvider(value)
+                        if (value === '302.ai') {
+                          setApiUrl('https://api.302.ai/v1')
+                        }
+                      }}
+                      disabled={processing}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('config.selectAiProvider')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="gemini">Google Gemini</SelectItem>
+                        <SelectItem value="openai">{t('config.openaiCompatible')}</SelectItem>
+                        <SelectItem value="ollama">Ollama</SelectItem>
+                        <SelectItem value="302.ai">302.AI</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button variant="link" className="p-0 h-auto text-xs shrink-0" asChild>
+                      <a href={providerSettings[aiProvider].url} target="_blank" rel="noopener noreferrer">
+                        {t('config.visitSite')}
+                        <ExternalLink className="h-3 w-3 ml-1" />
+                      </a>
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="apikey">
-                    {aiProvider === 'gemini' ? 'Gemini API Key' : aiProvider === 'ollama' ? 'API Token (可选)' : 'API Token'}
+                    {providerSettings[aiProvider].apiKeyLabel}
                   </Label>
                   <Input
                     id="apikey"
                     type="password"
-                    placeholder={
-                      aiProvider === 'gemini'
-                        ? t('config.enterGeminiApiKey')
-                        : aiProvider === 'ollama'
-                          ? 'API Token (通常不需要)'
-                          : t('config.enterApiToken')
-                    }
+                    placeholder={providerSettings[aiProvider].apiKeyPlaceholder}
                     value={apiKey}
                     onChange={(e) => setApiKey(e.target.value)}
                     disabled={processing}
@@ -105,7 +148,7 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
                 </div>
               </div>
 
-              {(aiProvider === 'openai' || aiProvider === 'ollama') && (
+              {(aiProvider === 'openai' || aiProvider === 'ollama' || aiProvider === '302.ai') && (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -113,10 +156,10 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
                       <Input
                         id="api-url"
                         type="url"
-                        placeholder={aiProvider === 'ollama' ? 'http://localhost:11434' : 'https://api.openai.com/v1'}
+                        placeholder={providerSettings[aiProvider].apiUrlPlaceholder}
                         value={apiUrl}
                         onChange={(e) => setApiUrl(e.target.value)}
-                        disabled={processing}
+                        disabled={processing || aiProvider === '302.ai'}
                       />
                     </div>
 
@@ -125,7 +168,7 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
                       <Input
                         id="model"
                         type="text"
-                        placeholder={aiProvider === 'ollama' ? 'llama2, mistral, codellama...' : t('config.modelPlaceholder')}
+                        placeholder={providerSettings[aiProvider].modelPlaceholder}
                         value={model}
                         onChange={(e) => setModel(e.target.value)}
                         disabled={processing}
@@ -159,7 +202,7 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
                     <Input
                       id="gemini-model"
                       type="text"
-                      placeholder={t('config.geminiModelPlaceholder')}
+                      placeholder={providerSettings.gemini.modelPlaceholder}
                       value={model}
                       onChange={(e) => setModel(e.target.value)}
                       disabled={processing}
