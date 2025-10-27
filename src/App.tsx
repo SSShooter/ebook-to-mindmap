@@ -218,27 +218,40 @@ ${bookSummary.overallSummary}
 
   // 章节选择处理函数
   const handleChapterSelect = useCallback((chapterId: string, checked: boolean) => {
-    setSelectedChapters(prev => {
+    setSelectedChapters((prev: Set<string>) => {
       const newSet = new Set(prev)
       if (checked) {
         newSet.add(chapterId)
       } else {
         newSet.delete(chapterId)
       }
+      
+      // 实时更新选中的章节缓存
+      if (file) {
+        cacheService.setSelectedChapters(file.name, newSet)
+        console.log('💾 [DEBUG] 实时更新选中的章节缓存:', newSet.size)
+      }
+      
       return newSet
     })
-  }, [])
+  }, [file])
 
   // 全选/取消全选处理函数
   const handleSelectAll = useCallback((checked: boolean) => {
     if (!extractedChapters) return
 
-    if (checked) {
-      setSelectedChapters(new Set(extractedChapters.map(chapter => chapter.id)))
-    } else {
-      setSelectedChapters(new Set())
+    const newSelectedChapters: Set<string> = checked 
+      ? new Set(extractedChapters.map(chapter => chapter.id))
+      : new Set()
+    
+    setSelectedChapters(newSelectedChapters)
+    
+    // 更新选中的章节缓存
+    if (file) {
+      cacheService.setSelectedChapters(file.name, newSelectedChapters)
+      console.log('💾 [DEBUG] 全选操作更新选中的章节缓存:', newSelectedChapters.size)
     }
-  }, [extractedChapters])
+  }, [extractedChapters, file])
 
   // 清除整本书缓存的函数
   const clearBookCache = () => {
@@ -314,8 +327,36 @@ ${bookSummary.overallSummary}
 
       setBookData(extractedBookData)
       setExtractedChapters(chapters)
-      // 默认选中所有章节
-      setSelectedChapters(new Set(chapters.map(chapter => chapter.id)))
+      
+      // 尝试从缓存中加载选中的章节
+      const cachedSelectedChapters = cacheService.getSelectedChapters(file.name)
+      let newSelectedChapters: Set<string>
+      
+      if (cachedSelectedChapters && cachedSelectedChapters.length > 0) {
+        // 验证缓存的章节ID是否仍然有效
+        const validChapterIds = chapters.map(chapter => chapter.id)
+        const validSelectedChapters = cachedSelectedChapters.filter(id => validChapterIds.includes(id))
+        
+        if (validSelectedChapters.length > 0) {
+          newSelectedChapters = new Set(validSelectedChapters)
+          console.log('✅ [DEBUG] 从缓存加载了选中的章节:', validSelectedChapters.length)
+        } else {
+          // 缓存的章节ID无效，使用默认选中所有章节
+          newSelectedChapters = new Set(chapters.map(chapter => chapter.id))
+          console.log('⚠️ [DEBUG] 缓存的章节ID无效，使用默认选中所有章节')
+        }
+      } else {
+        // 没有缓存，使用默认选中所有章节
+        newSelectedChapters = new Set(chapters.map(chapter => chapter.id))
+      }
+      
+      // 更新选中章节状态
+      setSelectedChapters(newSelectedChapters as Set<string>)
+      
+      // 缓存选中的章节
+      cacheService.setSelectedChapters(file.name, newSelectedChapters as Set<string>)
+      console.log('💾 [DEBUG] 已缓存选中的章节:', newSelectedChapters.size)
+      
       setCurrentStep(t('progress.chaptersExtracted', { count: chapters.length }))
 
       toast.success(t('progress.successfullyExtracted', { count: chapters.length }), {

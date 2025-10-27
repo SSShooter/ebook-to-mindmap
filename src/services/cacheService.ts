@@ -11,9 +11,10 @@ export type CacheKeyType =
   | 'combined_mindmap' // 整书思维导图（直接从整书内容生成）
   | 'merged_mindmap'   // 合并思维导图（从章节思维导图合并生成）
   | 'mindmap_arrows'   // 思维导图箭头
+  | 'selected_chapters' // 选中的章节
 
 // 定义缓存值的类型
-export type CacheValue = string | MindElixirData | null
+export type CacheValue = string | MindElixirData | string[] | null
 
 // 定义存储在 localStorage 中的缓存项结构
 interface CacheItem {
@@ -87,10 +88,34 @@ export class CacheService {
     return value && typeof value === 'object' && 'nodeData' in value ? value as MindElixirData : null
   }
 
+  // 获取选中章节的缓存值
+  getSelectedChapters(filename: string): string[] | null {
+    const key = CacheService.generateKey(filename, 'selected_chapters')
+    const value = this.cache.get(key)
+    return Array.isArray(value) ? value : null
+  }
+
   // 设置缓存值
   setCache(filename: string, type: CacheKeyType, value: CacheValue, chapterId?: string): void {
     const key = CacheService.generateKey(filename, type, chapterId)
 
+    // 如果缓存已满，删除最旧的条目
+    if (this.cache.size >= this.MAX_CACHE_SIZE) {
+      const firstKey = this.cache.keys().next().value
+      if (firstKey) {
+        this.cache.delete(firstKey)
+      }
+    }
+
+    this.cache.set(key, value)
+    this.saveToLocalStorage()
+  }
+
+  // 缓存选中的章节
+  setSelectedChapters(filename: string, selectedChapters: Set<string>): void {
+    const key = CacheService.generateKey(filename, 'selected_chapters')
+    const value = Array.from(selectedChapters)
+    
     // 如果缓存已满，删除最旧的条目
     if (this.cache.size >= this.MAX_CACHE_SIZE) {
       const firstKey = this.cache.keys().next().value
@@ -146,7 +171,7 @@ export class CacheService {
   }
 
   // 清除特定类型缓存
-  clearSpecificCache(fileName: string, cacheType: 'connections' | 'overall_summary' | 'combined_mindmap' | 'merged_mindmap'): boolean {
+  clearSpecificCache(fileName: string, cacheType: 'connections' | 'overall_summary' | 'combined_mindmap' | 'merged_mindmap' | 'selected_chapters'): boolean {
     const type: CacheKeyType = cacheType
     return this.deleteCache(fileName, type)
   }
@@ -154,6 +179,9 @@ export class CacheService {
   // 清除整本书缓存
   clearBookCache(fileName: string, processingMode: 'summary' | 'mindmap' | 'combined_mindmap'): number {
     let deletedCount = 0
+
+    // 清除选中章节缓存
+    if (this.deleteCache(fileName, 'selected_chapters')) deletedCount++
 
     if (processingMode === 'summary') {
       // 文字总结模式：清除章节总结、章节关联、全书总结相关缓存
