@@ -1008,14 +1008,14 @@ ${bookSummary.overallSummary}
           <EpubReader
             className="w-[800px] shrink-0 sticky top-0"
             chapter={currentReadingChapter}
-            bookData={fullBookData || undefined}
+            bookData={fullBookData as EpubBookData || undefined}
             onClose={() => setCurrentReadingChapter(null)}
           />
         ) : file.name.endsWith('.pdf') ? (
           <PdfReader
             className="w-[800px] shrink-0 sticky top-0"
             chapter={currentReadingChapter}
-            bookData={fullBookData || undefined}
+            bookData={fullBookData as PdfBookData || undefined}
             onClose={() => setCurrentReadingChapter(null)}
           />
         ) : null

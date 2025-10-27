@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next'
 
 interface PdfReaderProps {
   chapter: ChapterData
-  bookData?: BookData | any // 支持不同类型的BookData
+  bookData?: BookData
   onClose: () => void
   className?: string
 }

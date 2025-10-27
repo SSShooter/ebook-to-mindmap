@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next'
 
 interface EpubReaderProps {
   chapter: ChapterData
-  bookData?: BookData | any // 支持不同类型的BookData
+  bookData?: BookData
   onClose: () => void
   className?: string
 }
@@ -21,6 +21,7 @@ export function EpubReader({ chapter, bookData, onClose, className }: EpubReader
   const [isLoadingHtml, setIsLoadingHtml] = useState(false)
   const [epubProcessor] = useState(() => new EpubProcessor())
   const shadowRef = useRef<HTMLDivElement>(null)
+  const scrollAreaRef = useRef<HTMLDivElement>(null)
 
   // 使用 Shadow DOM 来隔离 EPUB 内容样式
   useEffect(() => {
@@ -51,6 +52,13 @@ export function EpubReader({ chapter, bookData, onClose, className }: EpubReader
         setChapterHtmlContent(chapter.content)
       } finally {
         setIsLoadingHtml(false)
+        // 章节加载完成后滚动到顶部
+        if (scrollAreaRef.current) {
+          const scrollViewport = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]')
+          if (scrollViewport) {
+            scrollViewport.scrollTop = 0
+          }
+        }
       }
     }
 
@@ -77,7 +85,7 @@ export function EpubReader({ chapter, bookData, onClose, className }: EpubReader
           </div>
         </CardHeader>
         <CardContent className="pt-6">
-          <ScrollArea className="h-[80vh]">
+          <ScrollArea ref={scrollAreaRef} className="h-[80vh]">
             <div className="prose prose-sm max-w-none">
               {isLoadingHtml ? (
                 <div className="flex items-center justify-center py-8">
