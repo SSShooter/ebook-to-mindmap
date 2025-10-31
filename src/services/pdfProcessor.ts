@@ -150,31 +150,8 @@ export class PdfProcessor {
           detectedChapters = this.detectChapters(allPageTexts)
         }
 
-        if (detectedChapters.length === 0) {
-          // 如果没有检测到章节，按页面分组
-          const pagesPerChapter = Math.max(1, Math.floor(totalPages / 10)) // 每章最多10页
+        chapters.push(...detectedChapters)
 
-          for (let i = 0; i < totalPages; i += pagesPerChapter) {
-            const endPage = Math.min(i + pagesPerChapter, totalPages)
-            const chapterContent = allPageTexts
-              .slice(i, endPage)
-              .join('\n\n')
-              .trim()
-
-            if (chapterContent.length > 100) {
-              chapters.push({
-                id: `chapter-${Math.floor(i / pagesPerChapter) + 1}`,
-                title: `第 ${Math.floor(i / pagesPerChapter) + 1} 部分 (第${i + 1}-${endPage}页)`,
-                content: chapterContent,
-                startPage: i + 1,
-                endPage: endPage
-              })
-            }
-          }
-        } else {
-          // 使用检测到的章节
-          chapters.push(...detectedChapters)
-        }
       }
 
       console.log(`📊 [DEBUG] 最终提取到 ${chapters.length} 个章节`)

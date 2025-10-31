@@ -314,7 +314,7 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
               />
             </div>
 
-            <div className="p-3 bg-amber-50 rounded-lg border">
+            <div className="p-3 bg-amber-50 rounded-lg border mb-4">
               <div className="space-y-2">
                 <Label htmlFor="max-sub-chapter-depth" className="text-sm font-medium">
                   {t('config.recursionDepth')}
@@ -342,7 +342,7 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
               </div>
             </div>
 
-            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border">
+            {/* <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border">
               <div className="space-y-1">
                 <Label htmlFor="smart-detection" className="text-sm font-medium">
                   {t('config.smartChapterDetection')}
@@ -357,7 +357,7 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
                 onCheckedChange={setUseSmartDetection}
                 disabled={processing}
               />
-            </div>
+            </div> */}
 
           </div>
         </ScrollArea>
