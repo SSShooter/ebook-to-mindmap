@@ -28,14 +28,13 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
     setTemperature,
     setProcessingMode,
     setBookType,
-    setUseSmartDetection,
     setSkipNonEssentialChapters,
     setOutputLanguage
   } = useConfigStore()
 
   // 从store中解构状态值
   const { provider: aiProvider, apiKey, apiUrl, model, temperature } = aiConfig
-  const { processingMode, bookType, useSmartDetection, skipNonEssentialChapters, outputLanguage } = processingOptions
+  const { processingMode, bookType, skipNonEssentialChapters, outputLanguage } = processingOptions
 
   const providerSettings = {
     gemini: {
@@ -43,7 +42,7 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
       apiKeyPlaceholder: t('config.enterGeminiApiKey'),
       modelPlaceholder: t('config.geminiModelPlaceholder'),
       apiUrlPlaceholder: '', // Gemini does not use a separate API URL input in this UI
-      url: 'https://ai.google.dev/',
+      url: 'https://aistudio.google.com/',
     },
     openai: {
       apiKeyLabel: 'API Token',
