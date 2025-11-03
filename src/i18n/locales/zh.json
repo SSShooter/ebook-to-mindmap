@@ -128,6 +128,8 @@
     "smartChapterDetectionDescription": "当文档没有目录时，尝试智能识别章节标题（如\"第X章\"、\"Chapter X\"等）",
     "skipIrrelevantChapters": "跳过无关键内容章节",
     "skipIrrelevantChaptersDescription": "自动跳过致谢、推荐阅读、作者简介等非核心内容章节",
+    "forceUseSpine": "强制使用Spine获取EPUB章节",
+    "forceUseSpineDescription": "如果EPUB文件无法正常获取章节，可以尝试打开此开关强制使用Spine方式提取章节",
     "recursionDepth": "递归处理子章节层数",
     "selectRecursionDepth": "选择递归层数",
     "noRecursion": "不递归处理子章节",

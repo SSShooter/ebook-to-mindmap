@@ -82,7 +82,7 @@ function App() {
 
   // 从store中解构状态值
   const { apiKey } = aiConfig
-  const { processingMode, bookType, useSmartDetection, skipNonEssentialChapters } = processingOptions
+  const { processingMode, bookType, useSmartDetection, skipNonEssentialChapters, forceUseSpine } = processingOptions
 
   // zustand的persist中间件会自动处理配置的加载和保存
 
@@ -309,7 +309,7 @@ ${bookSummary.overallSummary}
         setProgress(50)
 
         setCurrentStep('正在提取章节内容...')
-        chapters = await processor.extractChapters(bookData.book, useSmartDetection, skipNonEssentialChapters, processingOptions.maxSubChapterDepth)
+        chapters = await processor.extractChapters(bookData.book, useSmartDetection, skipNonEssentialChapters, processingOptions.maxSubChapterDepth, forceUseSpine)
       } else if (isPdf) {
         const processor = new PdfProcessor()
         setCurrentStep('正在解析 PDF 文件...')
@@ -371,7 +371,7 @@ ${bookSummary.overallSummary}
     } finally {
       setExtractingChapters(false)
     }
-  }, [file, useSmartDetection, skipNonEssentialChapters, processingOptions.maxSubChapterDepth, t])
+  }, [file, useSmartDetection, skipNonEssentialChapters, processingOptions.maxSubChapterDepth, forceUseSpine, t])
 
   const processEbook = useCallback(async () => {
     if (!extractedChapters || !bookData || !apiKey) {

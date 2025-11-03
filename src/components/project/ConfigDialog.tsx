@@ -29,12 +29,13 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
     setProcessingMode,
     setBookType,
     setSkipNonEssentialChapters,
-    setOutputLanguage
+    setOutputLanguage,
+    setForceUseSpine
   } = useConfigStore()
 
   // 从store中解构状态值
   const { provider: aiProvider, apiKey, apiUrl, model, temperature } = aiConfig
-  const { processingMode, bookType, skipNonEssentialChapters, outputLanguage } = processingOptions
+  const { processingMode, bookType, skipNonEssentialChapters, outputLanguage, forceUseSpine } = processingOptions
 
   const providerSettings = {
     gemini: {
@@ -309,6 +310,23 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
                 id="skip-non-essential"
                 checked={skipNonEssentialChapters}
                 onCheckedChange={setSkipNonEssentialChapters}
+                disabled={processing}
+              />
+            </div>
+
+            <div className="flex items-center justify-between p-3 bg-cyan-50 rounded-lg border">
+              <div className="space-y-1">
+                <Label htmlFor="force-use-spine" className="text-sm font-medium">
+                  {t('config.forceUseSpine')}
+                </Label>
+                <p className="text-xs text-gray-600">
+                  {t('config.forceUseSpineDescription')}
+                </p>
+              </div>
+              <Switch
+                id="force-use-spine"
+                checked={forceUseSpine}
+                onCheckedChange={setForceUseSpine}
                 disabled={processing}
               />
             </div>

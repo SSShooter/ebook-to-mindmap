@@ -19,6 +19,7 @@ interface ProcessingOptions {
   skipNonEssentialChapters: boolean
   maxSubChapterDepth: number
   outputLanguage: SupportedLanguage
+  forceUseSpine: boolean
 }
 
 // 配置store状态接口
@@ -39,6 +40,7 @@ interface ConfigState {
   setSkipNonEssentialChapters: (enabled: boolean) => void
   setMaxSubChapterDepth: (depth: number) => void
   setOutputLanguage: (language: SupportedLanguage) => void
+  setForceUseSpine: (enabled: boolean) => void
 }
 
 // 默认配置
@@ -56,7 +58,8 @@ const defaultProcessingOptions: ProcessingOptions = {
   useSmartDetection: false,
   skipNonEssentialChapters: true,
   maxSubChapterDepth: 0,
-  outputLanguage: 'en'
+  outputLanguage: 'en',
+  forceUseSpine: false
 }
 
 // 创建配置store
@@ -100,6 +103,9 @@ export const useConfigStore = create<ConfigState>()(
       })),
       setOutputLanguage: (outputLanguage) => set((state) => ({
         processingOptions: { ...state.processingOptions, outputLanguage }
+      })),
+      setForceUseSpine: (forceUseSpine) => set((state) => ({
+        processingOptions: { ...state.processingOptions, forceUseSpine }
       }))
     }),
     {

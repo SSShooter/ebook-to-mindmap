@@ -46,7 +46,7 @@ export class EpubProcessor {
     }
   }
 
-  async extractChapters(book: Book, useSmartDetection: boolean = false, skipNonEssentialChapters: boolean = true, maxSubChapterDepth: number = 0): Promise<ChapterData[]> {
+  async extractChapters(book: Book, useSmartDetection: boolean = false, skipNonEssentialChapters: boolean = true, maxSubChapterDepth: number = 0, forceUseSpine: boolean = false): Promise<ChapterData[]> {
     try {
       const chapters: ChapterData[] = []
 
@@ -56,8 +56,8 @@ export class EpubProcessor {
         let chapterInfos = await this.extractChaptersFromToc(book, toc, 0, maxSubChapterDepth)
         console.log(`📚 [DEBUG] 找到 ${chapterInfos.length} 个章节信息`, chapterInfos)
 
-        // 回退：当 TOC 长度≤3 时，直接用 spineItems 生成章节信息
-        if (toc.length <= 3) {
+        // 回退：当 TOC 长度≤3 或强制使用 Spine 时，直接用 spineItems 生成章节信息
+        if (toc.length <= 3 || forceUseSpine) {
           const fallbackChapterInfos = book.spine.spineItems
             .map((spineItem: Section, idx: number) => {
               const navItem: NavItem = {
@@ -75,10 +75,15 @@ export class EpubProcessor {
               }
             })
             .filter(item => !!item.href)
-          console.log('🔁 [DEBUG] TOC长度≤3，直接用 spineItems 生成章节信息，fallback 章节数:', fallbackChapterInfos.length)
-
-          if (fallbackChapterInfos.length >= chapterInfos.length) {
+          
+          if (forceUseSpine) {
+            console.log('🔁 [DEBUG] 强制使用Spine获取章节，章节数:', fallbackChapterInfos.length)
             chapterInfos = fallbackChapterInfos
+          } else {
+            console.log('🔁 [DEBUG] TOC长度≤3，直接用 spineItems 生成章节信息，fallback 章节数:', fallbackChapterInfos.length)
+            if (fallbackChapterInfos.length >= chapterInfos.length) {
+              chapterInfos = fallbackChapterInfos
+            }
           }
         }
         if (chapterInfos.length > 0) {

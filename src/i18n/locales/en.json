@@ -166,6 +166,8 @@
     "smartChapterDetectionDescription": "When the document has no table of contents, try to intelligently identify chapter titles (such as \"Chapter X\", \"第X章\", etc.)",
     "skipIrrelevantChapters": "Skip Irrelevant Content Chapters",
     "skipIrrelevantChaptersDescription": "Automatically skip acknowledgments, recommended reading, author biography and other non-core content chapters",
+    "forceUseSpine": "Force Use Spine for EPUB Chapters",
+    "forceUseSpineDescription": "If the EPUB file cannot extract chapters properly, try enabling this option to force use Spine method for chapter extraction",
     "recursionDepth": "Recursive Sub-chapter Processing Depth",
     "selectRecursionDepth": "Select Recursion Depth",
     "noRecursion": "No recursive sub-chapter processing",
