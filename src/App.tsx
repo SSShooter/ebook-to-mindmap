@@ -225,13 +225,13 @@ ${bookSummary.overallSummary}
       } else {
         newSet.delete(chapterId)
       }
-      
+
       // 实时更新选中的章节缓存
       if (file) {
         cacheService.setSelectedChapters(file.name, newSet)
         console.log('💾 [DEBUG] 实时更新选中的章节缓存:', newSet.size)
       }
-      
+
       return newSet
     })
   }, [file])
@@ -240,12 +240,12 @@ ${bookSummary.overallSummary}
   const handleSelectAll = useCallback((checked: boolean) => {
     if (!extractedChapters) return
 
-    const newSelectedChapters: Set<string> = checked 
+    const newSelectedChapters: Set<string> = checked
       ? new Set(extractedChapters.map(chapter => chapter.id))
       : new Set()
-    
+
     setSelectedChapters(newSelectedChapters)
-    
+
     // 更新选中的章节缓存
     if (file) {
       cacheService.setSelectedChapters(file.name, newSelectedChapters)
@@ -327,16 +327,16 @@ ${bookSummary.overallSummary}
 
       setBookData(extractedBookData)
       setExtractedChapters(chapters)
-      
+
       // 尝试从缓存中加载选中的章节
       const cachedSelectedChapters = cacheService.getSelectedChapters(file.name)
       let newSelectedChapters: Set<string>
-      
+
       if (cachedSelectedChapters && cachedSelectedChapters.length > 0) {
         // 验证缓存的章节ID是否仍然有效
         const validChapterIds = chapters.map(chapter => chapter.id)
         const validSelectedChapters = cachedSelectedChapters.filter(id => validChapterIds.includes(id))
-        
+
         if (validSelectedChapters.length > 0) {
           newSelectedChapters = new Set(validSelectedChapters)
           console.log('✅ [DEBUG] 从缓存加载了选中的章节:', validSelectedChapters.length)
@@ -349,14 +349,14 @@ ${bookSummary.overallSummary}
         // 没有缓存，使用默认选中所有章节
         newSelectedChapters = new Set(chapters.map(chapter => chapter.id))
       }
-      
+
       // 更新选中章节状态
       setSelectedChapters(newSelectedChapters as Set<string>)
-      
+
       // 缓存选中的章节
       cacheService.setSelectedChapters(file.name, newSelectedChapters as Set<string>)
       console.log('💾 [DEBUG] 已缓存选中的章节:', newSelectedChapters.size)
-      
+
       setCurrentStep(t('progress.chaptersExtracted', { count: chapters.length }))
 
       toast.success(t('progress.successfullyExtracted', { count: chapters.length }), {
@@ -624,12 +624,11 @@ ${bookSummary.overallSummary}
             <BookOpen className="h-8 w-8 text-blue-600" />
             {t('app.title')}
           </h1>
-          <p className="text-gray-600">{t('app.description')}</p>
           <LanguageSwitcher />
         </div>
 
         {currentStepIndex === 1 ? (
-          <>
+          <div className='min-h-[80vh] space-y-4'>
             {/* 步骤1: 文件上传和配置 */}
             <Card>
               <CardHeader>
@@ -789,9 +788,9 @@ ${bookSummary.overallSummary}
                 </CardContent>
               </Card>
             )}
-          </>
+          </div>
         ) : (
-          <>
+          <div className='min-h-[80vh] space-y-4'>
             {/* 步骤2: 处理过程和结果显示 */}
             <div className="flex items-center gap-4 mb-4">
               <Button
@@ -998,8 +997,20 @@ ${bookSummary.overallSummary}
                 </CardContent>
               </Card>
             )}
-          </>
+          </div>
         )}
+
+        <p className="text-gray-600 text-center pb-4">
+          Mindmap powered by{' '}
+          <a
+            href="https://mind-elixir.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:text-blue-800 hover:underline"
+          >
+            MindElixir
+          </a>
+        </p>
       </div>
 
       {/* 阅读组件插入到这里 */}

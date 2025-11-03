@@ -1,7 +1,7 @@
 {
   "app": {
     "title": "电子书转思维导图",
-    "description": "使用 AI 技术按章节解析 EPUB 和 PDF 电子书并生成智能总结"
+    "description": "Mindmap powered by MindElixir"
   },
   "upload": {
     "title": "文件上传与配置",

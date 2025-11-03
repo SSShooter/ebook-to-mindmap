@@ -1,7 +1,7 @@
 {
   "app": {
     "title": "eBook to Mind Map",
-    "description": "Use AI technology to parse EPUB and PDF eBooks by chapters and generate intelligent summaries"
+    "description": "Mindmap powered by MindElixir"
   },
   "upload": {
     "title": "File Upload & Configuration",
