@@ -3,9 +3,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Settings, ExternalLink } from 'lucide-react'
+import { Settings, ExternalLink, Download, Upload } from 'lucide-react'
+import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
 import { useConfigStore, useAIConfig, useProcessingOptions } from '../../stores/configStore'
 import type { SupportedLanguage } from '../../services/prompts/utils'
@@ -36,6 +37,56 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
   // 从store中解构状态值
   const { provider: aiProvider, apiKey, apiUrl, model, temperature } = aiConfig
   const { processingMode, bookType, skipNonEssentialChapters, outputLanguage, forceUseSpine } = processingOptions
+
+  // 导出配置
+  const handleExportConfig = () => {
+    const config = {
+      aiConfig,
+      processingOptions
+    }
+    const dataStr = JSON.stringify(config, null, 2)
+    const dataBlob = new Blob([dataStr], { type: 'application/json' })
+    const url = URL.createObjectURL(dataBlob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `ebook-mindmap-config-${new Date().toISOString().split('T')[0]}.json`
+    link.click()
+    URL.revokeObjectURL(url)
+    toast.success(t('config.exportSuccess'))
+  }
+
+  // 导入配置
+  const handleImportConfig = () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = 'application/json'
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (!file) return
+
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        try {
+          const config = JSON.parse(event.target?.result as string)
+          
+          // 验证配置结构
+          if (!config.aiConfig || !config.processingOptions) {
+            toast.error(t('config.importError'))
+            return
+          }
+
+          // 使用统一的导入方法
+          useConfigStore.getState().importConfig(config)
+          toast.success(t('config.importSuccess'))
+        } catch (error) {
+          console.error('Failed to import config:', error)
+          toast.error(t('config.importError'))
+        }
+      }
+      reader.readAsText(file)
+    }
+    input.click()
+  }
 
   const providerSettings = {
     gemini: {
@@ -85,7 +136,7 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Settings className="h-5 w-5" />
-            {t('config.aiServiceConfig')}
+            {t('config.title')}
           </DialogTitle>
           <DialogDescription>
             {t('config.description')}
@@ -378,6 +429,26 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
 
           </div>
         </ScrollArea>
+        <DialogFooter className="flex-row justify-end gap-2">
+          <Button
+            variant="outline"
+            onClick={handleImportConfig}
+            disabled={processing}
+            className="flex items-center gap-2"
+          >
+            <Upload className="h-4 w-4" />
+            {t('config.importConfig')}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handleExportConfig}
+            disabled={processing}
+            className="flex items-center gap-2"
+          >
+            <Download className="h-4 w-4" />
+            {t('config.exportConfig')}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )

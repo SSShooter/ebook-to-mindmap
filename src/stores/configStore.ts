@@ -41,6 +41,9 @@ interface ConfigState {
   setMaxSubChapterDepth: (depth: number) => void
   setOutputLanguage: (language: SupportedLanguage) => void
   setForceUseSpine: (enabled: boolean) => void
+  
+  // 统一导入配置
+  importConfig: (config: { aiConfig?: Partial<AIConfig>, processingOptions?: Partial<ProcessingOptions> }) => void
 }
 
 // 默认配置
@@ -106,6 +109,12 @@ export const useConfigStore = create<ConfigState>()(
       })),
       setForceUseSpine: (forceUseSpine) => set((state) => ({
         processingOptions: { ...state.processingOptions, forceUseSpine }
+      })),
+      
+      // 统一导入配置
+      importConfig: (config) => set((state) => ({
+        aiConfig: config.aiConfig ? { ...state.aiConfig, ...config.aiConfig } : state.aiConfig,
+        processingOptions: config.processingOptions ? { ...state.processingOptions, ...config.processingOptions } : state.processingOptions
       }))
     }),
     {

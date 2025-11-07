@@ -183,7 +183,12 @@
     "outputLanguageEn": "English",
     "outputLanguageZh": "Chinese",
     "outputLanguageDescription": "Control the language of AI-generated content. Auto mode will follow the current interface language.",
-    "visitSite": "Visit Website"
+    "visitSite": "Visit Website",
+    "importConfig": "Import Configuration",
+    "exportConfig": "Export Configuration",
+    "importSuccess": "Configuration imported successfully",
+    "exportSuccess": "Configuration exported successfully",
+    "importError": "Failed to import configuration file, please check the file format"
   },
   "download": {
     "title": "Download Mind Map",
