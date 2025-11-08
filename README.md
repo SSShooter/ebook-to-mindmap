@@ -60,25 +60,16 @@
 > **🔒 隐私保护说明**：本工具采用 BYOK（Bring Your Own Key）模式，您需要使用自己的 API Key。所有 AI 请求均由您的浏览器本地直接连接 AI 供应商（Google 或 OpenAI），绝不经过任何第三方代理或中转服务器，确保您的数据安全和隐私。
 
 1. 点击「配置」按钮
-2. 选择 AI 服务提供商：
-   - **Google Gemini**（推荐）：需要 Gemini API Key
-   - **OpenAI GPT**：需要 OpenAI API Key 和 API 地址
+2. 选择 AI 服务提供商，推荐试用 **Google Gemini**
 3. 输入相应的 API Key
-4. 选择模型（可选，使用默认模型即可）
+4. 填写模型
 
 #### 获取 API Key
 
-**Google Gemini API Key**：
+以 **Google Gemini** 为例：
 
 1. 访问 [Google AI Studio](https://aistudio.google.com/)
 2. 登录 Google 账号
-3. 创建新的 API Key
-4. 复制 API Key 到配置中
-
-**OpenAI API Key**：
-
-1. 访问 [OpenAI Platform](https://platform.openai.com/)
-2. 登录并进入 API Keys 页面
 3. 创建新的 API Key
 4. 复制 API Key 到配置中
 
@@ -90,6 +81,8 @@
 2. 选择要处理的电子书文件
 3. 支持的格式：`.epub`、`.pdf`
 
+你可以在 [Project Gutenberg](https://www.gutenberg.org/)、[standard ebooks](https://standardebooks.org/) 等网站获取到免费电子书。
+
 ### 3. 配置处理选项
 
 在配置对话框中设置处理参数：
@@ -98,7 +91,7 @@
 
 - **文字总结模式**：适合需要文字总结的场景
 - **章节思维导图模式**：为每个章节生成独立思维导图
-- **整书思维导图模式**：生成整本书的统一思维导图
+- **整书思维导图模式**：生成整本书的统一思维导图（如果书的内容太长会因为模型上下文不足生成失败）
 
 #### 书籍类型
 
@@ -116,7 +109,7 @@
 1. 点击「提取章节」按钮
 2. 系统会自动解析文件并提取章节结构
 3. 提取完成后会显示章节列表
-4. 可以选择需要处理的章节（默认全选）
+4. 可以选择需要处理的章节
 
 ### 5. 开始处理
 
