@@ -6,7 +6,13 @@
 </p>
 
 
+[中文](README.md) | English
+
+![E-book to Mind Map Screenshot1](/img/screenshot1.jpg)
+
 An intelligent e-book parsing tool powered by AI technology that converts EPUB and PDF format e-books into structured mind maps and text summaries.
+
+Try it now: https://ebook2me.mind-elixir.com/
 
 ## ✨ Features
 
@@ -18,6 +24,8 @@ An intelligent e-book parsing tool powered by AI technology that converts EPUB a
 ### 🤖 AI-Powered Content Processing
 
 - **Multiple AI Services**: Support for Google Gemini and OpenAI GPT models
+- **BYOK Mode**: Requires using your own API Key (Bring Your Own Key), ensuring data security and privacy
+- **Direct Local Connection**: All AI requests are made directly from your browser to the AI providers, never through any third-party proxy or intermediary servers
 - **Three Processing Modes**:
   - 📝 **Text Summary Mode**: Generate chapter summaries, analyze chapter relationships, output complete book summary
   - 🧠 **Chapter Mind Map Mode**: Generate independent mind maps for each chapter
@@ -32,7 +40,7 @@ An intelligent e-book parsing tool powered by AI technology that converts EPUB a
 
 ### 💾 Efficient Caching Mechanism
 
-- **Smart Caching**: Automatically cache AI processing results to avoid redundant computation
+- **Smart Caching**: Automatically cache AI processing results, allowing continuation from the last position if processing is interrupted
 - **Cache Management**: Support clearing cache by mode to save storage space
 - **Offline Viewing**: Processed content can be viewed offline
 
@@ -43,41 +51,13 @@ An intelligent e-book parsing tool powered by AI technology that converts EPUB a
 - **Interactive Mind Maps**: Support zooming, dragging, node expand/collapse
 - **Content Preview**: Support viewing original chapter content
 
-## 🚀 Quick Start
-
-### Requirements
-
-- Node.js 18+
-- pnpm (recommended) or npm
-
-### Install Dependencies
-
-```bash
-# Clone the project
-git clone https://github.com/SSShooter/ebook-to-mindmap
-cd ebook-to-mindmap
-
-# Install dependencies
-pnpm install
-# or
-npm install
-```
-
-### Start Development Server
-
-```bash
-pnpm dev
-# or
-npm run dev
-```
-
-Visit `http://localhost:5173` to start using.
-
 ## 📖 User Guide
 
 ### 1. Configure AI Service
 
 First-time use requires AI service configuration:
+
+> **🔒 Privacy Protection Note**: This tool uses the BYOK (Bring Your Own Key) mode, requiring you to use your own API Key. All AI requests are made directly from your browser to the AI providers (Google or OpenAI), never through any third-party proxy or intermediary servers, ensuring your data security and privacy.
 
 1. Click the "Configure" button
 2. Select AI service provider:
@@ -177,28 +157,7 @@ Depending on the selected processing mode, you can view different types of resul
   - Google Gemini: @google/generative-ai
   - OpenAI: Custom implementation
 
-## 🔧 Advanced Features
 
-### Cache Management
-
-System automatically caches AI processing results for improved efficiency:
-
-- **Auto Caching**: Processing results are automatically saved locally
-- **Smart Reuse**: Identical content won't be processed repeatedly
-- **Cache Cleanup**: Can clear specific types of cache by mode
-- **Storage Optimization**: Cache data is compressed to save storage space
-
-### Batch Processing
-
-- **Chapter Selection**: Support batch select/deselect chapters
-- **Concurrent Processing**: Multiple chapters can be processed in parallel (subject to API limits)
-- **Resume Processing**: Can continue from last position after interruption
-
-### Export Functions
-
-- **Mind Map Export**: Support exporting as PNG, SVG and other formats
-- **Text Summary Export**: Support exporting as Markdown, TXT formats
-- **Data Backup**: Support exporting processing result data
 
 ## 📄 License
 
@@ -218,4 +177,6 @@ Thanks to the following open source projects:
 
 ---
 
-For questions or suggestions, please submit an Issue or contact the developer.
+For questions or suggestions, please submit an Issue or contact the developer (WeChat👇)
+
+<img width="220" alt="WeChat" src="/img/wechat.JPG" />
