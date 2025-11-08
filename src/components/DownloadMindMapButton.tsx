@@ -26,12 +26,12 @@ export const DownloadMindMapButton: React.FC<DownloadMindMapButtonProps> = ({
   const { t } = useTranslation()
   
   const EXPORT_FORMATS = [
-    { key: 'PNG', label: t('download.formats.png') },
-    { key: 'JPEG', label: t('download.formats.jpeg') },
-    { key: 'WEBP', label: t('download.formats.webp') },
-    { key: 'HTML', label: t('download.formats.html') },
-    { key: 'JSON', label: t('download.formats.json') },
-    { key: 'Markdown', label: t('download.formats.markdown') },
+    { key: 'PNG', label: `${t('download.downloadAs')} PNG` },
+    { key: 'JPEG', label: `${t('download.downloadAs')} JPEG` },
+    { key: 'WEBP', label: `${t('download.downloadAs')} WEBP` },
+    { key: 'HTML', label: `${t('download.downloadAs')} HTML` },
+    { key: 'JSON', label: `${t('download.downloadAs')} JSON` },
+    { key: 'Markdown', label: `${t('download.downloadAs')} Markdown` },
   ]
   const handleDownload = (format: string) => {
     let instance

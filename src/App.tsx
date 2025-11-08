@@ -933,6 +933,13 @@ ${bookSummary.overallSummary}
                               onClearCache={clearChapterCache}
                               onOpenInMindElixir={openInMindElixir}
                               onDownloadMindMap={downloadMindMap}
+                              onReadChapter={() => {
+                                // 根据章节ID找到对应的ChapterData
+                                const chapterData = extractedChapters?.find(ch => ch.id === chapter.id)
+                                if (chapterData) {
+                                  setCurrentReadingChapter(chapterData)
+                                }
+                              }}
                               mindElixirOptions={options}
                             />
                           )

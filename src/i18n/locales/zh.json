@@ -154,16 +154,9 @@
   },
   "download": {
     "title": "下载思维导图",
-    "downloadAllMarkdown": "下载完整Markdown",
-    "markdownDownloaded": "Markdown文件已下载",
-    "formats": {
-      "png": "下载为 PNG",
-      "jpeg": "下载为 JPEG",
-      "svg": "下载为 SVG",
-      "pdf": "下载为 PDF",
-      "xmind": "下载为 XMind",
-      "json": "下载为 JSON"
-    }
+    "downloadAs": "下载",
+    "downloadAllMarkdown": "下载完整 Markdown",
+    "markdownDownloaded": "Markdown 文件已下载"
   },
   "viewContent": {
     "originalText": "原文内容",

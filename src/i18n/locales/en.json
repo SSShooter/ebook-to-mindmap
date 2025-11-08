@@ -194,14 +194,7 @@
     "title": "Download Mind Map",
     "downloadAllMarkdown": "Download Complete Markdown",
     "markdownDownloaded": "Markdown file downloaded",
-    "formats": {
-      "png": "Download as PNG",
-      "jpeg": "Download as JPEG",
-      "svg": "Download as SVG",
-      "pdf": "Download as PDF",
-      "xmind": "Download as XMind",
-      "json": "Download as JSON"
-    }
+    "downloadAs": "Download"
   },
   "viewContent": {
     "originalText": "Original Content",
