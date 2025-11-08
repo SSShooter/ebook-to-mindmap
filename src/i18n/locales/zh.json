@@ -94,7 +94,10 @@
     "copyContent": "复制内容",
     "expand": "展开",
     "collapse": "折叠",
-    "error": "未知错误"
+    "error": "未知错误",
+    "processing": "正在处理中...",
+    "generatingContent": "正在生成内容,请稍候...",
+    "generatingMindMap": "正在生成思维导图,请稍候..."
   },
   "config": {
     "title": "配置",

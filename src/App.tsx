@@ -34,7 +34,7 @@ interface Chapter {
   content: string
   summary?: string
   mindMap?: MindElixirData
-  processed: boolean
+  isLoading?: boolean
 }
 
 interface BookSummary {
@@ -441,6 +441,26 @@ ${bookSummary.overallSummary}
         const chapter = chapters[i]
         setCurrentStep(`正在处理第 ${i + 1}/${totalChapters} 章: ${chapter.title}`)
 
+        // 推入一个loading状态的item
+        const loadingChapter: Chapter = {
+          id: chapter.id,
+          title: chapter.title,
+          content: chapter.content,
+          isLoading: true
+        }
+
+        if (processingMode === 'summary') {
+          setBookSummary(prevSummary => ({
+            ...prevSummary!,
+            chapters: [...(prevSummary?.chapters || []), loadingChapter]
+          }))
+        } else if (processingMode === 'mindmap') {
+          setBookMindMap(prevMindMap => ({
+            ...prevMindMap!,
+            chapters: [...(prevMindMap?.chapters || []), loadingChapter]
+          }))
+        }
+
         let processedChapter: Chapter
 
         if (processingMode === 'summary') {
@@ -455,11 +475,12 @@ ${bookSummary.overallSummary}
           processedChapter = {
             ...chapter,
             summary,
-            processed: true
+            isLoading: false
           }
 
           processedChapters.push(processedChapter)
 
+          // 替换loading状态的章节为处理完成的章节
           setBookSummary(prevSummary => ({
             ...prevSummary!,
             chapters: [...processedChapters]
@@ -477,11 +498,12 @@ ${bookSummary.overallSummary}
           processedChapter = {
             ...chapter,
             mindMap,
-            processed: true
+            isLoading: false
           }
 
           processedChapters.push(processedChapter)
 
+          // 替换loading状态的章节为处理完成的章节
           setBookMindMap(prevMindMap => ({
             ...prevMindMap!,
             chapters: [...processedChapters]
@@ -490,7 +512,7 @@ ${bookSummary.overallSummary}
           // 整书思维导图模式 - 只收集章节内容，不生成单独的思维导图
           processedChapter = {
             ...chapter,
-            processed: true
+            isLoading: false
           }
 
           processedChapters.push(processedChapter)
@@ -872,6 +894,7 @@ ${bookSummary.overallSummary}
                             index={index}
                             defaultCollapsed={index > 0}
                             onClearCache={clearChapterCache}
+                            isLoading={chapter.isLoading}
                             onReadChapter={() => {
                               // 根据章节ID找到对应的ChapterData
                               const chapterData = extractedChapters?.find(ch => ch.id === chapter.id)
@@ -919,14 +942,15 @@ ${bookSummary.overallSummary}
                       </TabsList>
 
                       <TabsContent value="chapters" className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {bookMindMap.chapters.map((chapter, index) => (
-                          chapter.mindMap && (
+                        {bookMindMap.chapters.map((chapter, index) => {
+                          return (
                             <MindMapCard
                               key={chapter.id}
                               id={chapter.id}
                               title={chapter.title}
+                              isLoading={chapter.isLoading}
                               content={chapter.content}
-                              mindMapData={chapter.mindMap}
+                              mindMapData={chapter.mindMap || { nodeData: { topic: '', id: '', children: [] } }}
                               index={index}
                               showCopyButton={false}
                               onClearCache={clearChapterCache}
@@ -942,7 +966,7 @@ ${bookSummary.overallSummary}
                               mindElixirOptions={options}
                             />
                           )
-                        ))}
+                        })}
                       </TabsContent>
 
                       <TabsContent value="combined">

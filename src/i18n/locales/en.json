@@ -132,7 +132,10 @@
     "copyChapterContent": "Copy Chapter Content",
     "copyContent": "Copy Content",
     "expand": "Expand",
-    "collapse": "Collapse"
+    "collapse": "Collapse",
+    "processing": "Processing...",
+    "generatingContent": "Generating content, please wait...",
+    "generatingMindMap": "Generating mind map, please wait..."
   },
   "config": {
     "title": "Configuration",
