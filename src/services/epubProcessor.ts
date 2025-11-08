@@ -75,7 +75,8 @@ export class EpubProcessor {
               }
             })
             .filter(item => !!item.href)
-          
+          console.log('🔁 [DEBUG] 使用 spineItems 生成章节信息', fallbackChapterInfos)
+
           if (forceUseSpine) {
             console.log('🔁 [DEBUG] 强制使用Spine获取章节，章节数:', fallbackChapterInfos.length)
             chapterInfos = fallbackChapterInfos
@@ -171,10 +172,11 @@ export class EpubProcessor {
 
         for (const subitem of subitems) {
           if (subitem.href) {
-            if (cleanHref === subitem.href.split('#')[0]) {
+            const subCleanHref = subitem.href.split('#')[0]
+            if (cleanHref === subCleanHref) {
               continue
             }
-            const subContent = await this.getSingleChapterContent(book, subitem.href.split('#')[0])
+            const subContent = await this.getSingleChapterContent(book, subCleanHref)
             if (subContent) {
               allContent += '\n\n' + subContent
             }
@@ -244,7 +246,6 @@ export class EpubProcessor {
       // 检查解析错误
       const parseError = doc.querySelector('parsererror')
       if (parseError) {
-        console.warn(`⚠️ [DEBUG] DOM解析出现错误，将使用正则表达式备选方案:`, parseError.textContent)
         throw new Error('DOM解析失败')
       }
 
