@@ -1,4 +1,10 @@
-# E-book to Mind Map
+<p align="center">
+  <a href="https://ebook2me.mind-elixir.com/" target="_blank" rel="noopener noreferrer">
+    <img width="150" src="/public/icon.png" alt="E-book to Mind Map logo">
+  </a>
+  <h1 align="center">E-book to Mind Map</h1>
+</p>
+
 
 An intelligent e-book parsing tool powered by AI technology that converts EPUB and PDF format e-books into structured mind maps and text summaries.
 

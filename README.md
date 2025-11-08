@@ -1,4 +1,10 @@
-# 电子书转思维导图
+<p align="center">
+  <a href="https://ebook2me.mind-elixir.com/" target="_blank" rel="noopener noreferrer">
+    <img width="150" src="/public/icon.png" alt="电子书转思维导图 logo">
+  </a>
+  <h1 align="center">电子书转思维导图</h1>
+</p>
+
 
 [English](README.en.md) | 中文
 

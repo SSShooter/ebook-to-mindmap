@@ -621,7 +621,7 @@ ${bookSummary.overallSummary}
       <div className="max-w-6xl space-y-4 w-[800px] shrink-0">
         <div className="text-center space-y-2 relative">
           <h1 className="text-4xl font-bold text-gray-900 flex items-center justify-center gap-2">
-            <BookOpen className="h-8 w-8 text-blue-600" />
+            <img src="/icon.png" alt="icon" className="h-12 w-12" />
             {t('app.title')}
           </h1>
           <LanguageSwitcher />
