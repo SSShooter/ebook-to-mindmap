@@ -98,12 +98,14 @@ export class EpubProcessor {
 
             console.log(`📄 [DEBUG] 提取章节 "${chapterInfo.title}" (href: ${chapterInfo.href})`)
 
-            const chapterContent = await this.extractContentFromHref(book, chapterInfo.href, chapterInfo.subitems)
+            const { title: extractedTitle, content: chapterContent } = await this.extractContentFromHref(book, chapterInfo.href, chapterInfo.subitems)
 
             if (chapterContent.trim().length > 100) {
+              // 如果从HTML中提取到了h2标题，优先使用；否则保留原标题
+              const finalTitle = extractedTitle || chapterInfo.title
               chapters.push({
                 id: `chapter-${chapters.length + 1}`,
-                title: chapterInfo.title,
+                title: finalTitle,
                 content: chapterContent,
                 href: chapterInfo.href,
                 tocItem: chapterInfo.tocItem,
@@ -152,7 +154,7 @@ export class EpubProcessor {
     return chapterInfos
   }
 
-  private async extractContentFromHref(book: Book, href: string, subitems?: NavItem[]): Promise<string> {
+  private async extractContentFromHref(book: Book, href: string, subitems?: NavItem[]): Promise<{ title: string; content: string }> {
     try {
       console.log(`🔍 [DEBUG] 尝试通过href获取章节内容: ${href}`)
 
@@ -160,11 +162,16 @@ export class EpubProcessor {
       const cleanHref = href.split('#')[0]
 
       let allContent = ''
+      let extractedTitle = ''
 
       // 首先获取主章节内容
-      const mainContent = await this.getSingleChapterContent(book, cleanHref)
+      const { title: mainTitle, content: mainContent } = await this.getSingleChapterContent(book, cleanHref)
       if (mainContent) {
         allContent += mainContent
+      }
+      // 使用主章节的h2标题（如果有）
+      if (mainTitle) {
+        extractedTitle = mainTitle
       }
 
       // 如果有子项目，也要获取子项目的内容
@@ -176,7 +183,7 @@ export class EpubProcessor {
             if (cleanHref === subCleanHref) {
               continue
             }
-            const subContent = await this.getSingleChapterContent(book, subCleanHref)
+            const { content: subContent } = await this.getSingleChapterContent(book, subCleanHref)
             if (subContent) {
               allContent += '\n\n' + subContent
             }
@@ -185,14 +192,14 @@ export class EpubProcessor {
       }
       console.log(`✅ [DEBUG] allContent`, allContent.length)
 
-      return allContent
+      return { title: extractedTitle, content: allContent }
     } catch (error) {
       console.warn(`❌ [DEBUG] 提取章节内容失败 (href: ${href}):`, error)
-      return ''
+      return { title: '', content: '' }
     }
   }
 
-  private async getSingleChapterContent(book: Book, href: string): Promise<string> {
+  private async getSingleChapterContent(book: Book, href: string): Promise<{ title: string; content: string }> {
     try {
       let section = null
       const spineItems = book.spine.spineItems
@@ -208,22 +215,22 @@ export class EpubProcessor {
 
       if (!section) {
         console.warn(`❌ [DEBUG] 无法获取章节: ${href}`)
-        return ''
+        return { title: '', content: '' }
       }
 
       // 读取章节内容
       const chapterHTML = await section.render(book.load.bind(book))
 
-      // 提取纯文本内容
-      const { textContent } = this.extractTextFromXHTML(chapterHTML)
+      // 提取标题和纯文本内容（一次性解析）
+      const { title, textContent } = this.extractTextFromXHTML(chapterHTML)
 
       // 卸载章节内容以释放内存
       section.unload()
 
-      return textContent
+      return { title, content: textContent }
     } catch (error) {
       console.warn(`❌ [DEBUG] 获取单个章节内容失败 (href: ${href}):`, error)
-      return ''
+      return { title: '', content: '' }
     }
   }
 
@@ -235,7 +242,7 @@ export class EpubProcessor {
     )
   }
 
-  private extractTextFromXHTML(xhtmlContent: string): { textContent: string } {
+  private extractTextFromXHTML(xhtmlContent: string): { title: string; textContent: string } {
     try {
       console.log(`🔍 [DEBUG] 开始解析XHTML内容，长度: ${xhtmlContent.length}`)
 
@@ -255,6 +262,16 @@ export class EpubProcessor {
         throw new Error('未找到body元素')
       }
 
+      // 尝试提取h1或h2标签作为标题（优先h1）
+      let title = ''
+      const h1Element = body.querySelector('h1')
+      const h2Element = body.querySelector('h2')
+      if (h1Element) {
+        title = h1Element.textContent?.trim() || ''
+      } else if (h2Element) {
+        title = h2Element.textContent?.trim() || ''
+      }
+
       // 移除脚本和样式标签
       const scripts = body.querySelectorAll('script, style')
       scripts.forEach(el => el.remove())
@@ -266,7 +283,7 @@ export class EpubProcessor {
 
       console.log(`✨ [DEBUG] 清理后文本长度: ${textContent.length}`)
 
-      return { textContent }
+      return { title, textContent }
     } catch (error) {
       console.warn(`⚠️ [DEBUG] DOM解析失败，使用正则表达式备选方案:`, error)
       // 如果DOM解析失败，使用正则表达式作为备选方案
