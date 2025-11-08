@@ -41,7 +41,6 @@ export interface Summary {
 - 最后添加一个金句节点记录几句本章金句
 - 适当添加表达该节点内涵的 emoji
 - 确保JSON格式正确，不要返回任何JSON以外的内容
-- 如果内容是致谢、目录、前言、序言、参考文献、出版社介绍、引用说明等的页面，请直接回复"{nodeData:null}"
 `
   
   return userPrompt
