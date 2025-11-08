@@ -109,7 +109,6 @@ export class AIService {
   async generateOverallSummary(
     bookTitle: string, 
     chapters: Chapter[], 
-    connections: string,
     outputLanguage: SupportedLanguage = 'en'
   ): Promise<string> {
     try {
@@ -118,7 +117,7 @@ export class AIService {
         `第${index + 1}章：${chapter.title}，内容：${chapter.summary || '无总结'}`
       ).join('\n')
 
-      const prompt = getOverallSummaryPrompt(bookTitle, chapterInfo, connections)
+      const prompt = getOverallSummaryPrompt(bookTitle, chapterInfo)
 
       const summary = await this.generateContent(prompt, outputLanguage)
 

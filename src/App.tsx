@@ -532,7 +532,6 @@ ${bookSummary.overallSummary}
           overallSummary = await aiService.generateOverallSummary(
             bookData.title,
             processedChapters,
-            connections!,
             processingOptions.outputLanguage
           )
           cacheService.setCache(file.name, 'overall_summary', overallSummary)
