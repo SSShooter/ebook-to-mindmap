@@ -64,6 +64,7 @@ function App() {
   const [extractingChapters, setExtractingChapters] = useState(false)
   const [progress, setProgress] = useState(0)
   const [currentStep, setCurrentStep] = useState('')
+  const [error, setError] = useState<string | null>(null)
   const [bookSummary, setBookSummary] = useState<BookSummary | null>(null)
   const [bookMindMap, setBookMindMap] = useState<BookMindMap | null>(null)
   const [extractedChapters, setExtractedChapters] = useState<ChapterData[] | null>(null)
@@ -292,6 +293,7 @@ ${bookSummary.overallSummary}
     setExtractingChapters(true)
     setProgress(0)
     setCurrentStep('')
+    setError(null) // 清除之前的错误状态
 
     try {
       let extractedBookData: { title: string; author: string }
@@ -364,14 +366,16 @@ ${bookSummary.overallSummary}
         position: 'top-center',
       })
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : t('progress.extractionError'), {
+      const errorMessage = err instanceof Error ? err.message : t('progress.extractionError')
+      setError(errorMessage)
+      toast.error(errorMessage, {
         duration: 5000,
         position: 'top-center',
       })
     } finally {
       setExtractingChapters(false)
     }
-  }, [file, useSmartDetection, skipNonEssentialChapters, processingOptions.maxSubChapterDepth, forceUseSpine, t])
+  }, [file, useSmartDetection, skipNonEssentialChapters, processingOptions.maxSubChapterDepth, forceUseSpine, t, error])
 
   const processEbook = useCallback(async () => {
     if (!extractedChapters || !bookData || !apiKey) {
@@ -398,6 +402,7 @@ ${bookSummary.overallSummary}
     setProcessing(true)
     setProgress(0)
     setCurrentStep('')
+    setError(null) // 清除之前的错误状态
 
     try {
       const aiService = new AIService(() => {
@@ -627,14 +632,16 @@ ${bookSummary.overallSummary}
       setProgress(100)
       setCurrentStep('处理完成！')
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : t('progress.processingError'), {
+      const errorMessage = err instanceof Error ? err.message : t('progress.processingError')
+      setError(errorMessage)
+      toast.error(errorMessage, {
         duration: 5000,
         position: 'top-center',
       })
     } finally {
       setProcessing(false)
     }
-  }, [extractedChapters, bookData, apiKey, file, selectedChapters, processingMode, bookType, customPrompt, processingOptions.outputLanguage, t])
+  }, [extractedChapters, bookData, apiKey, file, selectedChapters, processingMode, bookType, customPrompt, processingOptions.outputLanguage, t, error])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 flex justify-center gap-4 h-screen overflow-auto scroll-container">
@@ -827,18 +834,24 @@ ${bookSummary.overallSummary}
               </div>
             </div>
             {/* 处理进度 */}
-            {(processing || extractingChapters) && (
+            {(processing || extractingChapters || error) && (
               <Card>
                 <CardContent>
                   <div className="space-y-2">
                     <div className="flex justify-between items-center text-sm">
                       <div className="flex items-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        <span>{currentStep}</span>
+                        {error ? (
+                          <span className="text-red-500 font-medium">Error: {error}</span>
+                        ) : (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <span>{currentStep}</span>
+                          </>
+                        )}
                       </div>
-                      <span>{Math.round(progress)}%</span>
+                      <span>{error ? '' : `${Math.round(progress)}%`}</span>
                     </div>
-                    <Progress value={progress} className="w-full" />
+                    <Progress value={error ? 0 : progress} className="w-full" />
                   </div>
                 </CardContent>
               </Card>
