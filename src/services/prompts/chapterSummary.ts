@@ -8,7 +8,11 @@ export const getFictionChapterSummaryPrompt = (title: string, content: string) =
 章节内容：
 ${content}
 
-请用自然流畅的语言总结本章内容，包括主要情节发展、重要人物表现、关键观点或转折。`
+请用自然流畅的语言总结本章内容，包括：
+
+- 主要情节发展
+- 所有出现的人物及人物关系
+- 关键转折`
   
   return userPrompt
 }

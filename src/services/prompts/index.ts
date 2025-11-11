@@ -6,11 +6,13 @@ export {
 } from './chapterSummary'
 
 export {
-  getChapterConnectionsAnalysisPrompt
+  getChapterConnectionsAnalysisPrompt,
+  getFictionChapterConnectionsAnalysisPrompt
 } from './connectionAnalysis'
 
 export {
-  getOverallSummaryPrompt
+  getOverallSummaryPrompt,
+  getFictionOverallSummaryPrompt
 } from './overallSummary'
 
 // 测试连接的prompt

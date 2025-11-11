@@ -538,7 +538,7 @@ ${bookSummary.overallSummary}
         let connections = cacheService.getString(file.name, 'connections')
         if (!connections) {
           console.log('🔄 [DEBUG] 缓存未命中，开始分析章节关联')
-          connections = await aiService.analyzeConnections(processedChapters, processingOptions.outputLanguage)
+          connections = await aiService.analyzeConnections(processedChapters, processingOptions.outputLanguage, bookType)
           cacheService.setCache(file.name, 'connections', connections)
           console.log('💾 [DEBUG] 章节关联已缓存')
         } else {
@@ -559,7 +559,8 @@ ${bookSummary.overallSummary}
           overallSummary = await aiService.generateOverallSummary(
             bookData.title,
             processedChapters,
-            processingOptions.outputLanguage
+            processingOptions.outputLanguage,
+            bookType
           )
           cacheService.setCache(file.name, 'overall_summary', overallSummary)
           console.log('💾 [DEBUG] 全书总结已缓存')
@@ -691,7 +692,7 @@ ${bookSummary.overallSummary}
                       variant="outline"
                       size="sm"
                       onClick={clearBookCache}
-                      disabled={processing}
+                      disabled={!file || processing}
                       className="flex items-center gap-1 text-red-500 hover:text-red-700 hover:bg-red-50"
                     >
                       <Trash2 className="h-3.5 w-3.5" />

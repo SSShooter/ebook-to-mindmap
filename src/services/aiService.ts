@@ -3,7 +3,9 @@ import {
   getFictionChapterSummaryPrompt,
   getNonFictionChapterSummaryPrompt,
   getChapterConnectionsAnalysisPrompt,
+  getFictionChapterConnectionsAnalysisPrompt,
   getOverallSummaryPrompt,
+  getFictionOverallSummaryPrompt,
   getTestConnectionPrompt,
   getChapterMindMapPrompt,
   getMindMapArrowPrompt,
@@ -85,14 +87,16 @@ export class AIService {
     }
   }
 
-  async analyzeConnections(chapters: Chapter[], outputLanguage: SupportedLanguage = 'en'): Promise<string> {
+  async analyzeConnections(chapters: Chapter[], outputLanguage: SupportedLanguage = 'en', bookType: 'fiction' | 'non-fiction' = 'non-fiction'): Promise<string> {
     try {
       // 构建章节摘要信息
       const chapterSummaries = chapters.map((chapter) => 
         `${chapter.title}:\n${chapter.summary || '无总结'}`
       ).join('\n\n')
 
-      const prompt = getChapterConnectionsAnalysisPrompt(chapterSummaries)
+      const prompt = bookType === 'fiction'
+        ? getFictionChapterConnectionsAnalysisPrompt(chapterSummaries)
+        : getChapterConnectionsAnalysisPrompt(chapterSummaries)
 
       const connections = await this.generateContent(prompt, outputLanguage)
 
@@ -109,7 +113,8 @@ export class AIService {
   async generateOverallSummary(
     bookTitle: string, 
     chapters: Chapter[], 
-    outputLanguage: SupportedLanguage = 'en'
+    outputLanguage: SupportedLanguage = 'en',
+    bookType: 'fiction' | 'non-fiction' = 'non-fiction'
   ): Promise<string> {
     try {
       // 构建简化的章节信息
@@ -117,7 +122,9 @@ export class AIService {
         `第${index + 1}章：${chapter.title}，内容：${chapter.summary || '无总结'}`
       ).join('\n')
 
-      const prompt = getOverallSummaryPrompt(bookTitle, chapterInfo)
+      const prompt = bookType === 'fiction'
+        ? getFictionOverallSummaryPrompt(bookTitle, chapterInfo)
+        : getOverallSummaryPrompt(bookTitle, chapterInfo)
 
       const summary = await this.generateContent(prompt, outputLanguage)
 
