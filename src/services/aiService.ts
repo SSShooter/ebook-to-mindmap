@@ -83,7 +83,7 @@ export class AIService {
 
       return summary.trim()
     } catch (error) {
-      throw new Error(`章节总结失败: ${error instanceof Error ? error.message : '未知错误'}`)
+      throw new Error(`${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 
