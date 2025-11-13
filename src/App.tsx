@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -74,6 +74,7 @@ function App() {
   const [customPrompt, setCustomPrompt] = useState('')
   const [showBackToTop, setShowBackToTop] = useState(false)
   const [currentReadingChapter, setCurrentReadingChapter] = useState<ChapterData | null>(null)
+  const stepIndexRef = useRef<number>(currentStepIndex)
 
 
 
@@ -396,6 +397,7 @@ ${bookSummary.overallSummary}
     }
 
     // 跳转到步骤2并开始处理
+    stepIndexRef.current = 2
     setCurrentStepIndex(2)
     setBookSummary(null)
     setBookMindMap(null)
@@ -443,6 +445,7 @@ ${bookSummary.overallSummary}
 
       // 步骤3: 逐章处理
       for (let i = 0; i < chapters.length; i++) {
+        if (stepIndexRef.current === 1) return
         const chapter = chapters[i]
         setCurrentStep(`正在处理第 ${i + 1}/${totalChapters} 章: ${chapter.title}`)
 
@@ -530,6 +533,8 @@ ${bookSummary.overallSummary}
 
         setProgress(20 + (i + 1) / totalChapters * 60)
       }
+
+      if (stepIndexRef.current === 1) return
 
       if (processingMode === 'summary') {
         // 文字总结模式的后续步骤
@@ -824,7 +829,7 @@ ${bookSummary.overallSummary}
             <div className="flex items-center gap-4 mb-4">
               <Button
                 variant="outline"
-                onClick={() => setCurrentStepIndex(1)}
+                onClick={() => { stepIndexRef.current = 1; setCurrentStepIndex(1) }}
                 className="flex items-center gap-2"
               >
                 <ArrowLeft className="h-4 w-4" />
