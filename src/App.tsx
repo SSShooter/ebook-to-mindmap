@@ -828,7 +828,15 @@ ${bookSummary.overallSummary}
             <div className="flex items-center gap-4 mb-4">
               <Button
                 variant="outline"
-                onClick={() => { stepIndexRef.current = 1; setCurrentStepIndex(1) }}
+                onClick={() => { 
+                  stepIndexRef.current = 1; 
+                  setCurrentStepIndex(1);
+                  setProcessing(false);
+                  setExtractingChapters(false);
+                  setProgress(0);
+                  setCurrentStep('');
+                  setError(null);
+                }}
                 className="flex items-center gap-2"
               >
                 <ArrowLeft className="h-4 w-4" />

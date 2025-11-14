@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import { GenerativeModel, GoogleGenerativeAI } from '@google/generative-ai'
 import {
   getFictionChapterSummaryPrompt,
   getNonFictionChapterSummaryPrompt,
@@ -31,16 +31,16 @@ interface AIConfig {
 export class AIService {
   private config: AIConfig | (() => AIConfig)
   private genAI?: GoogleGenerativeAI
-  private model: any
+  private model!: GenerativeModel | { apiUrl: string; apiKey: string; model: string }
 
   constructor(config: AIConfig | (() => AIConfig)) {
     this.config = config
-    
+
     const currentConfig = typeof config === 'function' ? config() : config
-    
+
     if (currentConfig.provider === 'gemini') {
       this.genAI = new GoogleGenerativeAI(currentConfig.apiKey)
-      this.model = this.genAI.getGenerativeModel({ 
+      this.model = this.genAI.getGenerativeModel({
         model: currentConfig.model || 'gemini-1.5-flash'
       })
     } else if (currentConfig.provider === 'openai' || currentConfig.provider === '302.ai') {
@@ -90,7 +90,7 @@ export class AIService {
   async analyzeConnections(chapters: Chapter[], outputLanguage: SupportedLanguage = 'en', bookType: 'fiction' | 'non-fiction' = 'non-fiction'): Promise<string> {
     try {
       // 构建章节摘要信息
-      const chapterSummaries = chapters.map((chapter) => 
+      const chapterSummaries = chapters.map((chapter) =>
         `${chapter.title}:\n${chapter.summary || '无总结'}`
       ).join('\n\n')
 
@@ -111,14 +111,14 @@ export class AIService {
   }
 
   async generateOverallSummary(
-    bookTitle: string, 
-    chapters: Chapter[], 
+    bookTitle: string,
+    chapters: Chapter[],
     outputLanguage: SupportedLanguage = 'en',
     bookType: 'fiction' | 'non-fiction' = 'non-fiction'
   ): Promise<string> {
     try {
       // 构建简化的章节信息
-      const chapterInfo = chapters.map((chapter, index) => 
+      const chapterInfo = chapters.map((chapter, index) =>
         `第${index + 1}章：${chapter.title}，内容：${chapter.summary || '无总结'}`
       ).join('\n')
 
@@ -153,17 +153,17 @@ export class AIService {
       if (!mindMapJson || mindMapJson.trim().length === 0) {
         throw new Error('AI返回了空的思维导图数据')
       }
-      
+
       // 尝试解析JSON
       try {
         return JSON.parse(mindMapJson.trim())
-      } catch (parseError) {
+      } catch {
         // 尝试从代码块中提取JSON
         const jsonMatch = mindMapJson.match(/```(?:json)?\s*([\s\S]*?)```/)
         if (jsonMatch && jsonMatch[1]) {
           try {
             return JSON.parse(jsonMatch[1].trim())
-          } catch (extractError) {
+          } catch {
             throw new Error('AI返回的思维导图数据格式不正确')
           }
         }
@@ -188,13 +188,13 @@ export class AIService {
       // 尝试解析JSON
       try {
         return JSON.parse(arrowsJson.trim())
-      } catch (parseError) {
+      } catch {
         // 尝试从代码块中提取JSON
         const jsonMatch = arrowsJson.match(/```(?:json)?\s*([\s\S]*?)```/)
         if (jsonMatch && jsonMatch[1]) {
           try {
             return JSON.parse(jsonMatch[1].trim())
-          } catch (extractError) {
+          } catch {
             throw new Error('AI返回的箭头数据格式不正确')
           }
         }
@@ -208,7 +208,7 @@ export class AIService {
   async generateCombinedMindMap(bookTitle: string, chapters: Chapter[], customPrompt?: string): Promise<MindElixirData> {
     try {
       const basePrompt = getChapterMindMapPrompt()
-      const chaptersContent = chapters.map(item=>item.content).join('\n\n ------------- \n\n')
+      const chaptersContent = chapters.map(item => item.content).join('\n\n ------------- \n\n')
       let prompt = `${basePrompt}
         请为整本书《${bookTitle}》生成一个完整的思维导图，将所有章节的内容整合在一起。
         章节内容：\n${chaptersContent}`
@@ -223,17 +223,17 @@ export class AIService {
       if (!mindMapJson || mindMapJson.trim().length === 0) {
         throw new Error('AI返回了空的思维导图数据')
       }
-      
+
       // 尝试解析JSON
       try {
         return JSON.parse(mindMapJson.trim())
-      } catch (parseError) {
+      } catch {
         // 尝试从代码块中提取JSON
         const jsonMatch = mindMapJson.match(/```(?:json)?\s*([\s\S]*?)```/)
         if (jsonMatch && jsonMatch[1]) {
           try {
             return JSON.parse(jsonMatch[1].trim())
-          } catch (extractError) {
+          } catch {
             throw new Error('AI返回的思维导图数据格式不正确')
           }
         }
@@ -249,25 +249,26 @@ export class AIService {
     const config = this.getCurrentConfig()
     const language = outputLanguage || 'en'
     const systemPrompt = getLanguageInstruction(language)
-    
-    if (config.provider === 'gemini') {
+
+    if (config.provider === 'gemini' && 'generateContent' in this.model) {
       // Gemini API 不直接支持系统提示，将系统提示合并到用户提示前面
       const finalPrompt = `${prompt}\n\n**${systemPrompt}**`
-      const result = await this.model.generateContent(finalPrompt, {
+      const result = await this.model.generateContent({
+        contents: [{ role: 'user', parts: [{ text: finalPrompt }] }],
         generationConfig: {
           temperature: config.temperature || 0.7
         }
       })
       const response = await result.response
       return response.text()
-    } else if (config.provider === 'openai' || config.provider === '302.ai') {
-      const messages: Array<{role: 'system' | 'user', content: string}> = [
+    } else {
+      const messages: Array<{ role: 'system' | 'user', content: string }> = [
         {
           role: 'user',
           content: prompt + '\n\n' + systemPrompt
         }
       ]
-      
+
       const response = await fetch(`${this.model.apiUrl}/chat/completions`, {
         method: 'POST',
         headers: {
@@ -288,47 +289,6 @@ export class AIService {
 
       const data = await response.json()
       return data.choices[0]?.message?.content || ''
-    } else if (config.provider === 'ollama') {
-      // Ollama API 调用
-      const messages: Array<{role: 'system' | 'user', content: string}> = [
-        {
-          role: 'system',
-          content: systemPrompt
-        },
-        {
-          role: 'user',
-          content: prompt
-        }
-      ]
-      
-      const requestHeaders: Record<string, string> = {
-        'Content-Type': 'application/json'
-      }
-      
-      // 如果提供了API密钥，则添加Authorization头
-      if (this.model.apiKey) {
-        requestHeaders['Authorization'] = `Bearer ${this.model.apiKey}`
-      }
-      
-      const response = await fetch(`${this.model.apiUrl}/api/chat`, {
-        method: 'POST',
-        headers: requestHeaders,
-        body: JSON.stringify({
-          model: this.model.model,
-          messages,
-          stream: false,
-          options: {
-            temperature: config.temperature || 0.7
-          }
-        })
-      })
-
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status} ${response.statusText}`)
-      }
-
-      const data = await response.json()
-      return data.message?.content || ''
     }
   }
 
@@ -337,7 +297,7 @@ export class AIService {
     try {
       const text = await this.generateContent(getTestConnectionPrompt())
       return text.includes('连接成功') || text.includes('成功')
-    } catch (error) {
+    } catch {
       return false
     }
   }
