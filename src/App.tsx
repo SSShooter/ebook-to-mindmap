@@ -174,8 +174,7 @@ function App() {
 
     // 添加章节总结
     markdownContent += `## ${t('results.tabs.chapterSummary')}\n\n`
-    bookSummary.chapters.forEach((chapter, index) => {
-      markdownContent += `### ${index + 1}. ${chapter.title}\n\n`
+    bookSummary.chapters.forEach((chapter) => {
       markdownContent += `${chapter.summary || ''}\n\n`
     })
 
