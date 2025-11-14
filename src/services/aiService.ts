@@ -283,7 +283,7 @@ export class AIService {
 
       if (!response.ok) {
         const errorBody = await response.text()
-        throw new Error(`OpenAI API请求失败: ${response.status} ${response.statusText} - ${errorBody}`)
+        throw new Error(`Error: ${response.status} ${response.statusText} - ${errorBody}`)
       }
 
       const data = await response.json()
@@ -324,14 +324,12 @@ export class AIService {
       })
 
       if (!response.ok) {
-        throw new Error(`Ollama API请求失败: ${response.status} ${response.statusText}`)
+        throw new Error(`Error: ${response.status} ${response.statusText}`)
       }
 
       const data = await response.json()
       return data.message?.content || ''
     }
-    
-    throw new Error(`不支持的AI提供商: ${config.provider}`)
   }
 
   // 辅助方法：检查API连接
