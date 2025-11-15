@@ -56,6 +56,12 @@ interface BookMindMap {
 import { useAIConfig, useProcessingOptions, useConfigStore } from './stores/configStore'
 const cacheService = new CacheService()
 
+// 辅助函数：计算字符串大小（KB）
+function getStringSizeInKB(str: string): string {
+  const sizeInKB = new Blob([str]).size / 1024;
+  return sizeInKB.toFixed(1);
+}
+
 function App() {
   const { t } = useTranslation()
   const [currentStepIndex, setCurrentStepIndex] = useState(1) // 1: 配置步骤, 2: 处理步骤
@@ -780,13 +786,18 @@ ${bookSummary.overallSummary}
                           checked={selectedChapters.has(chapter.id)}
                           onCheckedChange={(checked) => handleChapterSelect(chapter.id, checked as boolean)}
                         />
-                        <Label
-                          htmlFor={`chapter-${chapter.id}`}
-                          className="text-sm truncate cursor-pointer flex-1"
-                          title={chapter.title}
-                        >
-                          {chapter.title}
-                        </Label>
+                        <div className="flex-1 min-w-0">
+                          <Label
+                            htmlFor={`chapter-${chapter.id}`}
+                            className="text-sm truncate cursor-pointer block"
+                            title={chapter.title}
+                          >
+                            {chapter.title}
+                          </Label>
+                          <span className="text-xs text-gray-500">
+                            {getStringSizeInKB(chapter.content)} KB
+                          </span>
+                        </div>
                         <Button
                           variant="outline"
                           size="sm"

@@ -241,7 +241,7 @@ export class AIService {
         throw new DOMException('Request was aborted', 'AbortError')
       }
       
-      const response = await result.response
+      const response = result.response
       return response.text()
     } else {
       const messages: Array<{ role: 'system' | 'user', content: string }> = [
