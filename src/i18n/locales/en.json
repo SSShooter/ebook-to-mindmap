@@ -135,7 +135,8 @@
     "collapse": "Collapse",
     "processing": "Processing...",
     "generatingContent": "Generating content, please wait...",
-    "generatingMindMap": "Generating mind map, please wait..."
+    "generatingMindMap": "Generating mind map, please wait...",
+    "generationCancelled": "Generation cancelled"
   },
   "config": {
     "title": "Configuration",

@@ -74,7 +74,7 @@ function App() {
   const [customPrompt, setCustomPrompt] = useState('')
   const [showBackToTop, setShowBackToTop] = useState(false)
   const [currentReadingChapter, setCurrentReadingChapter] = useState<ChapterData | null>(null)
-  const stepIndexRef = useRef<number>(currentStepIndex)
+  const abortControllerRef = useRef<AbortController | null>(null)
 
 
 
@@ -295,6 +295,9 @@ ${bookSummary.overallSummary}
     setCurrentStep('')
     setError(null) // 清除之前的错误状态
 
+    // 创建新的AbortController
+    abortControllerRef.current = new AbortController()
+
     try {
       let extractedBookData: { title: string; author: string }
       let chapters: ChapterData[]
@@ -309,7 +312,7 @@ ${bookSummary.overallSummary}
         extractedBookData = { title: bookData.title, author: bookData.author }
         setFullBookData(bookData) // 保存完整的BookData对象
         setProgress(50)
-
+        
         setCurrentStep('正在提取章节内容...')
         chapters = await processor.extractChapters(bookData.book, useSmartDetection, skipNonEssentialChapters, processingOptions.maxSubChapterDepth, forceUseSpine)
       } else if (isPdf) {
@@ -319,7 +322,7 @@ ${bookSummary.overallSummary}
         extractedBookData = { title: bookData.title, author: bookData.author }
         setFullBookData(bookData) // 保存完整的BookData对象
         setProgress(50)
-
+        
         setCurrentStep('正在提取章节内容...')
         chapters = await processor.extractChapters(file, useSmartDetection, skipNonEssentialChapters, processingOptions.maxSubChapterDepth)
       } else {
@@ -366,6 +369,12 @@ ${bookSummary.overallSummary}
         position: 'top-center',
       })
     } catch (err) {
+      // 如果是AbortError，不显示错误信息
+      if (err instanceof Error && err.name === 'AbortError') {
+        console.log(t('common.generationCancelled'))
+        return
+      }
+      
       const errorMessage = err instanceof Error ? err.message : t('progress.extractionError')
       setError(errorMessage)
       toast.error(errorMessage, {
@@ -374,6 +383,10 @@ ${bookSummary.overallSummary}
       })
     } finally {
       setExtractingChapters(false)
+      // 清理AbortController
+      if (abortControllerRef.current) {
+        abortControllerRef.current = null
+      }
     }
   }, [file, useSmartDetection, skipNonEssentialChapters, processingOptions.maxSubChapterDepth, forceUseSpine, t, error])
 
@@ -396,7 +409,6 @@ ${bookSummary.overallSummary}
     }
 
     // 跳转到步骤2并开始处理
-    stepIndexRef.current = 2
     setCurrentStepIndex(2)
     setBookSummary(null)
     setBookMindMap(null)
@@ -404,6 +416,10 @@ ${bookSummary.overallSummary}
     setProgress(0)
     setCurrentStep('')
     setError(null) // 清除之前的错误状态
+
+    // 创建新的AbortController
+    abortControllerRef.current = new AbortController()
+    const abortSignal = abortControllerRef.current.signal
 
     try {
       const aiService = new AIService(() => {
@@ -444,7 +460,6 @@ ${bookSummary.overallSummary}
 
       // 步骤3: 逐章处理
       for (let i = 0; i < chapters.length; i++) {
-        if (stepIndexRef.current === 1) return
         const chapter = chapters[i]
         setCurrentStep(`正在处理第 ${i + 1}/${totalChapters} 章: ${chapter.title}`)
 
@@ -475,7 +490,7 @@ ${bookSummary.overallSummary}
           let summary = cacheService.getString(file.name, 'summary', chapter.id)
 
           if (!summary) {
-            summary = await aiService.summarizeChapter(chapter.title, chapter.content, bookType, processingOptions.outputLanguage, customPrompt)
+            summary = await aiService.summarizeChapter(chapter.title, chapter.content, bookType, processingOptions.outputLanguage, customPrompt, abortSignal)
             cacheService.setCache(file.name, 'summary', summary, chapter.id)
           }
 
@@ -497,7 +512,7 @@ ${bookSummary.overallSummary}
           let mindMap = cacheService.getMindMap(file.name, 'mindmap', chapter.id)
 
           if (!mindMap) {
-            mindMap = await aiService.generateChapterMindMap(chapter.content, processingOptions.outputLanguage, customPrompt)
+            mindMap = await aiService.generateChapterMindMap(chapter.content, processingOptions.outputLanguage, customPrompt, abortSignal)
             cacheService.setCache(file.name, 'mindmap', mindMap, chapter.id)
           }
 
@@ -533,8 +548,6 @@ ${bookSummary.overallSummary}
         setProgress(20 + (i + 1) / totalChapters * 60)
       }
 
-      if (stepIndexRef.current === 1) return
-
       if (processingMode === 'summary') {
         // 文字总结模式的后续步骤
         // 步骤4: 分析章节关联
@@ -542,7 +555,7 @@ ${bookSummary.overallSummary}
         let connections = cacheService.getString(file.name, 'connections')
         if (!connections) {
           console.log('🔄 [DEBUG] 缓存未命中，开始分析章节关联')
-          connections = await aiService.analyzeConnections(processedChapters, processingOptions.outputLanguage, bookType)
+          connections = await aiService.analyzeConnections(processedChapters, processingOptions.outputLanguage, bookType, abortSignal)
           cacheService.setCache(file.name, 'connections', connections)
           console.log('💾 [DEBUG] 章节关联已缓存')
         } else {
@@ -564,7 +577,8 @@ ${bookSummary.overallSummary}
             bookData.title,
             processedChapters,
             processingOptions.outputLanguage,
-            bookType
+            bookType,
+            abortSignal
           )
           cacheService.setCache(file.name, 'overall_summary', overallSummary)
           console.log('💾 [DEBUG] 全书总结已缓存')
@@ -620,7 +634,7 @@ ${bookSummary.overallSummary}
         let combinedMindMap = cacheService.getMindMap(file.name, 'combined_mindmap')
         if (!combinedMindMap) {
           console.log('🔄 [DEBUG] 缓存未命中，开始生成整书思维导图')
-          combinedMindMap = await aiService.generateCombinedMindMap(bookData.title, processedChapters, customPrompt)
+          combinedMindMap = await aiService.generateCombinedMindMap(bookData.title, processedChapters, customPrompt, abortSignal)
           cacheService.setCache(file.name, 'combined_mindmap', combinedMindMap)
           console.log('💾 [DEBUG] 整书思维导图已缓存')
         } else {
@@ -637,6 +651,12 @@ ${bookSummary.overallSummary}
       setProgress(100)
       setCurrentStep('处理完成！')
     } catch (err) {
+      // 如果是AbortError，不显示错误信息
+      if (err instanceof Error && err.name === 'AbortError') {
+        console.log(t('common.generationCancelled'))
+        return
+      }
+      
       const errorMessage = err instanceof Error ? err.message : t('progress.processingError')
       setError(errorMessage)
       toast.error(errorMessage, {
@@ -645,6 +665,10 @@ ${bookSummary.overallSummary}
       })
     } finally {
       setProcessing(false)
+      // 清理AbortController
+      if (abortControllerRef.current) {
+        abortControllerRef.current = null
+      }
     }
   }, [extractedChapters, bookData, apiKey, file, selectedChapters, processingMode, bookType, customPrompt, processingOptions.outputLanguage, t, error])
 
@@ -829,7 +853,12 @@ ${bookSummary.overallSummary}
               <Button
                 variant="outline"
                 onClick={() => { 
-                  stepIndexRef.current = 1; 
+                  // 取消所有正在进行的请求
+                  if (abortControllerRef.current) {
+                    abortControllerRef.current.abort()
+                    abortControllerRef.current = null
+                  }
+                  
                   setCurrentStepIndex(1);
                   setProcessing(false);
                   setExtractingChapters(false);
