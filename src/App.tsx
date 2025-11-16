@@ -236,7 +236,6 @@ ${bookSummary.overallSummary}
       // 实时更新选中的章节缓存
       if (file) {
         cacheService.setSelectedChapters(file.name, newSet)
-        console.log('💾 [DEBUG] 实时更新选中的章节缓存:', newSet.size)
       }
 
       return newSet
@@ -780,20 +779,23 @@ ${bookSummary.overallSummary}
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                     {extractedChapters.map((chapter) => (
-                      <div key={chapter.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      <Label
+                        key={chapter.id}
+                        htmlFor={`chapter-${chapter.id}`}
+                        className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                      >
                         <Checkbox
                           id={`chapter-${chapter.id}`}
                           checked={selectedChapters.has(chapter.id)}
                           onCheckedChange={(checked) => handleChapterSelect(chapter.id, checked as boolean)}
                         />
                         <div className="flex-1 min-w-0">
-                          <Label
-                            htmlFor={`chapter-${chapter.id}`}
-                            className="text-sm truncate cursor-pointer block"
+                          <div
+                            className="text-sm truncate block"
                             title={chapter.title}
                           >
                             {chapter.title}
-                          </Label>
+                          </div>
                           <span className="text-xs text-gray-500">
                             {getStringSizeInKB(chapter.content)} KB
                           </span>
@@ -801,11 +803,14 @@ ${bookSummary.overallSummary}
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => setCurrentReadingChapter(chapter)}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setCurrentReadingChapter(chapter)
+                          }}
                         >
                           <BookOpen className="h-3 w-3" />
                         </Button>
-                      </div>
+                      </Label>
                     ))}
                   </div>
 
