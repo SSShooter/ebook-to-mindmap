@@ -128,5 +128,26 @@ export const useConfigStore = create<ConfigState>()(
 )
 
 // 导出便捷的选择器
-export const useAIConfig = () => useConfigStore((state) => state.aiConfig)
+export const useAIConfig = () => {
+  // Try to get default model from model store first
+  const modelStore = typeof window !== 'undefined' ? 
+    JSON.parse(localStorage.getItem('ebook-models') || '{"state":{"models":[]}}') : 
+    { state: { models: [] } }
+  
+  const defaultModel = modelStore.state.models.find((m: any) => m.isDefault)
+  
+  if (defaultModel) {
+    return {
+      provider: defaultModel.provider,
+      apiKey: defaultModel.apiKey,
+      apiUrl: defaultModel.apiUrl,
+      model: defaultModel.model,
+      temperature: defaultModel.temperature
+    }
+  }
+  
+  // Fallback to old config store
+  return useConfigStore((state) => state.aiConfig)
+}
+
 export const useProcessingOptions = () => useConfigStore((state) => state.processingOptions)

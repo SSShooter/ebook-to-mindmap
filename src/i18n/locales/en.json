@@ -5,6 +5,7 @@
   },
   "nav": {
     "summary": "AI Summary",
+    "models": "Models",
     "settings": "Settings"
   },
   "upload": {
@@ -231,5 +232,23 @@
       "nextChapter": "Next Chapter",
       "chapterInfo": "Chapter {{current}} of {{total}}"
     }
+  },
+  "models": {
+    "title": "Model Management",
+    "description": "Manage AI models and set default model",
+    "addModel": "Add Model",
+    "editModel": "Edit Model",
+    "modelName": "Model Name",
+    "modelNamePlaceholder": "e.g., My GPT-4 Model",
+    "modelId": "Model ID",
+    "actions": "Actions",
+    "noModels": "No models configured. Click 'Add Model' to get started.",
+    "nameRequired": "Model name is required",
+    "apiKeyRequired": "API Key is required",
+    "addSuccess": "Model added successfully",
+    "updateSuccess": "Model updated successfully",
+    "deleteSuccess": "Model deleted successfully",
+    "defaultSet": "Default model set successfully",
+    "cannotDeleteLast": "Cannot delete the last model"
   }
 }

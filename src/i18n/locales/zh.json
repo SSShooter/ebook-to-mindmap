@@ -5,6 +5,7 @@
   },
   "nav": {
     "summary": "AI 总结",
+    "models": "模型管理",
     "settings": "设置"
   },
   "upload": {
@@ -198,5 +199,23 @@
     "launchSuccess": "已成功发送到 Mind Elixir Desktop",
     "launchError": "启动 Mind Elixir Desktop 失败",
     "exportError": "导出思维导图失败"
+  },
+  "models": {
+    "title": "模型管理",
+    "description": "管理 AI 模型并设置默认模型",
+    "addModel": "添加模型",
+    "editModel": "编辑模型",
+    "modelName": "模型名称",
+    "modelNamePlaceholder": "例如：我的 GPT-4 模型",
+    "modelId": "模型 ID",
+    "actions": "操作",
+    "noModels": "暂无配置的模型。点击「添加模型」开始配置。",
+    "nameRequired": "模型名称不能为空",
+    "apiKeyRequired": "API Key 不能为空",
+    "addSuccess": "模型添加成功",
+    "updateSuccess": "模型更新成功",
+    "deleteSuccess": "模型删除成功",
+    "defaultSet": "默认模型设置成功",
+    "cannotDeleteLast": "不能删除最后一个模型"
   }
 }

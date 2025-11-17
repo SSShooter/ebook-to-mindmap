@@ -1,25 +1,18 @@
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Settings, ExternalLink, Download, Upload } from 'lucide-react'
+import { Settings, Download, Upload } from 'lucide-react'
 import { toast } from 'sonner'
-import { useConfigStore, useAIConfig, useProcessingOptions } from '../stores/configStore'
+import { useConfigStore, useProcessingOptions } from '../stores/configStore'
 import type { SupportedLanguage } from '../services/prompts/utils'
 
 export function SettingsPage() {
   const { t, i18n } = useTranslation()
-  const aiConfig = useAIConfig()
   const processingOptions = useProcessingOptions()
   const {
-    setAiProvider,
-    setApiKey,
-    setApiUrl,
-    setModel,
-    setTemperature,
     setProcessingMode,
     setBookType,
     setSkipNonEssentialChapters,
@@ -27,12 +20,10 @@ export function SettingsPage() {
     setForceUseSpine
   } = useConfigStore()
 
-  const { provider: aiProvider, apiKey, apiUrl, model, temperature } = aiConfig
   const { processingMode, bookType, skipNonEssentialChapters, outputLanguage, forceUseSpine } = processingOptions
 
   const handleExportConfig = () => {
     const config = {
-      aiConfig,
       processingOptions
     }
     const dataStr = JSON.stringify(config, null, 2)
@@ -59,7 +50,7 @@ export function SettingsPage() {
         try {
           const config = JSON.parse(event.target?.result as string)
           
-          if (!config.aiConfig || !config.processingOptions) {
+          if (!config.processingOptions) {
             toast.error(t('config.importError'))
             return
           }
@@ -74,37 +65,6 @@ export function SettingsPage() {
       reader.readAsText(file)
     }
     input.click()
-  }
-
-  const providerSettings = {
-    gemini: {
-      apiKeyLabel: 'Gemini API Key',
-      apiKeyPlaceholder: t('config.enterGeminiApiKey'),
-      modelPlaceholder: t('config.geminiModelPlaceholder'),
-      apiUrlPlaceholder: '',
-      url: 'https://aistudio.google.com/',
-    },
-    openai: {
-      apiKeyLabel: 'API Token',
-      apiKeyPlaceholder: t('config.enterApiToken'),
-      apiUrlPlaceholder: 'https://api.openai.com/v1',
-      modelPlaceholder: t('config.modelPlaceholder'),
-      url: 'https://platform.openai.com/',
-    },
-    ollama: {
-      apiKeyLabel: 'API Token',
-      apiKeyPlaceholder: 'API Token',
-      apiUrlPlaceholder: 'http://localhost:11434',
-      modelPlaceholder: 'llama2, mistral, codellama...',
-      url: 'https://ollama.com/',
-    },
-    '302.ai': {
-      apiKeyLabel: 'API Token',
-      apiKeyPlaceholder: t('config.enterApiToken'),
-      apiUrlPlaceholder: 'https://api.302.ai/v1',
-      modelPlaceholder: t('config.modelPlaceholder'),
-      url: 'https://share.302.ai/BJ7iSL',
-    },
   }
 
   return (
@@ -142,130 +102,6 @@ export function SettingsPage() {
                   {t('config.interfaceLanguageDescription') || 'Select the language for the application interface'}
                 </p>
               </div>
-            </div>
-
-            {/* AI Service Config */}
-            <div className="space-y-4 p-6 bg-white rounded-lg border shadow-sm">
-              <div className="flex items-center gap-2 mb-4">
-                <Settings className="h-5 w-5" />
-                <h2 className="text-lg font-semibold">{t('config.aiServiceConfig')}</h2>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="ai-provider">{t('config.aiProvider')}</Label>
-                  <div className="flex flex-col items-start gap-2">
-                    <Select
-                      value={aiProvider}
-                      onValueChange={(value: 'gemini' | 'openai' | 'ollama' | '302.ai') => {
-                        setAiProvider(value)
-                        if (value === '302.ai') {
-                          setApiUrl('https://api.302.ai/v1')
-                        }
-                      }}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('config.selectAiProvider')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="gemini">Google Gemini</SelectItem>
-                        <SelectItem value="openai">{t('config.openaiCompatible')}</SelectItem>
-                        <SelectItem value="ollama">Ollama</SelectItem>
-                        <SelectItem value="302.ai">302.AI</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Button variant="link" className="p-0 h-auto text-xs" asChild>
-                      <a href={providerSettings[aiProvider].url} target="_blank" rel="noopener noreferrer">
-                        {t('config.visitSite')}
-                        <ExternalLink className="h-3 w-3 ml-1" />
-                      </a>
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="apikey">{providerSettings[aiProvider].apiKeyLabel}</Label>
-                  <Input
-                    id="apikey"
-                    type="password"
-                    placeholder={providerSettings[aiProvider].apiKeyPlaceholder}
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              {(aiProvider === 'openai' || aiProvider === 'ollama' || aiProvider === '302.ai') && (
-                <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="api-url">{t('config.apiUrl')}</Label>
-                      <Input
-                        id="api-url"
-                        type="url"
-                        placeholder={providerSettings[aiProvider].apiUrlPlaceholder}
-                        value={apiUrl}
-                        onChange={(e) => setApiUrl(e.target.value)}
-                        disabled={aiProvider === '302.ai'}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="model">{t('config.modelName')}</Label>
-                      <Input
-                        id="model"
-                        type="text"
-                        placeholder={providerSettings[aiProvider].modelPlaceholder}
-                        value={model}
-                        onChange={(e) => setModel(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="openai-temperature">{t('config.temperature')}</Label>
-                    <Input
-                      id="openai-temperature"
-                      type="number"
-                      min="0"
-                      max="2"
-                      step="0.1"
-                      placeholder="0.7"
-                      value={temperature}
-                      onChange={(e) => setTemperature(parseFloat(e.target.value))}
-                    />
-                    <p className="text-xs text-gray-600">{t('config.temperatureDescription')}</p>
-                  </div>
-                </>
-              )}
-
-              {aiProvider === 'gemini' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="gemini-model">{t('config.modelName')}</Label>
-                    <Input
-                      id="gemini-model"
-                      type="text"
-                      placeholder={providerSettings.gemini.modelPlaceholder}
-                      value={model}
-                      onChange={(e) => setModel(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="gemini-temperature">{t('config.temperature')}</Label>
-                    <Input
-                      id="gemini-temperature"
-                      type="number"
-                      min="0"
-                      max="2"
-                      step="0.1"
-                      placeholder="0.7"
-                      value={temperature}
-                      onChange={(e) => setTemperature(parseFloat(e.target.value) || 0.7)}
-                    />
-                    <p className="text-xs text-gray-600">{t('config.temperatureDescription')}</p>
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Output Language */}

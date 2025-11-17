@@ -3,6 +3,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { Sidebar } from './components/layout/Sidebar'
 import { SummaryPage } from './pages/SummaryPage'
 import { SettingsPage } from './pages/SettingsPage'
+import { ModelsPage } from './pages/ModelsPage'
 import { Footer } from './components/Footer'
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
       <div className="flex-1 flex flex-col bg-gradient-to-br from-blue-50 to-indigo-100">
         <Switch>
           <Route path="/" component={SummaryPage} />
+          <Route path="/models" component={ModelsPage} />
           <Route path="/settings" component={SettingsPage} />
         </Switch>
         <Footer />

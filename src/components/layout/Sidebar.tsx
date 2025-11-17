@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Link, useLocation } from 'wouter'
-import { BookOpen, Settings } from 'lucide-react'
+import { BookOpen, Settings, Brain } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export function Sidebar() {
@@ -12,6 +12,11 @@ export function Sidebar() {
       path: '/',
       icon: BookOpen,
       label: t('nav.summary'),
+    },
+    {
+      path: '/models',
+      icon: Brain,
+      label: t('nav.models'),
     },
     {
       path: '/settings',
