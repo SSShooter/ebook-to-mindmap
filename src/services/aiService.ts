@@ -139,7 +139,7 @@ export class AIService {
     }
   }
 
-  async generateChapterMindMap(content: string, outputLanguage: SupportedLanguage = 'en', customPrompt?: string, abortSignal?: AbortSignal): Promise<MindElixirData> {
+  async generateChapterMindMap(content: string, outputLanguage: SupportedLanguage = 'en', customPrompt?: string, abortSignal?: AbortSignal) {
     try {
       const basePrompt = getChapterMindMapPrompt()
       let prompt = basePrompt + `章节内容：\n${content}`
@@ -151,26 +151,26 @@ export class AIService {
 
       const mindMapJson = await this.generateContent(prompt, outputLanguage, abortSignal)
 
-      return this.parseJsonResponse(mindMapJson, "思维导图")
+      return this.parseJsonResponse(mindMapJson, "思维导图") as MindElixirData
     } catch (error) {
       throw new Error(`章节思维导图生成失败: ${error instanceof Error ? error.message : '未知错误'}`)
     }
   }
 
-  async generateMindMapArrows(combinedMindMapData: any, outputLanguage: SupportedLanguage = 'en', abortSignal?: AbortSignal): Promise<any> {
+  async generateMindMapArrows(combinedMindMapData: MindElixirData, outputLanguage: SupportedLanguage = 'en', abortSignal?: AbortSignal) {
     try {
       const basePrompt = getMindMapArrowPrompt()
       const prompt = basePrompt + `\n\n当前思维导图数据：\n${JSON.stringify(combinedMindMapData, null, 2)}`
 
       const arrowsJson = await this.generateContent(prompt, outputLanguage, abortSignal)
 
-      return this.parseJsonResponse(arrowsJson, "箭头")
+      return this.parseJsonResponse(arrowsJson, "箭头") as MindElixirData['arrows']
     } catch (error) {
       throw new Error(`思维导图箭头生成失败: ${error instanceof Error ? error.message : '未知错误'}`)
     }
   }
 
-  async generateCombinedMindMap(bookTitle: string, chapters: Chapter[], customPrompt?: string, abortSignal?: AbortSignal): Promise<MindElixirData> {
+  async generateCombinedMindMap(bookTitle: string, chapters: Chapter[], customPrompt?: string, abortSignal?: AbortSignal) {
     try {
       const basePrompt = getChapterMindMapPrompt()
       const chaptersContent = chapters.map(item => item.content).join('\n\n ------------- \n\n')
@@ -185,14 +185,14 @@ export class AIService {
 
       const mindMapJson = await this.generateContent(prompt, 'en', abortSignal)
 
-      return this.parseJsonResponse(mindMapJson, "思维导图")
+      return this.parseJsonResponse(mindMapJson, "思维导图") as MindElixirData
     } catch (error) {
       throw new Error(`整书思维导图生成失败: ${error instanceof Error ? error.message : '未知错误'}`)
     }
   }
 
   // 辅助方法：解析AI返回的JSON数据
-  private parseJsonResponse(response: string, errorContext: string): any {
+  private parseJsonResponse(response: string, errorContext: string): unknown {
     if (!response || response.trim().length === 0) {
       throw new Error(`AI返回了空的${errorContext}数据`)
     }
@@ -215,7 +215,7 @@ export class AIService {
   }
 
   // 统一的内容生成方法
-  private async generateContent(prompt: string, outputLanguage?: SupportedLanguage, abortSignal?: AbortSignal): Promise<string> {
+  private async generateContent(prompt: string, outputLanguage?: SupportedLanguage, abortSignal?: AbortSignal) {
     const config = this.getCurrentConfig()
     const language = outputLanguage || 'en'
     const systemPrompt = getLanguageInstruction(language)
@@ -243,7 +243,7 @@ export class AIService {
       
       const response = result.response
       return response.text()
-    } else {
+    } else if ('apiUrl' in this.model) {
       const messages: Array<{ role: 'system' | 'user', content: string }> = [
         {
           role: 'user',
