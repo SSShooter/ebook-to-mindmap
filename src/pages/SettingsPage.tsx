@@ -9,10 +9,9 @@ import { Settings, ExternalLink, Download, Upload } from 'lucide-react'
 import { toast } from 'sonner'
 import { useConfigStore, useAIConfig, useProcessingOptions } from '../stores/configStore'
 import type { SupportedLanguage } from '../services/prompts/utils'
-import { LanguageSwitcher } from '../components/LanguageSwitcher'
 
 export function SettingsPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const aiConfig = useAIConfig()
   const processingOptions = useProcessingOptions()
   const {
@@ -111,19 +110,40 @@ export function SettingsPage() {
   return (
     <div className="flex-1 overflow-auto">
       <div className="max-w-4xl mx-auto p-8">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
-              <Settings className="h-8 w-8" />
-              {t('config.title')}
-            </h1>
-            <p className="text-gray-600 mt-2">{t('config.description')}</p>
-          </div>
-          <LanguageSwitcher />
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
+            <Settings className="h-8 w-8" />
+            {t('config.title')}
+          </h1>
+          <p className="text-gray-600 mt-2">{t('config.description')}</p>
         </div>
 
         <ScrollArea className="h-[calc(100vh-240px)]">
           <div className="space-y-6 pr-4">
+            {/* Interface Language */}
+            <div className="p-6 bg-blue-50 rounded-lg border">
+              <div className="space-y-2">
+                <Label htmlFor="interface-language" className="text-sm font-medium">
+                  {t('config.interfaceLanguage') || 'Interface Language'}
+                </Label>
+                <Select 
+                  value={i18n.language} 
+                  onValueChange={(value) => i18n.changeLanguage(value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('config.selectInterfaceLanguage') || 'Select interface language'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="en">English</SelectItem>
+                    <SelectItem value="zh">中文</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-gray-600">
+                  {t('config.interfaceLanguageDescription') || 'Select the language for the application interface'}
+                </p>
+              </div>
+            </div>
+
             {/* AI Service Config */}
             <div className="space-y-4 p-6 bg-white rounded-lg border shadow-sm">
               <div className="flex items-center gap-2 mb-4">
