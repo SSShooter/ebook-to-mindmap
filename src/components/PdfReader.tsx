@@ -10,40 +10,43 @@ import { cn } from '@/lib/utils'
 import { useTranslation } from 'react-i18next'
 
 interface PdfReaderProps {
-  chapter: ChapterData
+  initialChapterId: string
+  chapterIds: string[]
+  chapters: ChapterData[]
   bookData?: BookData
   onClose: () => void
   className?: string
-  chapterIds?: string[]
-  currentIndex?: number
-  onNavigate?: (index: number) => void
 }
 
 interface PageContent {
   canvas?: HTMLCanvasElement
 }
 
-export function PdfReader({ chapter, bookData, onClose, className, chapterIds = [], currentIndex = 0, onNavigate }: PdfReaderProps) {
+export function PdfReader({ initialChapterId, chapterIds, chapters, bookData, onClose, className }: PdfReaderProps) {
   const { t } = useTranslation()
+  const [currentIndex, setCurrentIndex] = useState(() => 
+    chapterIds.indexOf(initialChapterId)
+  )
   const [chapterPages, setChapterPages] = useState<PageContent[]>([])
   const [currentPageIndex, setCurrentPageIndex] = useState(0)
   const [isLoadingPages, setIsLoadingPages] = useState(false)
   const [pdfProcessor] = useState(() => new PdfProcessor())
   const canvasContainerRef = useRef<HTMLDivElement>(null)
 
+  const chapter = chapters.find(ch => ch.id === chapterIds[currentIndex])!
   const hasMultipleChapters = chapterIds.length > 1
   const canGoPreviousChapter = hasMultipleChapters && currentIndex > 0
   const canGoNextChapter = hasMultipleChapters && currentIndex < chapterIds.length - 1
 
   const handlePreviousChapter = () => {
-    if (canGoPreviousChapter && onNavigate) {
-      onNavigate(currentIndex - 1)
+    if (canGoPreviousChapter) {
+      setCurrentIndex(currentIndex - 1)
     }
   }
 
   const handleNextChapter = () => {
-    if (canGoNextChapter && onNavigate) {
-      onNavigate(currentIndex + 1)
+    if (canGoNextChapter) {
+      setCurrentIndex(currentIndex + 1)
     }
   }
 

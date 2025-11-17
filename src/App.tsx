@@ -14,14 +14,6 @@ import { PdfProcessor, type BookData as PdfBookData } from './services/pdfProces
 import { AIService } from './services/aiService'
 import { CacheService } from './services/cacheService'
 import { ConfigDialog } from './components/project/ConfigDialog'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
 import type { MindElixirData, Options } from 'mind-elixir'
 import type { Summary } from 'node_modules/mind-elixir/dist/types/summary'
 import { LanguageSwitcher } from './components/LanguageSwitcher'
@@ -29,6 +21,8 @@ import { MarkdownCard } from './components/MarkdownCard'
 import { MindMapCard } from './components/MindMapCard'
 import { EpubReader } from './components/EpubReader'
 import { PdfReader } from './components/PdfReader'
+import { Footer } from './components/Footer'
+import { TagDialog } from './components/TagDialog'
 import { toast } from 'sonner'
 import { Toaster } from '@/components/ui/sonner'
 import { scrollToTop, openInMindElixir, downloadMindMap } from './utils'
@@ -98,13 +92,11 @@ function App() {
   const [fullBookData, setFullBookData] = useState<EpubBookData | PdfBookData | null>(null)
   const [customPrompt, setCustomPrompt] = useState('')
   const [showBackToTop, setShowBackToTop] = useState(false)
-  const [currentReadingChapter, setCurrentReadingChapter] = useState<ChapterData | null>(null)
+  const [readingChapterId, setReadingChapterId] = useState<string | null>(null)
   const [readingChapterIds, setReadingChapterIds] = useState<string[]>([])
-  const [currentReadingIndex, setCurrentReadingIndex] = useState(0)
   const abortControllerRef = useRef<AbortController | null>(null)
   const [chapterTags, setChapterTags] = useState<Map<string, string>>(new Map())
   const [showTagDialog, setShowTagDialog] = useState(false)
-  const [tagInput, setTagInput] = useState('')
   const [boxSelectedChapters, setBoxSelectedChapters] = useState<Set<string>>(new Set())
 
 
@@ -145,7 +137,8 @@ function App() {
       setFullBookData(null)
       setBookSummary(null)
       setBookMindMap(null)
-      setCurrentReadingChapter(null)
+      setReadingChapterId(null)
+      setReadingChapterIds([])
       setChapterTags(new Map()) // 重置章节标签
     } else {
       toast.error(t('upload.invalidFile'), {
@@ -314,16 +307,7 @@ ${bookSummary.overallSummary}
   }, [boxSelectedChapters])
 
   // 确认添加标签（每个章节只能有1个tag，会覆盖）
-  const handleConfirmAddTags = useCallback(() => {
-    if (!tagInput.trim()) {
-      toast.error('请输入标签', {
-        duration: 3000,
-        position: 'top-center',
-      })
-      return
-    }
-
-    const tag = tagInput.trim() // 只取第一个标签
+  const handleConfirmAddTags = useCallback((tag: string) => {
     const newChapterTags = new Map(chapterTags)
 
     boxSelectedChapters.forEach(chapterId => {
@@ -339,14 +323,13 @@ ${bookSummary.overallSummary}
     }
     
     setShowTagDialog(false)
-    setTagInput('')
     setBoxSelectedChapters(new Set()) // 清空框选状态
 
     toast.success(`已为 ${boxSelectedChapters.size} 个章节设置标签: ${tag}`, {
       duration: 3000,
       position: 'top-center',
     })
-  }, [tagInput, boxSelectedChapters, chapterTags, file])
+  }, [boxSelectedChapters, chapterTags, file])
 
   // 移除单个章节的标签
   const handleRemoveTag = useCallback((chapterId: string) => {
@@ -1044,9 +1027,8 @@ ${bookSummary.overallSummary}
                             size="sm"
                             onClick={(e) => {
                               e.stopPropagation()
+                              setReadingChapterId(chapter.id)
                               setReadingChapterIds([chapter.id])
-                              setCurrentReadingIndex(0)
-                              setCurrentReadingChapter(chapter)
                             }}
                           >
                             <BookOpen className="h-3 w-3" />
@@ -1220,11 +1202,9 @@ ${bookSummary.overallSummary}
                               onReadChapter={() => {
                                 // 打开分组的所有章节
                                 const chapterIds = group.chapterIds
-                                const firstChapterData = extractedChapters?.find(ch => ch.id === chapterIds[0])
-                                if (firstChapterData) {
+                                if (chapterIds.length > 0) {
+                                  setReadingChapterId(chapterIds[0])
                                   setReadingChapterIds(chapterIds)
-                                  setCurrentReadingIndex(0)
-                                  setCurrentReadingChapter(firstChapterData)
                                 }
                               }}
                             />
@@ -1293,11 +1273,9 @@ ${bookSummary.overallSummary}
                               onReadChapter={() => {
                                 // 打开分组的所有章节
                                 const chapterIds = group.chapterIds
-                                const firstChapterData = extractedChapters?.find(ch => ch.id === chapterIds[0])
-                                if (firstChapterData) {
+                                if (chapterIds.length > 0) {
+                                  setReadingChapterId(chapterIds[0])
                                   setReadingChapterIds(chapterIds)
-                                  setCurrentReadingIndex(0)
-                                  setCurrentReadingChapter(firstChapterData)
                                 }
                               }}
                               mindElixirOptions={options}
@@ -1367,61 +1345,33 @@ ${bookSummary.overallSummary}
           </div>
         )}
 
-        <p className="text-gray-600 text-center pb-4">
-          Mindmap powered by{' '}
-          <a
-            href="https://mind-elixir.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 hover:text-blue-800 hover:underline"
-          >
-            MindElixir
-          </a>
-        </p>
+        <Footer />
       </div>
 
       {/* 阅读组件插入到这里 */}
-      {currentReadingChapter && file && extractedChapters && (
+      {readingChapterId && file && extractedChapters && (
         file.name.endsWith('.epub') ? (
           <EpubReader
             className="w-[800px] shrink-0 sticky top-0"
-            chapter={currentReadingChapter}
+            initialChapterId={readingChapterId}
+            chapterIds={readingChapterIds}
+            chapters={extractedChapters}
             bookData={fullBookData as EpubBookData || undefined}
             onClose={() => {
-              setCurrentReadingChapter(null)
+              setReadingChapterId(null)
               setReadingChapterIds([])
-              setCurrentReadingIndex(0)
-            }}
-            chapterIds={readingChapterIds}
-            currentIndex={currentReadingIndex}
-            onNavigate={(index) => {
-              const chapterId = readingChapterIds[index]
-              const chapterData = extractedChapters.find(ch => ch.id === chapterId)
-              if (chapterData) {
-                setCurrentReadingIndex(index)
-                setCurrentReadingChapter(chapterData)
-              }
             }}
           />
         ) : file.name.endsWith('.pdf') ? (
           <PdfReader
             className="w-[800px] shrink-0 sticky top-0"
-            chapter={currentReadingChapter}
+            initialChapterId={readingChapterId}
+            chapterIds={readingChapterIds}
+            chapters={extractedChapters}
             bookData={fullBookData as PdfBookData || undefined}
             onClose={() => {
-              setCurrentReadingChapter(null)
+              setReadingChapterId(null)
               setReadingChapterIds([])
-              setCurrentReadingIndex(0)
-            }}
-            chapterIds={readingChapterIds}
-            currentIndex={currentReadingIndex}
-            onNavigate={(index) => {
-              const chapterId = readingChapterIds[index]
-              const chapterData = extractedChapters.find(ch => ch.id === chapterId)
-              if (chapterData) {
-                setCurrentReadingIndex(index)
-                setCurrentReadingChapter(chapterData)
-              }
             }}
           />
         ) : null
@@ -1440,40 +1390,12 @@ ${bookSummary.overallSummary}
       )}
 
       {/* 添加标签对话框 */}
-      <Dialog open={showTagDialog} onOpenChange={setShowTagDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>为框选的章节添加标签</DialogTitle>
-            <DialogDescription>
-              已框选 {boxSelectedChapters.size} 个章节。输入一个标签（会覆盖原有标签）。
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="tag-input">标签</Label>
-              <Input
-                id="tag-input"
-                placeholder="例如: 重点章节"
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleConfirmAddTags()
-                  }
-                }}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowTagDialog(false)}>
-              取消
-            </Button>
-            <Button onClick={handleConfirmAddTags}>
-              确认添加
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <TagDialog
+        open={showTagDialog}
+        onOpenChange={setShowTagDialog}
+        selectedCount={boxSelectedChapters.size}
+        onConfirm={handleConfirmAddTags}
+      />
     </div>
   )
 }

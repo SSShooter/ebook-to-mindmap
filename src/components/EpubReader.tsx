@@ -10,36 +10,39 @@ import { cn } from '@/lib/utils'
 import { useTranslation } from 'react-i18next'
 
 interface EpubReaderProps {
-  chapter: ChapterData
+  initialChapterId: string
+  chapterIds: string[]
+  chapters: ChapterData[]
   bookData?: BookData
   onClose: () => void
   className?: string
-  chapterIds?: string[]
-  currentIndex?: number
-  onNavigate?: (index: number) => void
 }
 
-export function EpubReader({ chapter, bookData, onClose, className, chapterIds = [], currentIndex = 0, onNavigate }: EpubReaderProps) {
+export function EpubReader({ initialChapterId, chapterIds, chapters, bookData, onClose, className }: EpubReaderProps) {
   const { t } = useTranslation()
+  const [currentIndex, setCurrentIndex] = useState(() => 
+    chapterIds.indexOf(initialChapterId)
+  )
   const [chapterHtmlContent, setChapterHtmlContent] = useState<string>('')
   const [isLoadingHtml, setIsLoadingHtml] = useState(false)
   const [epubProcessor] = useState(() => new EpubProcessor())
   const shadowRef = useRef<HTMLDivElement>(null)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
 
+  const chapter = chapters.find(ch => ch.id === chapterIds[currentIndex])!
   const hasMultipleChapters = chapterIds.length > 1
   const canGoPrevious = hasMultipleChapters && currentIndex > 0
   const canGoNext = hasMultipleChapters && currentIndex < chapterIds.length - 1
 
   const handlePrevious = () => {
-    if (canGoPrevious && onNavigate) {
-      onNavigate(currentIndex - 1)
+    if (canGoPrevious) {
+      setCurrentIndex(currentIndex - 1)
     }
   }
 
   const handleNext = () => {
-    if (canGoNext && onNavigate) {
-      onNavigate(currentIndex + 1)
+    if (canGoNext) {
+      setCurrentIndex(currentIndex + 1)
     }
   }
 
