@@ -4,7 +4,6 @@ import { Sidebar } from './components/layout/Sidebar'
 import { SummaryPage } from './pages/SummaryPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { ModelsPage } from './pages/ModelsPage'
-import { Footer } from './components/Footer'
 
 function App() {
   return (
@@ -17,7 +16,6 @@ function App() {
           <Route path="/models" component={ModelsPage} />
           <Route path="/settings" component={SettingsPage} />
         </Switch>
-        <Footer />
       </div>
     </div>
   )

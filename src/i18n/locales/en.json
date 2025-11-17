@@ -249,6 +249,9 @@
     "updateSuccess": "Model updated successfully",
     "deleteSuccess": "Model deleted successfully",
     "defaultSet": "Default model set successfully",
-    "cannotDeleteLast": "Cannot delete the last model"
+    "cannotDeleteLast": "Cannot delete the last model",
+    "selectModel": "Select Model for This Request",
+    "noModelsConfigured": "No models configured. Please go to Model Management to add models first.",
+    "selectModelPlaceholder": "Select a model"
   }
 }

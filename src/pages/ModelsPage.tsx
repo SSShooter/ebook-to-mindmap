@@ -146,16 +146,6 @@ export function ModelsPage() {
               
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <Label htmlFor="model-name">{t('models.modelName')}</Label>
-                  <Input
-                    id="model-name"
-                    placeholder={t('models.modelNamePlaceholder')}
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-2">
                   <Label htmlFor="provider">{t('config.aiProvider')}</Label>
                   <div className="flex flex-col items-start gap-2">
                     <Select
@@ -186,7 +176,15 @@ export function ModelsPage() {
                     </Button>
                   </div>
                 </div>
-
+                <div className="space-y-2">
+                  <Label htmlFor="model-name">{t('models.modelName')}</Label>
+                  <Input
+                    id="model-name"
+                    placeholder={t('models.modelNamePlaceholder')}
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  />
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="api-key">{providerSettings[formData.provider].apiKeyLabel}</Label>
                   <Input

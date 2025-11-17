@@ -86,6 +86,8 @@
     }
   },
   "common": {
+    "cancel": "取消",
+    "save": "保存",
     "copy": "复制",
     "delete": "删除",
     "viewContent": "查看内容",
@@ -216,6 +218,9 @@
     "updateSuccess": "模型更新成功",
     "deleteSuccess": "模型删除成功",
     "defaultSet": "默认模型设置成功",
-    "cannotDeleteLast": "不能删除最后一个模型"
+    "cannotDeleteLast": "不能删除最后一个模型",
+    "selectModel": "选择本次请求的模型",
+    "noModelsConfigured": "暂无配置的模型。请先前往模型管理添加模型。",
+    "selectModelPlaceholder": "选择一个模型"
   }
 }
