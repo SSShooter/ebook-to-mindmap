@@ -1,12 +1,11 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Textarea } from '@/components/ui/textarea'
-import { Upload, BookOpen, Brain, FileText, Loader2, List, Trash2, Tag, X } from 'lucide-react'
+import { Upload, BookOpen, Brain, FileText, Loader2, List, Trash2, Tag, X, RefreshCw } from 'lucide-react'
 import { ConfigDialog } from './project/ConfigDialog'
 import { TagDialog } from './TagDialog'
 import { CacheService } from '@/services/cacheService'
@@ -51,6 +50,8 @@ export function Step1Config({
   const [chapterTags, setChapterTags] = useState<Map<string, string>>(new Map())
   const [boxSelectedChapters, setBoxSelectedChapters] = useState<Set<string>>(new Set())
   const [showTagDialog, setShowTagDialog] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const configStore = useConfigStore()
   const { apiKey } = configStore.aiConfig
@@ -129,17 +130,49 @@ export function Step1Config({
     }
   }, [extractedChapters, file])
 
-  const handleFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = event.target.files?.[0]
+  const validateAndSetFile = useCallback((selectedFile: File | null) => {
     if (selectedFile && (selectedFile.name.endsWith('.epub') || selectedFile.name.endsWith('.pdf'))) {
       onFileChange(selectedFile)
-    } else {
+    } else if (selectedFile) {
       toast.error(t('upload.invalidFile'), {
         duration: 3000,
         position: 'top-center',
       })
     }
   }, [onFileChange, t])
+
+  const handleFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = event.target.files?.[0]
+    validateAndSetFile(selectedFile || null)
+  }, [validateAndSetFile])
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(true)
+  }, [])
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+  }, [])
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+    
+    const droppedFile = e.dataTransfer.files?.[0]
+    validateAndSetFile(droppedFile || null)
+  }, [validateAndSetFile])
+
+  const handleReselectFile = useCallback(() => {
+    onFileChange(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }, [onFileChange])
 
   const handleBoxSelect = useCallback((chapterId: string, checked: boolean) => {
     setBoxSelectedChapters((prev) => {
@@ -234,52 +267,77 @@ export function Step1Config({
 
   return (
     <div className='min-h-[80vh] space-y-4'>
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Upload className="h-5 w-5" />
-            {t('upload.title')}
-          </CardTitle>
-          <CardDescription>
-            {t('upload.description')}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="file">{t('upload.selectFile')}</Label>
-            <Input
-              id="file"
-              type="file"
-              accept=".epub,.pdf"
-              onChange={handleFileChange}
-              disabled={processing}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <FileText className="h-4 w-4" />
-              {t('upload.selectedFile')}: {file?.name || t('upload.noFileSelected')}
+      {!file ? (
+        <Card>
+          <CardContent>
+            <div
+              className={`relative border-2 border-dashed rounded-lg p-12 text-center transition-colors cursor-pointer ${
+                isDragging 
+                  ? 'border-blue-500 bg-blue-50' 
+                  : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+              }`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".epub,.pdf"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+              <Upload className="h-16 w-16 mx-auto mb-4 text-gray-400" />
+              <h3 className="text-xl font-semibold mb-2">{t('upload.title')}</h3>
+              <p className="text-gray-600 mb-4">{t('upload.description')}</p>
+              <p className="text-sm text-gray-500">
+                拖拽文件到此处或点击选择文件
+              </p>
+              <p className="text-xs text-gray-400 mt-2">
+                支持 EPUB 和 PDF 格式
+              </p>
             </div>
-            <div className="flex items-center gap-2">
-              <ConfigDialog processing={processing} file={file} />
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={clearBookCache}
-                disabled={!file || processing}
-                className="flex items-center gap-1 text-red-500 hover:text-red-700 hover:bg-red-50"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-                {t('upload.clearCache')}
-              </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardContent>
+            <div className="">
+              <div className="flex items-center gap-3">
+                <FileText className="h-5 w-5 text-gray-600" />
+                  <p className="font-medium truncate">{file.name}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                  <p className="text-xs text-gray-500">
+                    {(file.size / 1024 / 1024).toFixed(2)} MB
+                  </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleReselectFile}
+                  disabled={processing || extractingChapters}
+                >
+                  <RefreshCw className="h-3.5 w-3.5 mr-1" />
+                  重新选择
+                </Button>
+                <ConfigDialog processing={processing} file={file} />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearBookCache}
+                  disabled={processing}
+                  className="flex items-center gap-1 text-red-500 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  {t('upload.clearCache')}
+                </Button>
+              </div>
             </div>
-          </div>
-          <div className="space-y-2">
             <Button
               onClick={onExtractChapters}
-              disabled={!file || extractingChapters || processing}
-              className="w-full"
+              disabled={extractingChapters || processing}
+              className="w-full mt-4"
             >
               {extractingChapters ? (
                 <>
@@ -293,9 +351,9 @@ export function Step1Config({
                 </>
               )}
             </Button>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       {extractedChapters && bookData && (
         <Card>
@@ -331,7 +389,7 @@ export function Step1Config({
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               {extractedChapters.map((chapter) => {
                 const tag = chapterTags.get(chapter.id)
                 const isBoxSelected = boxSelectedChapters.has(chapter.id)

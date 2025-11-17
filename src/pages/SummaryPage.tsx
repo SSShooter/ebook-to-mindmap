@@ -422,71 +422,99 @@ export function SummaryPage() {
     }
   }, [extractedChapters, bookData, apiKey, file, processingMode, bookType, customPrompt, configStore.processingOptions.outputLanguage, t])
 
+  const hasReader = readingChapterId && file && extractedChapters
+
   return (
-    <div className="flex-1 flex gap-4 p-4 overflow-auto scroll-container">
-      <div className="max-w-6xl space-y-4 w-[800px] shrink-0">
-        {currentStepIndex === 1 ? (
-          <Step1Config
-            file={file}
-            onFileChange={handleFileChange}
-            extractedChapters={extractedChapters}
-            customPrompt={customPrompt}
-            onCustomPromptChange={setCustomPrompt}
-            onExtractChapters={extractChapters}
-            onStartProcessing={handleStartProcessing}
-            extractingChapters={extractingChapters}
-            processing={processing}
-            onReadChapter={handleReadChapter}
-          />
-        ) : (
-          <Step2Results
-            bookData={bookData}
-            processing={processing}
-            extractingChapters={extractingChapters}
-            progress={progress}
-            currentStep={currentStep}
-            error={error}
-            bookSummary={bookSummary}
-            bookMindMap={bookMindMap}
-            processingMode={processingMode}
-            extractedChapters={extractedChapters}
-            onBackToConfig={handleBackToConfig}
-            onClearChapterCache={clearChapterCache}
-            onClearSpecificCache={clearSpecificCache}
-            onReadChapter={handleReadChapter}
-            mindElixirOptions={options}
-          />
+    <div className="flex-1 flex relative overflow-hidden">
+      {/* Left Module - Scrollable */}
+      <div 
+        className={`
+          transition-all duration-300 ease-in-out
+          ${hasReader ? 'w-full lg:w-1/2' : 'w-full'}
+          flex justify-center
+          overflow-y-auto overflow-x-hidden
+          scroll-container
+        `}
+      >
+        <div className="w-full max-w-4xl p-4 space-y-4">
+          {currentStepIndex === 1 ? (
+            <Step1Config
+              file={file}
+              onFileChange={handleFileChange}
+              extractedChapters={extractedChapters}
+              customPrompt={customPrompt}
+              onCustomPromptChange={setCustomPrompt}
+              onExtractChapters={extractChapters}
+              onStartProcessing={handleStartProcessing}
+              extractingChapters={extractingChapters}
+              processing={processing}
+              onReadChapter={handleReadChapter}
+            />
+          ) : (
+            <Step2Results
+              bookData={bookData}
+              processing={processing}
+              extractingChapters={extractingChapters}
+              progress={progress}
+              currentStep={currentStep}
+              error={error}
+              bookSummary={bookSummary}
+              bookMindMap={bookMindMap}
+              processingMode={processingMode}
+              extractedChapters={extractedChapters}
+              onBackToConfig={handleBackToConfig}
+              onClearChapterCache={clearChapterCache}
+              onClearSpecificCache={clearSpecificCache}
+              onReadChapter={handleReadChapter}
+              mindElixirOptions={options}
+            />
+          )}
+        </div>
+      </div>
+
+      {/* Reader - Slides in from right, fixed height 100vh */}
+      <div 
+        className={`
+          fixed lg:absolute top-0 right-0
+          h-screen
+          w-full lg:w-1/2
+          transition-transform duration-300 ease-in-out
+          ${hasReader ? 'translate-x-0' : 'translate-x-full'}
+          bg-background
+          z-40
+          overflow-hidden
+        `}
+      >
+        {hasReader && (
+          file.name.endsWith('.epub') ? (
+            <EpubReader
+              className="w-full h-full"
+              initialChapterId={readingChapterId}
+              chapterIds={readingChapterIds}
+              chapters={extractedChapters}
+              bookData={fullBookData as EpubBookData || undefined}
+              onClose={() => {
+                setReadingChapterId(null)
+                setReadingChapterIds([])
+              }}
+            />
+          ) : file.name.endsWith('.pdf') ? (
+            <PdfReader
+              className="w-full h-full"
+              initialChapterId={readingChapterId}
+              chapterIds={readingChapterIds}
+              chapters={extractedChapters}
+              bookData={fullBookData as PdfBookData || undefined}
+              onClose={() => {
+                setReadingChapterId(null)
+                setReadingChapterIds([])
+              }}
+            />
+          ) : null
         )}
       </div>
 
-      {readingChapterId && file && extractedChapters && (
-        file.name.endsWith('.epub') ? (
-          <EpubReader
-            className="w-[800px] shrink-0 sticky top-0"
-            initialChapterId={readingChapterId}
-            chapterIds={readingChapterIds}
-            chapters={extractedChapters}
-            bookData={fullBookData as EpubBookData || undefined}
-            onClose={() => {
-              setReadingChapterId(null)
-              setReadingChapterIds([])
-            }}
-          />
-        ) : file.name.endsWith('.pdf') ? (
-          <PdfReader
-            className="w-[800px] shrink-0 sticky top-0"
-            initialChapterId={readingChapterId}
-            chapterIds={readingChapterIds}
-            chapters={extractedChapters}
-            bookData={fullBookData as PdfBookData || undefined}
-            onClose={() => {
-              setReadingChapterId(null)
-              setReadingChapterIds([])
-            }}
-          />
-        ) : null
-      )}
-
+      {/* Back to Top Button */}
       {showBackToTop && (
         <Button
           onClick={scrollToTop}
