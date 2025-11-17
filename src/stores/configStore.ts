@@ -127,27 +127,38 @@ export const useConfigStore = create<ConfigState>()(
   )
 )
 
-// 导出便捷的选择器
-export const useAIConfig = () => {
-  // Try to get default model from model store first
-  const modelStore = typeof window !== 'undefined' ? 
-    JSON.parse(localStorage.getItem('ebook-models') || '{"state":{"models":[]}}') : 
-    { state: { models: [] } }
+// Helper to get default model from model store
+const getDefaultModelFromStorage = (): AIConfig | null => {
+  if (typeof window === 'undefined') return null
   
-  const defaultModel = modelStore.state.models.find((m: any) => m.isDefault)
-  
-  if (defaultModel) {
-    return {
-      provider: defaultModel.provider,
-      apiKey: defaultModel.apiKey,
-      apiUrl: defaultModel.apiUrl,
-      model: defaultModel.model,
-      temperature: defaultModel.temperature
+  try {
+    const modelStore = JSON.parse(localStorage.getItem('ebook-models') || '{"state":{"models":[]}}')
+    const defaultModel = modelStore.state.models.find((m: { isDefault: boolean; provider: string; apiKey: string; apiUrl: string; model: string; temperature: number }) => m.isDefault)
+    
+    if (defaultModel) {
+      return {
+        provider: defaultModel.provider as AIConfig['provider'],
+        apiKey: defaultModel.apiKey,
+        apiUrl: defaultModel.apiUrl,
+        model: defaultModel.model,
+        temperature: defaultModel.temperature
+      }
     }
+  } catch (error) {
+    console.error('Failed to load default model from storage:', error)
   }
   
-  // Fallback to old config store
-  return useConfigStore((state) => state.aiConfig)
+  return null
+}
+
+// 导出便捷的选择器
+export const useAIConfig = () => {
+  const configStoreAIConfig = useConfigStore((state) => state.aiConfig)
+  
+  // Try to get default model from model store first
+  const defaultModel = getDefaultModelFromStorage()
+  
+  return defaultModel || configStoreAIConfig
 }
 
 export const useProcessingOptions = () => useConfigStore((state) => state.processingOptions)
