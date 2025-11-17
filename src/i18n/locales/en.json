@@ -3,6 +3,10 @@
     "title": "eBook to Mind Map",
     "description": "Mindmap powered by MindElixir"
   },
+  "nav": {
+    "summary": "AI Summary",
+    "settings": "Settings"
+  },
   "upload": {
     "title": "File Upload & Configuration",
     "description": "Select EPUB or PDF file and configure AI service",

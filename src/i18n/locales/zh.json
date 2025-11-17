@@ -3,6 +3,10 @@
     "title": "电子书转思维导图",
     "description": "Mindmap powered by MindElixir"
   },
+  "nav": {
+    "summary": "AI 总结",
+    "settings": "设置"
+  },
   "upload": {
     "title": "文件上传与配置",
     "description": "选择 EPUB 或 PDF 文件并配置 AI 服务",
