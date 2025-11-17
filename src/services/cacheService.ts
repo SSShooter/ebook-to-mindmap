@@ -12,9 +12,10 @@ export type CacheKeyType =
   | 'merged_mindmap'   // 合并思维导图（从章节思维导图合并生成）
   | 'mindmap_arrows'   // 思维导图箭头
   | 'selected_chapters' // 选中的章节
+  | 'chapter_tags'     // 章节标签
 
 // 定义缓存值的类型
-export type CacheValue = string | MindElixirData | string[] | null
+export type CacheValue = string | MindElixirData | string[] | Record<string, string> | null
 
 // 定义存储在 localStorage 中的缓存项结构
 interface CacheItem {
@@ -95,6 +96,13 @@ export class CacheService {
     return Array.isArray(value) ? value : null
   }
 
+  // 获取章节标签的缓存值
+  getChapterTags(filename: string): Record<string, string> | null {
+    const key = CacheService.generateKey(filename, 'chapter_tags')
+    const value = this.cache.get(key)
+    return value && typeof value === 'object' && !Array.isArray(value) && !('nodeData' in value) ? value as Record<string, string> : null
+  }
+
   // 设置缓存值
   setCache(filename: string, type: CacheKeyType, value: CacheValue, chapterId?: string): void {
     const key = CacheService.generateKey(filename, type, chapterId)
@@ -115,6 +123,23 @@ export class CacheService {
   setSelectedChapters(filename: string, selectedChapters: Set<string>): void {
     const key = CacheService.generateKey(filename, 'selected_chapters')
     const value = Array.from(selectedChapters)
+    
+    // 如果缓存已满，删除最旧的条目
+    if (this.cache.size >= this.MAX_CACHE_SIZE) {
+      const firstKey = this.cache.keys().next().value
+      if (firstKey) {
+        this.cache.delete(firstKey)
+      }
+    }
+
+    this.cache.set(key, value)
+    this.saveToLocalStorage()
+  }
+
+  // 缓存章节标签
+  setChapterTags(filename: string, chapterTags: Map<string, string>): void {
+    const key = CacheService.generateKey(filename, 'chapter_tags')
+    const value = Object.fromEntries(chapterTags)
     
     // 如果缓存已满，删除最旧的条目
     if (this.cache.size >= this.MAX_CACHE_SIZE) {
@@ -171,7 +196,7 @@ export class CacheService {
   }
 
   // 清除特定类型缓存
-  clearSpecificCache(fileName: string, cacheType: 'connections' | 'overall_summary' | 'combined_mindmap' | 'merged_mindmap' | 'selected_chapters'): boolean {
+  clearSpecificCache(fileName: string, cacheType: 'connections' | 'overall_summary' | 'combined_mindmap' | 'merged_mindmap' | 'selected_chapters' | 'chapter_tags'): boolean {
     const type: CacheKeyType = cacheType
     return this.deleteCache(fileName, type)
   }
@@ -182,6 +207,8 @@ export class CacheService {
 
     // 清除选中章节缓存
     if (this.deleteCache(fileName, 'selected_chapters')) deletedCount++
+    // 清除章节标签缓存
+    if (this.deleteCache(fileName, 'chapter_tags')) deletedCount++
 
     if (processingMode === 'summary') {
       // 文字总结模式：清除章节总结、章节关联、全书总结相关缓存

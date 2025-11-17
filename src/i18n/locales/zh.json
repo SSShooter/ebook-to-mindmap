@@ -174,11 +174,17 @@
       "nextPage": "下一页",
       "pageInfo": "第 {{current}} 页，共 {{total}} 页",
       "pdfPageInfo": "PDF第{{page}}页",
-      "loadingPages": "正在加载PDF页面..."
+      "loadingPages": "正在加载PDF页面...",
+      "previousChapter": "上一章",
+      "nextChapter": "下一章",
+      "chapterInfo": "第 {{current}} 章，共 {{total}} 章"
     },
     "epub": {
       "close": "关闭",
-      "loadingContent": "正在加载章节内容..."
+      "loadingContent": "正在加载章节内容...",
+      "previousChapter": "上一章",
+      "nextChapter": "下一章",
+      "chapterInfo": "第 {{current}} 章，共 {{total}} 章"
     }
   },
   "mindElixir": {

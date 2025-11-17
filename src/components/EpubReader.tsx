@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
-import { BookOpen, Loader2 } from 'lucide-react'
+import { BookOpen, Loader2, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 import type { ChapterData, BookData } from '@/services/epubProcessor'
 import { EpubProcessor } from '@/services/epubProcessor'
 import { cn } from '@/lib/utils'
@@ -13,15 +14,34 @@ interface EpubReaderProps {
   bookData?: BookData
   onClose: () => void
   className?: string
+  chapterIds?: string[]
+  currentIndex?: number
+  onNavigate?: (index: number) => void
 }
 
-export function EpubReader({ chapter, bookData, onClose, className }: EpubReaderProps) {
+export function EpubReader({ chapter, bookData, onClose, className, chapterIds = [], currentIndex = 0, onNavigate }: EpubReaderProps) {
   const { t } = useTranslation()
   const [chapterHtmlContent, setChapterHtmlContent] = useState<string>('')
   const [isLoadingHtml, setIsLoadingHtml] = useState(false)
   const [epubProcessor] = useState(() => new EpubProcessor())
   const shadowRef = useRef<HTMLDivElement>(null)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
+
+  const hasMultipleChapters = chapterIds.length > 1
+  const canGoPrevious = hasMultipleChapters && currentIndex > 0
+  const canGoNext = hasMultipleChapters && currentIndex < chapterIds.length - 1
+
+  const handlePrevious = () => {
+    if (canGoPrevious && onNavigate) {
+      onNavigate(currentIndex - 1)
+    }
+  }
+
+  const handleNext = () => {
+    if (canGoNext && onNavigate) {
+      onNavigate(currentIndex + 1)
+    }
+  }
 
   // 使用 Shadow DOM 来隔离 EPUB 内容样式
   useEffect(() => {
@@ -74,6 +94,11 @@ export function EpubReader({ chapter, bookData, onClose, className }: EpubReader
             <CardTitle className="flex items-center gap-2">
               <BookOpen className="h-5 w-5" />
               {chapter.title}
+              {hasMultipleChapters && (
+                <Badge variant="secondary" className="ml-2">
+                  {currentIndex + 1} / {chapterIds.length}
+                </Badge>
+              )}
             </CardTitle>
             <Button
               variant="outline"
@@ -83,6 +108,37 @@ export function EpubReader({ chapter, bookData, onClose, className }: EpubReader
               {t('reader.epub.close')}
             </Button>
           </div>
+          
+          {/* 章节导航 */}
+          {hasMultipleChapters && (
+            <div className="flex items-center justify-between pt-2 gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handlePrevious}
+                disabled={!canGoPrevious}
+                className="flex items-center gap-1"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                {t('reader.epub.previousChapter')}
+              </Button>
+
+              <div className="text-sm text-muted-foreground text-center flex-1">
+                {t('reader.epub.chapterInfo', { current: currentIndex + 1, total: chapterIds.length })}
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleNext}
+                disabled={!canGoNext}
+                className="flex items-center gap-1"
+              >
+                {t('reader.epub.nextChapter')}
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
         </CardHeader>
         <CardContent className="pt-6">
           <ScrollArea ref={scrollAreaRef} className="h-[80vh]">

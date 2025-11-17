@@ -212,11 +212,17 @@
       "nextPage": "Next",
       "pageInfo": "Page {{current}} of {{total}}",
       "pdfPageInfo": "PDF Page {{page}}",
-      "loadingPages": "Loading PDF pages..."
+      "loadingPages": "Loading PDF pages...",
+      "previousChapter": "Previous Chapter",
+      "nextChapter": "Next Chapter",
+      "chapterInfo": "Chapter {{current}} of {{total}}"
     },
     "epub": {
       "close": "Close",
-      "loadingContent": "Loading chapter content..."
+      "loadingContent": "Loading chapter content...",
+      "previousChapter": "Previous Chapter",
+      "nextChapter": "Next Chapter",
+      "chapterInfo": "Chapter {{current}} of {{total}}"
     }
   }
 }

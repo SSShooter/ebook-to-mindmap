@@ -14,19 +14,38 @@ interface PdfReaderProps {
   bookData?: BookData
   onClose: () => void
   className?: string
+  chapterIds?: string[]
+  currentIndex?: number
+  onNavigate?: (index: number) => void
 }
 
 interface PageContent {
   canvas?: HTMLCanvasElement
 }
 
-export function PdfReader({ chapter, bookData, onClose, className }: PdfReaderProps) {
+export function PdfReader({ chapter, bookData, onClose, className, chapterIds = [], currentIndex = 0, onNavigate }: PdfReaderProps) {
   const { t } = useTranslation()
   const [chapterPages, setChapterPages] = useState<PageContent[]>([])
   const [currentPageIndex, setCurrentPageIndex] = useState(0)
   const [isLoadingPages, setIsLoadingPages] = useState(false)
   const [pdfProcessor] = useState(() => new PdfProcessor())
   const canvasContainerRef = useRef<HTMLDivElement>(null)
+
+  const hasMultipleChapters = chapterIds.length > 1
+  const canGoPreviousChapter = hasMultipleChapters && currentIndex > 0
+  const canGoNextChapter = hasMultipleChapters && currentIndex < chapterIds.length - 1
+
+  const handlePreviousChapter = () => {
+    if (canGoPreviousChapter && onNavigate) {
+      onNavigate(currentIndex - 1)
+    }
+  }
+
+  const handleNextChapter = () => {
+    if (canGoNextChapter && onNavigate) {
+      onNavigate(currentIndex + 1)
+    }
+  }
 
   // 加载章节的页面内容
   useEffect(() => {
@@ -97,6 +116,11 @@ export function PdfReader({ chapter, bookData, onClose, className }: PdfReaderPr
                   {t('reader.pdf.page', { startPage: chapter.startPage, endPage: chapter.endPage })}
                 </Badge>
               )}
+              {hasMultipleChapters && (
+                <Badge variant="outline" className="ml-2">
+                  {currentIndex + 1} / {chapterIds.length}
+                </Badge>
+              )}
             </CardTitle>
             <div className="flex items-center gap-2">
               <Button
@@ -108,6 +132,37 @@ export function PdfReader({ chapter, bookData, onClose, className }: PdfReaderPr
               </Button>
             </div>
           </div>
+
+          {/* 章节导航 */}
+          {hasMultipleChapters && (
+            <div className="flex items-center justify-between pt-2 pb-2 border-b">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handlePreviousChapter}
+                disabled={!canGoPreviousChapter}
+                className="flex items-center gap-1"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                {t('reader.pdf.previousChapter')}
+              </Button>
+
+              <div className="text-sm text-muted-foreground">
+                {t('reader.pdf.chapterInfo', { current: currentIndex + 1, total: chapterIds.length })}
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleNextChapter}
+                disabled={!canGoNextChapter}
+                className="flex items-center gap-1"
+              >
+                {t('reader.pdf.nextChapter')}
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
 
           {/* 页面导航 */}
           {totalPages > 1 && (
