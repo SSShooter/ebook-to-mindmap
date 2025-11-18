@@ -1,15 +1,17 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'wouter'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Upload, BookOpen, Brain, FileText, Loader2, List, Trash2, Tag, X, RefreshCw } from 'lucide-react'
+import { Upload, BookOpen, Brain, FileText, Loader2, List, Trash2, Tag, X, RefreshCw, MessageSquarePlus } from 'lucide-react'
 import { ConfigDialog } from './project/ConfigDialog'
 import { TagDialog } from './TagDialog'
 import { CacheService } from '@/services/cacheService'
 import { useConfigStore } from '@/stores/configStore'
+import { useCustomPromptStore } from '@/stores/customPromptStore'
 import { toast } from 'sonner'
 import type { ChapterData } from '@/services/epubProcessor'
 
@@ -33,6 +35,7 @@ function getStringSizeInKB(str: string): string {
   return sizeInKB.toFixed(1)
 }
 
+// TODO: move extractChapters into Step1
 export function Step1Config({
   file,
   onFileChange,
@@ -56,6 +59,19 @@ export function Step1Config({
   const configStore = useConfigStore()
   const { apiKey } = configStore.aiConfig
   const { processingMode } = configStore.processingOptions
+  const { prompts } = useCustomPromptStore()
+
+  // 当文件变化时自动提取章节
+  useEffect(() => {
+    if (file && !extractedChapters && !extractingChapters && !processing) {
+      console.log('🚀 [DEBUG] 文件已更新，开始自动提取章节:', file.name)
+      // 使用小延迟确保状态完全更新
+      const timer = setTimeout(() => {
+        onExtractChapters()
+      }, 100)
+      return () => clearTimeout(timer)
+    }
+  }, [file, extractedChapters, extractingChapters, processing, onExtractChapters])
 
   // 清除整本书缓存的函数
   const clearBookCache = useCallback(async () => {
@@ -135,18 +151,16 @@ export function Step1Config({
 
   const validateAndSetFile = useCallback((selectedFile: File | null) => {
     if (selectedFile && (selectedFile.name.endsWith('.epub') || selectedFile.name.endsWith('.pdf'))) {
+      console.log('✅ [DEBUG] 文件验证通过:', selectedFile.name)
       onFileChange(selectedFile)
-      // 自动提取章节
-      setTimeout(() => {
-        onExtractChapters()
-      }, 100)
     } else if (selectedFile) {
+      console.log('❌ [DEBUG] 文件格式不支持:', selectedFile.name)
       toast.error(t('upload.invalidFile'), {
         duration: 3000,
         position: 'top-center',
       })
     }
-  }, [onFileChange, onExtractChapters, t])
+  }, [onFileChange, t])
 
   const handleFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0]
@@ -491,17 +505,35 @@ export function Step1Config({
       {extractedChapters && bookData && (
         <div className="shrink-0 space-y-3 p-4 bg-gray-50 rounded-lg">
           <div>
-            <Label htmlFor="custom-prompt" className="text-sm font-medium">
-              {t('chapters.customPrompt')}
-            </Label>
-            <Textarea
-              id="custom-prompt"
-              placeholder={t('chapters.customPromptPlaceholder')}
-              value={customPrompt}
-              onChange={(e) => onCustomPromptChange(e.target.value)}
-              className="min-h-16 resize-none mt-1"
-              disabled={processing || extractingChapters}
-            />
+            <div className="flex items-center justify-between">
+              <Label htmlFor="custom-prompt" className="text-sm font-medium">
+                {t('chapters.customPrompt')}
+              </Label>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1 text-xs h-6"
+                asChild
+              >
+                <Link href="/custom-prompts">
+                  <MessageSquarePlus className="h-3 w-3" />
+                  {t('chapters.managePrompts')}
+                </Link>
+              </Button>
+            </div>
+            <Select value={customPrompt || 'default'} onValueChange={(value) => onCustomPromptChange(value === 'default' ? '' : value)} disabled={processing || extractingChapters}>
+              <SelectTrigger className="mt-1">
+                <SelectValue placeholder={t('chapters.selectCustomPrompt')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="default">{t('chapters.useDefaultPrompt')}</SelectItem>
+                {prompts.map((prompt) => (
+                  <SelectItem key={prompt.id} value={prompt.content}>
+                    {prompt.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <p className="text-xs text-gray-500 mt-1">
               {t('chapters.customPromptDescription')}
             </p>

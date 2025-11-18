@@ -4,6 +4,7 @@ import { Sidebar } from './components/layout/Sidebar'
 import { SummaryPage } from './pages/SummaryPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { ModelsPage } from './pages/ModelsPage'
+import { CustomPromptsPage } from './pages/CustomPromptsPage'
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Switch>
           <Route path="/" component={SummaryPage} />
           <Route path="/models" component={ModelsPage} />
+          <Route path="/custom-prompts" component={CustomPromptsPage} />
           <Route path="/settings" component={SettingsPage} />
         </Switch>
       </div>

@@ -6,6 +6,7 @@
   "nav": {
     "summary": "AI 总结",
     "models": "模型管理",
+    "customPrompts": "自定义提示词",
     "settings": "设置"
   },
   "upload": {
@@ -26,9 +27,12 @@
     "selectAll": "全选",
     "totalChapters": "共 {{count}} 章",
     "selectedChapters": "已选择 {{count}} 章",
-    "customPrompt": "补充提示词",
+    "customPrompt": "自定义提示词",
     "customPromptPlaceholder": "在此输入自定义提示词，将会拼接到AI请求中...",
     "customPromptDescription": "可选：添加自定义提示词来指导AI生成更符合您需求的内容",
+    "managePrompts": "管理提示词",
+    "selectCustomPrompt": "选择自定义提示词（可选）",
+    "useDefaultPrompt": "使用默认提示词",
     "startProcessing": "开始解析",
     "processing": "处理中...",
     "apiKeyRequired": "请先在配置中填写 API Key",
@@ -230,5 +234,33 @@
     "selectModel": "选择本次请求的模型",
     "noModelsConfigured": "暂无配置的模型。请先前往模型管理添加模型。",
     "selectModelPlaceholder": "选择一个模型"
+  },
+  "customPrompts": {
+    "title": "自定义提示词",
+    "description": "管理和自定义AI处理提示词模板",
+    "addPrompt": "添加提示词",
+    "editPrompt": "编辑提示词",
+    "promptName": "提示词名称",
+    "promptNamePlaceholder": "输入提示词名称",
+    "promptContent": "提示词内容",
+    "promptContentPlaceholder": "输入完整的提示词内容...",
+    "promptDescription": "描述（可选）",
+    "promptDescriptionPlaceholder": "简单描述这个提示词的用途",
+    "promptContentDescription": "提示词将用于指导AI如何处理电子书内容，例如总结、分析或生成思维导图的具体要求",
+    "actions": "操作",
+    "copy": "复制",
+    "edit": "编辑",
+    "delete": "删除",
+    "noPrompts": "暂无自定义提示词",
+    "nameRequired": "请输入提示词名称",
+    "contentRequired": "请输入提示词内容",
+    "duplicateName": "提示词名称已存在",
+    "addSuccess": "提示词添加成功",
+    "updateSuccess": "提示词更新成功",
+    "deleteSuccess": "提示词删除成功",
+    "managePrompts": "管理提示词",
+    "createdAt": "创建时间",
+    "selectCustomPrompt": "选择自定义提示词（可选）",
+    "useDefaultPrompt": "使用默认提示词"
   }
 }

@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Link, useLocation } from 'wouter'
-import { BookOpen, Settings, Brain } from 'lucide-react'
+import { BookOpen, Settings, Brain, MessageSquarePlus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Footer } from '../Footer'
 
@@ -18,6 +18,11 @@ export function Sidebar() {
       path: '/models',
       icon: Brain,
       label: t('nav.models'),
+    },
+    {
+      path: '/custom-prompts',
+      icon: MessageSquarePlus,
+      label: t('nav.customPrompts'),
     },
     {
       path: '/settings',

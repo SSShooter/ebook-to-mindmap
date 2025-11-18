@@ -6,6 +6,7 @@
   "nav": {
     "summary": "AI Summary",
     "models": "Models",
+    "customPrompts": "Custom Prompts",
     "settings": "Settings"
   },
   "upload": {
@@ -29,6 +30,9 @@
     "customPrompt": "Custom Prompt",
     "customPromptPlaceholder": "Enter custom prompt here, it will be appended to AI requests...",
     "customPromptDescription": "Optional: Add custom prompt to guide AI to generate content that better meets your needs",
+    "managePrompts": "Manage Prompts",
+    "selectCustomPrompt": "Select custom prompt (optional)",
+    "useDefaultPrompt": "Use default prompt",
     "startProcessing": "Start Processing",
     "processing": "Processing...",
     "apiKeyRequired": "Please enter API Key in configuration first",
@@ -261,5 +265,33 @@
     "selectModel": "Select Model for This Request",
     "noModelsConfigured": "No models configured. Please go to Model Management to add models first.",
     "selectModelPlaceholder": "Select a model"
+  },
+  "customPrompts": {
+    "title": "Custom Prompts",
+    "description": "Manage and customize AI processing prompt templates",
+    "addPrompt": "Add Prompt",
+    "editPrompt": "Edit Prompt",
+    "promptName": "Prompt Name",
+    "promptNamePlaceholder": "Enter prompt name",
+    "promptContent": "Prompt Content",
+    "promptContentPlaceholder": "Enter complete prompt content...",
+    "promptDescription": "Description (optional)",
+    "promptDescriptionPlaceholder": "Briefly describe the purpose of this prompt",
+    "promptContentDescription": "Prompts will be used to guide AI on how to process ebook content, such as specific requirements for summarization, analysis, or mind map generation",
+    "actions": "Actions",
+    "copy": "Copy",
+    "edit": "Edit",
+    "delete": "Delete",
+    "noPrompts": "No custom prompts available",
+    "nameRequired": "Please enter prompt name",
+    "contentRequired": "Please enter prompt content",
+    "duplicateName": "Prompt name already exists",
+    "addSuccess": "Prompt added successfully",
+    "updateSuccess": "Prompt updated successfully",
+    "deleteSuccess": "Prompt deleted successfully",
+    "managePrompts": "Manage Prompts",
+    "createdAt": "Created At",
+    "selectCustomPrompt": "Select custom prompt (optional)",
+    "useDefaultPrompt": "Use default prompt"
   }
 }
