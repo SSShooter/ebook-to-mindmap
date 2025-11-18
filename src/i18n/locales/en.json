@@ -18,7 +18,8 @@
     "extractChapters": "Extract Chapters",
     "extractingChapters": "Extracting chapters...",
     "invalidFile": "Please select a valid EPUB or PDF file",
-    "pleaseSelectFile": "Please select a file"
+    "pleaseSelectFile": "Please select a file",
+    "reselectFile": "Reselect File"
   },
   "chapters": {
     "title": "Chapter Selection",
@@ -56,6 +57,8 @@
     "combinedMindMapTitle": "Chapter Mind Map Integration for \"{{title}}\"",
     "author": "Author: {{author}}",
     "chapterCount": "{{count}} chapters total",
+    "groupCount": "{{count}} groups",
+    "processing": "Processing...",
     "tabs": {
       "chapterSummary": "Chapter Summary",
       "connections": "Chapter Connections",

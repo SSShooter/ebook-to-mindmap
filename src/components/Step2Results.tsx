@@ -1,8 +1,9 @@
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { BookOpen, Network, Loader2, ArrowLeft, Download } from 'lucide-react'
 import { MarkdownCard } from './MarkdownCard'
 import { MindMapCard } from './MindMapCard'
@@ -129,24 +130,51 @@ ${bookSummary.overallSummary}
   }
 
   return (
-    <div className='min-h-[80vh] space-y-4'>
-      <div className="flex items-center gap-4 mb-4">
-        <Button
-          variant="outline"
-          onClick={onBackToConfig}
-          className="flex items-center gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          {t('common.backToConfig')}
-        </Button>
-        <div className="text-lg font-medium text-gray-700 truncate">
-          {bookData ? `${bookData.title} - ${bookData.author}` : '处理中...'}
-        </div>
-      </div>
+    <div className='h-full flex flex-col p-4 gap-3'>
+      {/* 顶部固定区域 */}
+      <div className="shrink-0">
+        <div className="p-4 bg-gray-50 rounded-lg space-y-4">
+          {/* 头部导航和标题 */}
+          <div className="flex items-center justify-between gap-3 overflow-hidden">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={onBackToConfig}
+                    className="flex items-center gap-2 shrink-0"
+                  >
+                <ArrowLeft className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{t('common.backToConfig')}</p>
+                </TooltipContent>
+              </Tooltip>
+              <div className="text-lg font-medium text-gray-700 truncate">
+                {bookData ? `${bookData.title} - ${bookData.author}` : t('results.processing')}
+              </div>
+            {processingMode === 'summary' && bookSummary && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={downloadAllMarkdown}
+                    className="flex items-center gap-2 shrink-0"
+                  >
+                    <Download className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{t('download.downloadAllMarkdown')}</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </div>
 
-      {(processing || extractingChapters || error) && (
-        <Card>
-          <CardContent>
+          {/* 进度条状态 */}
+          {(processing || extractingChapters || error) && (
             <div className="space-y-2">
               <div className="flex justify-between items-center text-sm">
                 <div className="flex items-center gap-2">
@@ -163,40 +191,33 @@ ${bookSummary.overallSummary}
               </div>
               <Progress value={error ? 0 : progress} className="w-full" />
             </div>
-          </CardContent>
-        </Card>
-      )}
+          )}
 
-      {(bookSummary || bookMindMap) && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <div className="truncate flex-1 w-1">
+          {/* 结果统计信息 */}
+          {(bookSummary || bookMindMap) && (
+            <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+              <div className="flex items-center gap-2">
                 {processingMode === 'summary' ? (
-                  <><BookOpen className="h-5 w-5 inline-block mr-2" />{t('results.summaryTitle', { title: bookSummary?.title })}</>
+                  <><BookOpen className="h-5 w-5 text-gray-600" /><span className="font-medium text-sm text-gray-700">{t('results.summaryTitle', { title: bookSummary?.title })}</span></>
                 ) : processingMode === 'mindmap' ? (
-                  <><Network className="h-5 w-5 inline-block mr-2" />{t('results.chapterMindMapTitle', { title: bookMindMap?.title })}</>
+                  <><Network className="h-5 w-5 text-gray-600" /><span className="font-medium text-sm text-gray-700">{t('results.chapterMindMapTitle', { title: bookMindMap?.title })}</span></>
                 ) : (
-                  <><Network className="h-5 w-5 inline-block mr-2" />{t('results.wholeMindMapTitle', { title: bookMindMap?.title })}</>
+                  <><Network className="h-5 w-5 text-gray-600" /><span className="font-medium text-sm text-gray-700">{t('results.wholeMindMapTitle', { title: bookMindMap?.title })}</span></>
                 )}
               </div>
-              {processingMode === 'summary' && bookSummary && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={downloadAllMarkdown}
-                  className="flex items-center gap-2"
-                >
-                  <Download className="h-4 w-4" />
-                  {t('download.downloadAllMarkdown')}
-                </Button>
-              )}
-            </CardTitle>
-            <CardDescription>
-              {t('results.author', { author: bookSummary?.author || bookMindMap?.author })} | {bookSummary ? `${bookSummary.groups.length} 个分组` : bookMindMap ? `${bookMindMap.groups.length} 个分组` : ''}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+              <p className="text-xs text-gray-500">
+                {t('results.author', { author: bookSummary?.author || bookMindMap?.author })} • {bookSummary ? t('results.groupCount', { count: bookSummary.groups.length }) : bookMindMap ? t('results.groupCount', { count: bookMindMap.groups.length }) : ''}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 可滚动的内容区域 */}
+      {(bookSummary || bookMindMap) && (
+        <div className="flex-1 min-h-0">
+          <ScrollArea className="h-full">
+            <div className="pr-2">
             {processingMode === 'summary' && bookSummary ? (
               <Tabs defaultValue="chapters" className="w-full">
                 <TabsList className="grid w-full grid-cols-3">
@@ -205,7 +226,7 @@ ${bookSummary.overallSummary}
                   <TabsTrigger value="overall">{t('results.tabs.overallSummary')}</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="chapters" className="grid grid-cols-1 gap-4">
+                <TabsContent value="chapters" className="space-y-3">
                   {bookSummary.groups.map((group, index) => {
                     const groupTitle = group.tag 
                       ? `${group.tag} (${group.chapterTitles.join(', ')})`
@@ -272,7 +293,7 @@ ${bookSummary.overallSummary}
                   <TabsTrigger value="combined">{t('results.tabs.combinedMindMap')}</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="chapters" className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <TabsContent value="chapters" className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {bookMindMap.groups.map((group, index) => {
                     const groupTitle = group.tag 
                       ? `${group.tag} (${group.chapterTitles.join(', ')})`
@@ -325,13 +346,9 @@ ${bookSummary.overallSummary}
                       mindElixirOptions={mindElixirOptions}
                     />
                   ) : (
-                    <Card>
-                      <CardContent>
-                        <div className="text-center text-gray-500 py-8">
-                          {t('results.generatingMindMap')}
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <div className="text-center text-gray-500 py-8 bg-gray-50 rounded-lg">
+                      {t('results.generatingMindMap')}
+                    </div>
                   )}
                 </TabsContent>
               </Tabs>
@@ -353,17 +370,14 @@ ${bookSummary.overallSummary}
                   mindElixirOptions={mindElixirOptions}
                 />
               ) : (
-                <Card>
-                  <CardContent>
-                    <div className="text-center text-gray-500 py-8">
-                      {t('results.generatingMindMap')}
-                    </div>
-                  </CardContent>
-                </Card>
+                <div className="text-center text-gray-500 py-8 bg-gray-50 rounded-lg">
+                  {t('results.generatingMindMap')}
+                </div>
               )
             ) : null}
-          </CardContent>
-        </Card>
+            </div>
+          </ScrollArea>
+        </div>
       )}
     </div>
   )

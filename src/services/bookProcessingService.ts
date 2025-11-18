@@ -18,7 +18,6 @@ function hashString(str: string): string {
   return Math.abs(hash).toString(36)
 }
 
-// TODO: #Step2Results.tsx group 的缓存好像有问题，不选tag就能缓存，加了group刷新缓存就没了
 export interface Chapter {
   id: string
   title: string

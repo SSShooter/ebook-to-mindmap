@@ -1,10 +1,10 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Textarea } from '@/components/ui/textarea'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { Upload, BookOpen, Brain, FileText, Loader2, List, Trash2, Tag, X, RefreshCw } from 'lucide-react'
 import { ConfigDialog } from './project/ConfigDialog'
 import { TagDialog } from './TagDialog'
@@ -136,13 +136,17 @@ export function Step1Config({
   const validateAndSetFile = useCallback((selectedFile: File | null) => {
     if (selectedFile && (selectedFile.name.endsWith('.epub') || selectedFile.name.endsWith('.pdf'))) {
       onFileChange(selectedFile)
+      // 自动提取章节
+      setTimeout(() => {
+        onExtractChapters()
+      }, 100)
     } else if (selectedFile) {
       toast.error(t('upload.invalidFile'), {
         duration: 3000,
         position: 'top-center',
       })
     }
-  }, [onFileChange, t])
+  }, [onFileChange, onExtractChapters, t])
 
   const handleFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0]
@@ -171,11 +175,10 @@ export function Step1Config({
   }, [validateAndSetFile])
 
   const handleReselectFile = useCallback(() => {
-    onFileChange(null)
     if (fileInputRef.current) {
-      fileInputRef.current.value = ''
+      fileInputRef.current.click()
     }
-  }, [onFileChange])
+  }, [])
 
   const handleBoxSelect = useCallback((chapterId: string, checked: boolean) => {
     setBoxSelectedChapters((prev) => {
@@ -283,52 +286,50 @@ export function Step1Config({
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [handleAddTagsClick])
   return (
-    <div className='min-h-[80vh] space-y-4'>
-      {!file ? (
-        <Card>
-          <CardContent>
-            <div
-              className={`relative border-2 border-dashed rounded-lg p-12 text-center transition-colors cursor-pointer ${
-                isDragging 
-                  ? 'border-blue-500 bg-blue-50' 
-                  : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
-              }`}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".epub,.pdf"
-                onChange={handleFileChange}
-                className="hidden"
-              />
-              <Upload className="h-16 w-16 mx-auto mb-4 text-gray-400" />
-              <h3 className="text-xl font-semibold mb-2">{t('upload.title')}</h3>
-              <p className="text-gray-600 mb-4">{t('upload.description')}</p>
-              <p className="text-sm text-gray-500">
-                拖拽文件到此处或点击选择文件
-              </p>
-              <p className="text-xs text-gray-400 mt-2">
-                支持 EPUB 和 PDF 格式
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card>
-          <CardContent>
-            <div className="">
-              <div className="flex items-center gap-3">
-                <FileText className="h-5 w-5 text-gray-600" />
-                  <p className="font-medium truncate">{file.name}</p>
-              </div>
-              <div className="flex items-center gap-2">
+    <div className='h-full flex flex-col p-4 gap-3'>
+      {/* 隐藏的文件输入 - 始终存在 */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".epub,.pdf"
+        onChange={handleFileChange}
+        className="hidden"
+      />
+
+      {/* 顶部固定区域 */}
+      <div className="shrink-0">
+        {!file ? (
+          <div
+            className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
+              isDragging
+                ? 'border-blue-500 bg-blue-50'
+                : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+            }`}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <Upload className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+            <h3 className="text-lg font-semibold mb-1">{t('upload.title')}</h3>
+            <p className="text-sm text-gray-600 mb-2">{t('upload.description')}</p>
+            <p className="text-xs text-gray-500">
+              拖拽文件到此处或点击选择 • 支持 EPUB 和 PDF 格式
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between gap-3 p-3 bg-gray-50 rounded-lg">
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <FileText className="h-4 w-4 text-gray-600 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium truncate text-sm">{file.name}</p>
                   <p className="text-xs text-gray-500">
                     {(file.size / 1024 / 1024).toFixed(2)} MB
                   </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
                 <Button
                   variant="outline"
                   size="sm"
@@ -336,7 +337,7 @@ export function Step1Config({
                   disabled={processing || extractingChapters}
                 >
                   <RefreshCw className="h-3.5 w-3.5 mr-1" />
-                  重新选择
+                  {t('upload.reselectFile')}
                 </Button>
                 <ConfigDialog processing={processing} file={file} />
                 <Button
@@ -354,7 +355,7 @@ export function Step1Config({
             <Button
               onClick={onExtractChapters}
               disabled={extractingChapters || processing}
-              className="w-full mt-4"
+              className="w-full"
             >
               {extractingChapters ? (
                 <>
@@ -368,21 +369,21 @@ export function Step1Config({
                 </>
               )}
             </Button>
-          </CardContent>
-        </Card>
-      )}
+          </div>
+        )}
 
-      {extractedChapters && bookData && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <List className="h-5 w-5" />
-              {t('chapters.title')}
-            </CardTitle>
-            <CardDescription>
-              {bookData.title} {bookData.author && `- ${bookData.author}`} | {t('chapters.totalChapters', { count: extractedChapters.length })}，{t('chapters.selectedChapters', { count: selectedChapters.size })}
-            </CardDescription>
-            <div className="flex items-center justify-between gap-2 mt-2">
+        {extractedChapters && bookData && (
+          <div className="mt-3 p-4 bg-gray-50 rounded-lg">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <List className="h-4 w-4" />
+                <h3 className="font-semibold text-sm">{t('chapters.title')}</h3>
+              </div>
+              <p className="text-xs text-gray-600">
+                {t('chapters.totalChapters', { count: extractedChapters.length })} • {t('chapters.selectedChapters', { count: selectedChapters.size })}
+              </p>
+            </div>
+            <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <Checkbox
                   id="select-all"
@@ -404,122 +405,135 @@ export function Step1Config({
                 添加标签 {boxSelectedChapters.size > 0 && `(${boxSelectedChapters.size})`}
               </Button>
             </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {extractedChapters.map((chapter) => {
-                const tag = chapterTags.get(chapter.id)
-                const isBoxSelected = boxSelectedChapters.has(chapter.id)
-                return (
-                  <div
-                    key={chapter.id}
-                    className={`flex items-center gap-2 p-2 rounded-lg transition-all cursor-pointer ${
-                      isBoxSelected 
-                        ? 'bg-blue-100 border-2 border-blue-400' 
-                        : 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent'
-                    }`}
-                    onClick={() => handleBoxSelect(chapter.id, !isBoxSelected)}
-                  >
-                    <Checkbox
-                      id={`chapter-${chapter.id}`}
-                      checked={selectedChapters.has(chapter.id)}
-                      onCheckedChange={(checked) => handleChapterSelect(chapter.id, checked as boolean)}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div
-                        className="text-sm truncate block"
-                        title={chapter.title}
-                      >
-                        {chapter.title}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <span className="text-xs text-gray-500 shrink-0 py-0.5">
-                          {getStringSizeInKB(chapter.content)} KB
-                        </span>
-                        {tag && (
-                          <span
-                            className="flex items-center gap-0.5 px-1.5 py-0.5 bg-blue-100 text-blue-700 text-xs rounded overflow-hidden"
-                            onClick={(e) => {
-                              e.preventDefault()
-                              e.stopPropagation()
-                            }}
-                          >
-                            <span className='truncate'>
-                            {tag}
-                            </span>
-                            <X
-                              className="h-2.5 w-2.5 shrink-0 cursor-pointer hover:text-blue-900"
+          </div>
+        )}
+      </div>
+
+      {/* 可滚动的章节列表区域 */}
+      {extractedChapters && bookData && (
+        <div className="flex-1 min-h-0">
+          <ScrollArea className="h-full">
+            <div className="pr-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {extractedChapters.map((chapter) => {
+                  const tag = chapterTags.get(chapter.id)
+                  const isBoxSelected = boxSelectedChapters.has(chapter.id)
+                  return (
+                    <div
+                      key={chapter.id}
+                      className={`flex items-center gap-2 p-2 rounded-lg transition-all cursor-pointer ${
+                        isBoxSelected 
+                          ? 'bg-blue-100 border-2 border-blue-400' 
+                          : 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent'
+                      }`}
+                      onClick={() => handleBoxSelect(chapter.id, !isBoxSelected)}
+                    >
+                      <Checkbox
+                        id={`chapter-${chapter.id}`}
+                        checked={selectedChapters.has(chapter.id)}
+                        onCheckedChange={(checked) => handleChapterSelect(chapter.id, checked as boolean)}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div
+                          className="text-sm truncate block"
+                          title={chapter.title}
+                        >
+                          {chapter.title}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs text-gray-500 shrink-0 py-0.5">
+                            {getStringSizeInKB(chapter.content)} KB
+                          </span>
+                          {tag && (
+                            <span
+                              className="flex items-center gap-0.5 px-1.5 py-0.5 bg-blue-100 text-blue-700 text-xs rounded overflow-hidden"
                               onClick={(e) => {
                                 e.preventDefault()
                                 e.stopPropagation()
-                                handleRemoveTag(chapter.id)
                               }}
-                            />
-                          </span>
-                        )}
+                            >
+                              <span className='truncate'>
+                              {tag}
+                              </span>
+                              <X
+                                className="h-2.5 w-2.5 shrink-0 cursor-pointer hover:text-blue-900"
+                                onClick={(e) => {
+                                  e.preventDefault()
+                                  e.stopPropagation()
+                                  handleRemoveTag(chapter.id)
+                                }}
+                              />
+                            </span>
+                          )}
+                        </div>
                       </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onReadChapter(chapter.id, [chapter.id])
+                        }}
+                      >
+                        <BookOpen className="h-3 w-3" />
+                      </Button>
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        onReadChapter(chapter.id, [chapter.id])
-                      }}
-                    >
-                      <BookOpen className="h-3 w-3" />
-                    </Button>
-                  </div>
-                )
-              })}
+                  )
+                })}
+              </div>
             </div>
+          </ScrollArea>
+        </div>
+      )}
 
-            <div className="space-y-2">
-              <Label htmlFor="custom-prompt" className="text-sm font-medium">
-                {t('chapters.customPrompt')}
-              </Label>
-              <Textarea
-                id="custom-prompt"
-                placeholder={t('chapters.customPromptPlaceholder')}
-                value={customPrompt}
-                onChange={(e) => onCustomPromptChange(e.target.value)}
-                className="min-h-20 resize-none"
-                disabled={processing || extractingChapters}
-              />
-              <p className="text-xs text-gray-500">
-                {t('chapters.customPromptDescription')}
-              </p>
-            </div>
+      {/* 底部固定区域 */}
+      {extractedChapters && bookData && (
+        <div className="shrink-0 space-y-3 p-4 bg-gray-50 rounded-lg">
+          <div>
+            <Label htmlFor="custom-prompt" className="text-sm font-medium">
+              {t('chapters.customPrompt')}
+            </Label>
+            <Textarea
+              id="custom-prompt"
+              placeholder={t('chapters.customPromptPlaceholder')}
+              value={customPrompt}
+              onChange={(e) => onCustomPromptChange(e.target.value)}
+              className="min-h-16 resize-none mt-1"
+              disabled={processing || extractingChapters}
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              {t('chapters.customPromptDescription')}
+            </p>
+          </div>
 
-            <Button
-              onClick={() => {
-                if (!apiKey) {
-                  toast.error(t('chapters.apiKeyRequired'), {
-                    duration: 3000,
-                    position: 'top-center',
-                  })
-                  return
-                }
-                onStartProcessing(selectedChapters, chapterTags)
-              }}
-              disabled={!extractedChapters || processing || extractingChapters || selectedChapters.size === 0}
-              className="w-full"
-            >
-              {processing ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {t('chapters.processing')}
-                </>
-              ) : (
-                <>
-                  <Brain className="mr-2 h-4 w-4" />
-                  {t('chapters.startProcessing')}
-                </>
-              )}
-            </Button>
-          </CardContent>
-        </Card>
+          <Button
+            onClick={() => {
+              if (!apiKey) {
+                toast.error(t('chapters.apiKeyRequired'), {
+                  duration: 3000,
+                  position: 'top-center',
+                })
+                return
+              }
+              onStartProcessing(selectedChapters, chapterTags)
+            }}
+            disabled={!extractedChapters || processing || extractingChapters || selectedChapters.size === 0}
+            className="w-full"
+          >
+            {processing ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {t('chapters.processing')}
+              </>
+            ) : (
+              <>
+                <Brain className="mr-2 h-4 w-4" />
+                {t('chapters.startProcessing')}
+              </>
+            )}
+          </Button>
+        </div>
       )}
 
       <TagDialog

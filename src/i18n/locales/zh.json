@@ -18,7 +18,8 @@
     "extractChapters": "获取章节",
     "extractingChapters": "提取章节中...",
     "invalidFile": "请选择有效的 EPUB 或 PDF 文件",
-    "pleaseSelectFile": "请选择文件"
+    "pleaseSelectFile": "请选择文件",
+    "reselectFile": "重新选择"
   },
   "chapters": {
     "title": "章节选择",
@@ -56,6 +57,8 @@
     "combinedMindMapTitle": "《{{title}}》章节思维导图整合",
     "author": "作者: {{author}}",
     "chapterCount": "共 {{count}} 章",
+    "groupCount": "{{count}} 个分组",
+    "processing": "处理中...",
     "tabs": {
       "chapterSummary": "章节总结",
       "connections": "章节关联",
