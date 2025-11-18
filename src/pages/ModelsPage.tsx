@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Brain, Plus, Pencil, Trash2, Star, ExternalLink } from 'lucide-react'
+import { Brain, Plus, Pencil, Trash2, Star, ExternalLink, Copy } from 'lucide-react'
 import { toast } from 'sonner'
 import { useModelStore, type AIModel } from '../stores/modelStore'
 
@@ -93,6 +93,16 @@ export function ModelsPage() {
       return
     }
 
+    // Check for duplicate names (excluding the current editing model)
+    const isDuplicate = models.some(
+      model => model.name.trim() === formData.name.trim() && model.id !== editingModel?.id
+    )
+    
+    if (isDuplicate) {
+      toast.error(t('models.duplicateName'))
+      return
+    }
+
     if (editingModel) {
       updateModel(editingModel.id, formData)
       toast.success(t('models.updateSuccess'))
@@ -118,16 +128,37 @@ export function ModelsPage() {
     toast.success(t('models.defaultSet'))
   }
 
+  const handleCopy = (model: AIModel) => {
+    // Generate a unique name by appending a number
+    let copyName = `${model.name} (Copy)`
+    let counter = 1
+    while (models.some(m => m.name === copyName)) {
+      counter++
+      copyName = `${model.name} (Copy ${counter})`
+    }
+
+    setEditingModel(null)
+    setFormData({
+      name: copyName,
+      provider: model.provider,
+      apiKey: model.apiKey,
+      apiUrl: model.apiUrl,
+      model: model.model,
+      temperature: model.temperature
+    })
+    setIsDialogOpen(true)
+  }
+
   return (
-    <div className="flex-1 overflow-auto">
-      <div className="max-w-6xl mx-auto p-8">
-        <div className="mb-6 flex items-center justify-between">
+    <div className="flex-1 overflow-auto bg-gray-50">
+      <div className="max-w-4xl mx-auto p-8">
+        <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
-              <Brain className="h-8 w-8" />
+            <h1 className="text-2xl font-semibold text-gray-900 flex items-center gap-3">
+              <Brain className="h-6 w-6 text-gray-700" />
               {t('models.title')}
             </h1>
-            <p className="text-gray-600 mt-2">{t('models.description')}</p>
+            <p className="text-sm text-gray-500 mt-1">{t('models.description')}</p>
           </div>
           
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -177,7 +208,7 @@ export function ModelsPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="model-name">{t('models.modelName')}</Label>
+                  <Label htmlFor="model-name">{t('models.configName')}</Label>
                   <Input
                     id="model-name"
                     placeholder={t('models.modelNamePlaceholder')}
@@ -211,7 +242,7 @@ export function ModelsPage() {
                 )}
 
                 <div className="space-y-2">
-                  <Label htmlFor="model-id">{t('config.modelName')}</Label>
+                  <Label htmlFor="model-id">{t('models.modelId')}</Label>
                   <Input
                     id="model-id"
                     placeholder={providerSettings[formData.provider].modelPlaceholder}
@@ -248,16 +279,16 @@ export function ModelsPage() {
         </div>
 
         <ScrollArea className="h-[calc(100vh-240px)]">
-          <div className="bg-white rounded-lg border shadow-sm">
-            <Table>
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-12"></TableHead>
-                  <TableHead>{t('models.modelName')}</TableHead>
-                  <TableHead>{t('config.aiProvider')}</TableHead>
-                  <TableHead>{t('models.modelId')}</TableHead>
-                  <TableHead>{t('config.temperature')}</TableHead>
-                  <TableHead className="text-right">{t('models.actions')}</TableHead>
+                  <TableHead className="min-w-[120px] max-w-[200px]">{t('models.configName')}</TableHead>
+                  <TableHead className="w-[140px]">{t('config.aiProvider')}</TableHead>
+                  <TableHead className="min-w-[150px] max-w-[250px]">{t('models.modelId')}</TableHead>
+                  <TableHead className="w-[140px] text-right">{t('models.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -284,21 +315,33 @@ export function ModelsPage() {
                           />
                         </Button>
                       </TableCell>
-                      <TableCell className="font-medium">{model.name}</TableCell>
+                      <TableCell className="font-medium truncate max-w-[200px]" title={model.name}>
+                        {model.name}
+                      </TableCell>
                       <TableCell>
                         {model.provider === 'gemini' && 'Google Gemini'}
                         {model.provider === 'openai' && t('config.openaiCompatible')}
                         {model.provider === 'ollama' && 'Ollama'}
                         {model.provider === '302.ai' && '302.AI'}
                       </TableCell>
-                      <TableCell className="font-mono text-sm">{model.model}</TableCell>
-                      <TableCell>{model.temperature}</TableCell>
+                      <TableCell className="font-mono text-sm truncate max-w-[250px]" title={model.model}>
+                        {model.model}
+                      </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button
                             variant="ghost"
                             size="sm"
+                            onClick={() => handleCopy(model)}
+                            title={t('models.copy')}
+                          >
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={() => handleOpenDialog(model)}
+                            title={t('models.edit')}
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>
@@ -307,6 +350,7 @@ export function ModelsPage() {
                             size="sm"
                             onClick={() => handleDelete(model.id)}
                             disabled={models.length === 1}
+                            title={t('models.delete')}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -317,6 +361,7 @@ export function ModelsPage() {
                 )}
               </TableBody>
             </Table>
+            </div>
           </div>
         </ScrollArea>
       </div>

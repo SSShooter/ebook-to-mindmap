@@ -5,6 +5,19 @@ import type { SupportedLanguage } from './prompts/utils'
 import type { MindElixirData } from 'mind-elixir'
 import type { Summary } from 'node_modules/mind-elixir/dist/types/summary'
 
+/**
+ * 简单的字符串哈希函数（类似MD5但更轻量）
+ */
+function hashString(str: string): string {
+  let hash = 0
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i)
+    hash = ((hash << 5) - hash) + char
+    hash = hash & hash // Convert to 32bit integer
+  }
+  return Math.abs(hash).toString(36)
+}
+
 // TODO: #Step2Results.tsx group 的缓存好像有问题，不选tag就能缓存，加了group刷新缓存就没了
 export interface Chapter {
   id: string
@@ -67,7 +80,7 @@ export class BookProcessingService {
         // 第一次遇到这个tag，收集所有同tag的章节
         processedTags.add(tag)
         const sameTagChapters = chapters.filter(ch => chapterTags.get(ch.id) === tag)
-        const groupId = sameTagChapters.map(ch => ch.id).sort().join('_')
+        const groupId = hashString(sameTagChapters.map(ch => ch.id).sort().join('_'))
         groups.push({
           tag,
           chapters: sameTagChapters,

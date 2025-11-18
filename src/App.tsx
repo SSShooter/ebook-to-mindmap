@@ -7,10 +7,10 @@ import { ModelsPage } from './pages/ModelsPage'
 
 function App() {
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-gray-50">
       <Toaster />
       <Sidebar />
-      <div className="flex-1 flex flex-col bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="flex-1 flex flex-col bg-white">
         <Switch>
           <Route path="/" component={SummaryPage} />
           <Route path="/models" component={ModelsPage} />
