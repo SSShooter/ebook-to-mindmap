@@ -58,10 +58,10 @@ export function Step1Config({
   const { processingMode } = configStore.processingOptions
 
   // 清除整本书缓存的函数
-  const clearBookCache = useCallback(() => {
+  const clearBookCache = useCallback(async () => {
     if (!file) return
     const mode = processingMode === 'combined-mindmap' ? 'combined_mindmap' : processingMode as 'summary' | 'mindmap'
-    const deletedCount = cacheService.clearBookCache(file.name, mode)
+    const deletedCount = await cacheService.clearBookCache(file.name, mode)
     const modeNames = {
       'summary': '文字总结',
       'mindmap': '章节思维导图',
@@ -84,50 +84,53 @@ export function Step1Config({
   useEffect(() => {
     if (!extractedChapters || !file) return
 
-    // 尝试从缓存中加载选中的章节
-    const cachedSelectedChapters = cacheService.getSelectedChapters(file.name)
-    let newSelectedChapters: Set<string>
-
-    if (cachedSelectedChapters && cachedSelectedChapters.length > 0) {
-      // 验证缓存的章节ID是否仍然有效
+    const loadCache = async () => {
       const validChapterIds = extractedChapters.map(chapter => chapter.id)
-      const validSelectedChapters = cachedSelectedChapters.filter(id => validChapterIds.includes(id))
+      
+      // 并行加载选中章节和标签
+      const [cachedSelectedChapters, cachedChapterTags] = await Promise.all([
+        cacheService.getSelectedChapters(file.name),
+        cacheService.getChapterTags(file.name)
+      ])
 
-      if (validSelectedChapters.length > 0) {
-        newSelectedChapters = new Set(validSelectedChapters)
-        console.log('✅ [DEBUG] 从缓存加载了选中的章节:', validSelectedChapters.length)
-      } else {
-        // 缓存的章节ID无效，使用默认选中所有章节
-        newSelectedChapters = new Set(extractedChapters.map(chapter => chapter.id))
-        console.log('⚠️ [DEBUG] 缓存的章节ID无效，使用默认选中所有章节')
-      }
-    } else {
-      // 没有缓存，使用默认选中所有章节
-      newSelectedChapters = new Set(extractedChapters.map(chapter => chapter.id))
-    }
-
-    setSelectedChapters(newSelectedChapters)
-
-    // 缓存选中的章节
-    cacheService.setSelectedChapters(file.name, newSelectedChapters)
-    console.log('💾 [DEBUG] 已缓存选中的章节:', newSelectedChapters.size)
-
-    // 尝试从缓存中加载章节标签
-    const cachedChapterTags = cacheService.getChapterTags(file.name)
-    if (cachedChapterTags) {
-      // 验证缓存的章节ID是否仍然有效
-      const validChapterIds = extractedChapters.map(chapter => chapter.id)
-      const validTags = new Map<string, string>()
-      Object.entries(cachedChapterTags).forEach(([chapterId, tag]) => {
-        if (validChapterIds.includes(chapterId)) {
-          validTags.set(chapterId, tag)
+      // 处理选中的章节
+      let newSelectedChapters: Set<string>
+      if (cachedSelectedChapters && cachedSelectedChapters.length > 0) {
+        const validSelectedChapters = cachedSelectedChapters.filter((id: string) => validChapterIds.includes(id))
+        if (validSelectedChapters.length > 0) {
+          newSelectedChapters = new Set(validSelectedChapters)
+          console.log('✅ [DEBUG] 从缓存加载了选中的章节:', validSelectedChapters.length)
+        } else {
+          newSelectedChapters = new Set(validChapterIds)
+          console.log('⚠️ [DEBUG] 缓存的章节ID无效，使用默认选中所有章节')
         }
-      })
-      if (validTags.size > 0) {
-        setChapterTags(validTags)
-        console.log('✅ [DEBUG] 从缓存加载了章节标签:', validTags.size)
+      } else {
+        newSelectedChapters = new Set(validChapterIds)
       }
+
+      // 处理章节标签
+      const newChapterTags = new Map<string, string>()
+      if (cachedChapterTags) {
+        Object.entries(cachedChapterTags).forEach(([chapterId, tag]) => {
+          if (validChapterIds.includes(chapterId)) {
+            newChapterTags.set(chapterId, tag)
+          }
+        })
+        if (newChapterTags.size > 0) {
+          console.log('✅ [DEBUG] 从缓存加载了章节标签:', newChapterTags.size)
+        }
+      }
+
+      // 一次性更新所有状态，避免多次渲染
+      setSelectedChapters(newSelectedChapters)
+      setChapterTags(newChapterTags)
+
+      // 缓存选中的章节
+      await cacheService.setSelectedChapters(file.name, newSelectedChapters)
+      console.log('💾 [DEBUG] 已缓存选中的章节:', newSelectedChapters.size)
     }
+
+    loadCache()
   }, [extractedChapters, file])
 
   const validateAndSetFile = useCallback((selectedFile: File | null) => {
@@ -207,7 +210,7 @@ export function Step1Config({
       }
       // 实时更新选中的章节缓存
       if (file) {
-        cacheService.setSelectedChapters(file.name, newSet)
+        cacheService.setSelectedChapters(file.name, newSet).catch(console.error)
       }
       return newSet
     })
@@ -222,8 +225,9 @@ export function Step1Config({
     
     // 更新选中的章节缓存
     if (file) {
-      cacheService.setSelectedChapters(file.name, newSelectedChapters)
-      console.log('💾 [DEBUG] 全选操作更新选中的章节缓存:', newSelectedChapters.size)
+      cacheService.setSelectedChapters(file.name, newSelectedChapters).then(() => {
+        console.log('💾 [DEBUG] 全选操作更新选中的章节缓存:', newSelectedChapters.size)
+      }).catch(console.error)
     }
   }, [extractedChapters, file])
 
@@ -236,8 +240,9 @@ export function Step1Config({
     
     // 缓存章节标签
     if (file) {
-      cacheService.setChapterTags(file.name, newChapterTags)
-      console.log('💾 [DEBUG] 已缓存章节标签:', newChapterTags.size)
+      cacheService.setChapterTags(file.name, newChapterTags).then(() => {
+        console.log('💾 [DEBUG] 已缓存章节标签:', newChapterTags.size)
+      }).catch(console.error)
     }
     
     setShowTagDialog(false)
@@ -256,15 +261,27 @@ export function Step1Config({
     
     // 更新缓存
     if (file) {
-      cacheService.setChapterTags(file.name, newChapterTags)
-      console.log('💾 [DEBUG] 已更新章节标签缓存（移除标签）:', newChapterTags.size)
+      cacheService.setChapterTags(file.name, newChapterTags).then(() => {
+        console.log('💾 [DEBUG] 已更新章节标签缓存（移除标签）:', newChapterTags.size)
+      }).catch(console.error)
     }
   }, [chapterTags, file])
 
   const bookData = extractedChapters && extractedChapters.length > 0
     ? { title: '已提取章节', author: '' }
     : null
+  // 监听 Ctrl+G 快捷键打开标签对话框
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key === 'g') {
+        e.preventDefault()
+        handleAddTagsClick()
+      }
+    }
 
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [handleAddTagsClick])
   return (
     <div className='min-h-[80vh] space-y-4'>
       {!file ? (
@@ -416,21 +433,23 @@ export function Step1Config({
                       >
                         {chapter.title}
                       </div>
-                      <div className="flex items-center gap-1 flex-wrap">
-                        <span className="text-xs text-gray-500">
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs text-gray-500 shrink-0 py-0.5">
                           {getStringSizeInKB(chapter.content)} KB
                         </span>
                         {tag && (
                           <span
-                            className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-blue-100 text-blue-700 text-xs rounded"
+                            className="flex items-center gap-0.5 px-1.5 py-0.5 bg-blue-100 text-blue-700 text-xs rounded overflow-hidden"
                             onClick={(e) => {
                               e.preventDefault()
                               e.stopPropagation()
                             }}
                           >
+                            <span className='truncate'>
                             {tag}
+                            </span>
                             <X
-                              className="h-2.5 w-2.5 cursor-pointer hover:text-blue-900"
+                              className="h-2.5 w-2.5 shrink-0 cursor-pointer hover:text-blue-900"
                               onClick={(e) => {
                                 e.preventDefault()
                                 e.stopPropagation()

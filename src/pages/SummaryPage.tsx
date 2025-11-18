@@ -82,10 +82,10 @@ export function SummaryPage() {
     setReadingChapterIds([])
   }, [])
 
-  const clearChapterCache = useCallback((chapterId: string) => {
+  const clearChapterCache = useCallback(async (chapterId: string) => {
     if (!file) return
     const type = processingMode === 'summary' ? 'summary' : 'mindmap'
-    if (cacheService.clearChapterCache(file.name, chapterId, type)) {
+    if (await cacheService.clearChapterCache(file.name, chapterId, type)) {
       toast.success('已清除缓存，下次处理将重新生成内容', {
         duration: 3000,
         position: 'top-center',
@@ -93,7 +93,7 @@ export function SummaryPage() {
     }
   }, [file, processingMode])
 
-  const clearSpecificCache = useCallback((cacheType: 'connections' | 'overall_summary' | 'combined_mindmap' | 'merged_mindmap') => {
+  const clearSpecificCache = useCallback(async (cacheType: 'connections' | 'overall_summary' | 'combined_mindmap' | 'merged_mindmap') => {
     if (!file) return
     const displayNames = {
       connections: '章节关联',
@@ -101,7 +101,7 @@ export function SummaryPage() {
       combined_mindmap: '整书思维导图',
       merged_mindmap: '章节思维导图整合'
     }
-    if (cacheService.clearSpecificCache(file.name, cacheType)) {
+    if (await cacheService.clearSpecificCache(file.name, cacheType)) {
       toast.success(`已清除${displayNames[cacheType]}缓存，下次处理将重新生成内容`, {
         duration: 3000,
         position: 'top-center',
@@ -430,7 +430,7 @@ export function SummaryPage() {
       <div 
         className={`
           transition-all duration-300 ease-in-out
-          ${hasReader ? 'w-full lg:w-1/2' : 'w-full'}
+          ${hasReader ? 'w-full md:w-1/2' : 'w-full'}
           flex justify-center
           overflow-y-auto overflow-x-hidden
           scroll-container

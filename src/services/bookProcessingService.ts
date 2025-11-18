@@ -103,7 +103,7 @@ export class BookProcessingService {
     customPrompt: string,
     abortSignal: AbortSignal
   ): Promise<{ group: ChapterGroup; chapters: Chapter[] }> {
-    let summary = this.cacheService.getString(fileName, 'summary', group.groupId)
+    let summary = await this.cacheService.getString(fileName, 'summary', group.groupId)
 
     if (!summary) {
       const combinedTitle = group.tag 
@@ -119,7 +119,7 @@ export class BookProcessingService {
         customPrompt,
         abortSignal
       )
-      this.cacheService.setCache(fileName, 'summary', summary, group.groupId)
+      await this.cacheService.setCache(fileName, 'summary', summary, group.groupId)
     }
 
     const processedGroup: ChapterGroup = {
@@ -150,7 +150,7 @@ export class BookProcessingService {
     customPrompt: string,
     abortSignal: AbortSignal
   ): Promise<{ group: ChapterGroup; chapters: Chapter[] }> {
-    let mindMap = this.cacheService.getMindMap(fileName, 'mindmap', group.groupId)
+    let mindMap = await this.cacheService.getMindMap(fileName, 'mindmap', group.groupId)
 
     if (!mindMap) {
       const combinedContent = group.chapters.map(ch => `## ${ch.title}\n\n${ch.content}`).join('\n\n')
@@ -160,7 +160,7 @@ export class BookProcessingService {
         customPrompt,
         abortSignal
       )
-      this.cacheService.setCache(fileName, 'mindmap', mindMap, group.groupId)
+      await this.cacheService.setCache(fileName, 'mindmap', mindMap, group.groupId)
     }
 
     if (!mindMap.nodeData) {
@@ -195,7 +195,7 @@ export class BookProcessingService {
     bookType: BookType,
     abortSignal: AbortSignal
   ): Promise<string> {
-    let connections = this.cacheService.getString(fileName, 'connections')
+    let connections = await this.cacheService.getString(fileName, 'connections')
     
     if (!connections) {
       console.log('🔄 [DEBUG] 缓存未命中，开始分析章节关联')
@@ -205,7 +205,7 @@ export class BookProcessingService {
         bookType,
         abortSignal
       )
-      this.cacheService.setCache(fileName, 'connections', connections)
+      await this.cacheService.setCache(fileName, 'connections', connections)
       console.log('💾 [DEBUG] 章节关联已缓存')
     } else {
       console.log('✅ [DEBUG] 使用缓存的章节关联')
@@ -225,7 +225,7 @@ export class BookProcessingService {
     bookType: BookType,
     abortSignal: AbortSignal
   ): Promise<string> {
-    let overallSummary = this.cacheService.getString(fileName, 'overall_summary')
+    let overallSummary = await this.cacheService.getString(fileName, 'overall_summary')
     
     if (!overallSummary) {
       console.log('🔄 [DEBUG] 缓存未命中，开始生成全书总结')
@@ -236,7 +236,7 @@ export class BookProcessingService {
         bookType,
         abortSignal
       )
-      this.cacheService.setCache(fileName, 'overall_summary', overallSummary)
+      await this.cacheService.setCache(fileName, 'overall_summary', overallSummary)
       console.log('💾 [DEBUG] 全书总结已缓存')
     } else {
       console.log('✅ [DEBUG] 使用缓存的全书总结')
@@ -253,7 +253,7 @@ export class BookProcessingService {
     bookTitle: string,
     chapters: Chapter[]
   ): Promise<MindElixirData> {
-    let combinedMindMap = this.cacheService.getMindMap(fileName, 'merged_mindmap')
+    let combinedMindMap = await this.cacheService.getMindMap(fileName, 'merged_mindmap')
     
     if (!combinedMindMap) {
       console.log('🔄 [DEBUG] 缓存未命中，开始合并章节思维导图')
@@ -278,7 +278,7 @@ export class BookProcessingService {
         )
       }
 
-      this.cacheService.setCache(fileName, 'merged_mindmap', combinedMindMap)
+      await this.cacheService.setCache(fileName, 'merged_mindmap', combinedMindMap)
       console.log('💾 [DEBUG] 合并思维导图已缓存')
     } else {
       console.log('✅ [DEBUG] 使用缓存的合并思维导图')
@@ -297,7 +297,7 @@ export class BookProcessingService {
     customPrompt: string,
     abortSignal: AbortSignal
   ): Promise<MindElixirData> {
-    let combinedMindMap = this.cacheService.getMindMap(fileName, 'combined_mindmap')
+    let combinedMindMap = await this.cacheService.getMindMap(fileName, 'combined_mindmap')
     
     if (!combinedMindMap) {
       console.log('🔄 [DEBUG] 缓存未命中，开始生成整书思维导图')
@@ -307,7 +307,7 @@ export class BookProcessingService {
         customPrompt,
         abortSignal
       )
-      this.cacheService.setCache(fileName, 'combined_mindmap', combinedMindMap)
+      await this.cacheService.setCache(fileName, 'combined_mindmap', combinedMindMap)
       console.log('💾 [DEBUG] 整书思维导图已缓存')
     } else {
       console.log('✅ [DEBUG] 使用缓存的整书思维导图')
