@@ -1,12 +1,12 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'wouter'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Upload, BookOpen, Brain, FileText, Loader2, List, Trash2, Tag, X, RefreshCw, MessageSquarePlus } from 'lucide-react'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Upload, BookOpen, Brain, FileText, Loader2, List, Trash2, Tag, X, RefreshCw } from 'lucide-react'
 import { ConfigDialog } from './project/ConfigDialog'
 import { TagDialog } from './TagDialog'
 import { CacheService } from '@/services/cacheService'
@@ -102,7 +102,7 @@ export function Step1Config({
 
     const loadCache = async () => {
       const validChapterIds = extractedChapters.map(chapter => chapter.id)
-      
+
       // 并行加载选中章节和标签
       const [cachedSelectedChapters, cachedChapterTags] = await Promise.all([
         cacheService.getSelectedChapters(file.name),
@@ -183,7 +183,7 @@ export function Step1Config({
     e.preventDefault()
     e.stopPropagation()
     setIsDragging(false)
-    
+
     const droppedFile = e.dataTransfer.files?.[0]
     validateAndSetFile(droppedFile || null)
   }, [validateAndSetFile])
@@ -239,7 +239,7 @@ export function Step1Config({
       ? new Set(extractedChapters.map(chapter => chapter.id))
       : new Set<string>()
     setSelectedChapters(newSelectedChapters)
-    
+
     // 更新选中的章节缓存
     if (file) {
       cacheService.setSelectedChapters(file.name, newSelectedChapters).then(() => {
@@ -254,14 +254,14 @@ export function Step1Config({
       newChapterTags.set(chapterId, tag)
     })
     setChapterTags(newChapterTags)
-    
+
     // 缓存章节标签
     if (file) {
       cacheService.setChapterTags(file.name, newChapterTags).then(() => {
         console.log('💾 [DEBUG] 已缓存章节标签:', newChapterTags.size)
       }).catch(console.error)
     }
-    
+
     setShowTagDialog(false)
     setBoxSelectedChapters(new Set())
 
@@ -275,7 +275,7 @@ export function Step1Config({
     const newChapterTags = new Map(chapterTags)
     newChapterTags.delete(chapterId)
     setChapterTags(newChapterTags)
-    
+
     // 更新缓存
     if (file) {
       cacheService.setChapterTags(file.name, newChapterTags).then(() => {
@@ -299,6 +299,33 @@ export function Step1Config({
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [handleAddTagsClick])
+  if (!file) {
+    return <div
+      className={`m-4 relative border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${isDragging
+        ? 'border-blue-500 bg-blue-50'
+        : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+        }`}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      onClick={() => fileInputRef.current?.click()}
+    >
+      {/* 隐藏的文件输入 - 始终存在 */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".epub,.pdf"
+        onChange={handleFileChange}
+        className="hidden"
+      />
+      <Upload className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+      <h3 className="text-lg font-semibold mb-1">{t('upload.title')}</h3>
+      <p className="text-sm text-gray-600 mb-2">{t('upload.description')}</p>
+      <p className="text-xs text-gray-500">
+        拖拽文件到此处或点击选择 • 支持 EPUB 和 PDF 格式
+      </p>
+    </div>
+  }
   return (
     <div className='h-full flex flex-col p-4 gap-3'>
       {/* 隐藏的文件输入 - 始终存在 */}
@@ -311,83 +338,65 @@ export function Step1Config({
       />
 
       {/* 顶部固定区域 */}
-      <div className="shrink-0">
-        {!file ? (
-          <div
-            className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
-              isDragging
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
-            }`}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <Upload className="h-12 w-12 mx-auto mb-3 text-gray-400" />
-            <h3 className="text-lg font-semibold mb-1">{t('upload.title')}</h3>
-            <p className="text-sm text-gray-600 mb-2">{t('upload.description')}</p>
-            <p className="text-xs text-gray-500">
-              拖拽文件到此处或点击选择 • 支持 EPUB 和 PDF 格式
-            </p>
+      <div className="shrink-0 p-3 bg-gray-50 rounded-lg">
+        <div className="flex items-center justify-between gap-3 ">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <FileText className="h-4 w-4 text-gray-600 shrink-0" />
+            <div className="flex-1 flex min-w-0 items-center">
+              <p className="font-medium truncate text-sm">{file.name}</p>
+              <p className="text-xs text-gray-500 shrink-0">
+                {(file.size / 1024 / 1024).toFixed(2)} MB
+              </p>
+            </div>
           </div>
-        ) : (
-          <div className="space-y-2">
-            <div className="flex items-center justify-between gap-3 p-3 bg-gray-50 rounded-lg">
-              <div className="flex items-center gap-2 flex-1 min-w-0">
-                <FileText className="h-4 w-4 text-gray-600 shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate text-sm">{file.name}</p>
-                  <p className="text-xs text-gray-500">
-                    {(file.size / 1024 / 1024).toFixed(2)} MB
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
+            <Tooltip>
+              <TooltipTrigger asChild>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleReselectFile}
                   disabled={processing || extractingChapters}
                 >
-                  <RefreshCw className="h-3.5 w-3.5 mr-1" />
-                  {t('upload.reselectFile')}
+                  <RefreshCw className="h-3.5 w-3.5" />
                 </Button>
-                <ConfigDialog processing={processing} file={file} />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{t('upload.reselectFile')}</p>
+              </TooltipContent>
+            </Tooltip>
+            <ConfigDialog processing={processing} file={file} />
+            <Tooltip>
+              <TooltipTrigger asChild>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={clearBookCache}
                   disabled={processing}
-                  className="flex items-center gap-1 text-red-500 hover:text-red-700 hover:bg-red-50"
+                  className="text-red-500 hover:text-red-700 hover:bg-red-50"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
-                  {t('upload.clearCache')}
                 </Button>
-              </div>
-            </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{t('upload.clearCache')}</p>
+              </TooltipContent>
+            </Tooltip>
             <Button
               onClick={onExtractChapters}
               disabled={extractingChapters || processing}
-              className="w-full"
             >
               {extractingChapters ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {t('upload.extractingChapters')}
-                </>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
               ) : (
-                <>
                   <List className="mr-2 h-4 w-4" />
-                  {t('upload.extractChapters')}
-                </>
               )}
+                  {t('upload.extractChapters')}
             </Button>
           </div>
-        )}
-
+        </div>
         {extractedChapters && bookData && (
-          <div className="mt-3 p-4 bg-gray-50 rounded-lg">
+          <div className="mt-3 bg-gray-50 rounded-lg">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <List className="h-4 w-4" />
@@ -435,11 +444,10 @@ export function Step1Config({
                   return (
                     <div
                       key={chapter.id}
-                      className={`flex items-center gap-2 p-2 rounded-lg transition-all cursor-pointer ${
-                        isBoxSelected 
-                          ? 'bg-blue-100 border-2 border-blue-400' 
-                          : 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent'
-                      }`}
+                      className={`flex items-center gap-2 p-2 rounded-lg transition-all cursor-pointer ${isBoxSelected
+                        ? 'bg-blue-100 border-2 border-blue-400'
+                        : 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent'
+                        }`}
                       onClick={() => handleBoxSelect(chapter.id, !isBoxSelected)}
                     >
                       <Checkbox
@@ -468,7 +476,7 @@ export function Step1Config({
                               }}
                             >
                               <span className='truncate'>
-                              {tag}
+                                {tag}
                               </span>
                               <X
                                 className="h-2.5 w-2.5 shrink-0 cursor-pointer hover:text-blue-900"
@@ -509,31 +517,20 @@ export function Step1Config({
               <Label htmlFor="custom-prompt" className="text-sm font-medium">
                 {t('chapters.customPrompt')}
               </Label>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-1 text-xs h-6"
-                asChild
-              >
-                <Link href="/custom-prompts">
-                  <MessageSquarePlus className="h-3 w-3" />
-                  {t('chapters.managePrompts')}
-                </Link>
-              </Button>
+              <Select value={customPrompt || 'default'} onValueChange={(value) => onCustomPromptChange(value === 'default' ? '' : value)} disabled={processing || extractingChapters}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder={t('chapters.selectCustomPrompt')} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="default">{t('chapters.useDefaultPrompt')}</SelectItem>
+                  {prompts.map((prompt) => (
+                    <SelectItem key={prompt.id} value={prompt.content}>
+                      {prompt.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            <Select value={customPrompt || 'default'} onValueChange={(value) => onCustomPromptChange(value === 'default' ? '' : value)} disabled={processing || extractingChapters}>
-              <SelectTrigger className="mt-1">
-                <SelectValue placeholder={t('chapters.selectCustomPrompt')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="default">{t('chapters.useDefaultPrompt')}</SelectItem>
-                {prompts.map((prompt) => (
-                  <SelectItem key={prompt.id} value={prompt.content}>
-                    {prompt.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
             <p className="text-xs text-gray-500 mt-1">
               {t('chapters.customPromptDescription')}
             </p>

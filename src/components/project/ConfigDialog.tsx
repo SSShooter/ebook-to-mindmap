@@ -2,9 +2,10 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Settings, Download, Upload, Brain } from 'lucide-react'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Settings, Brain } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
 import { useConfigStore, useProcessingOptions } from '../../stores/configStore'
@@ -110,17 +111,22 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
 
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={processing}
-          className="flex items-center gap-1"
-        >
-          <Settings className="h-3.5 w-3.5" />
-          {t('config.title')}
-        </Button>
-      </DialogTrigger>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <DialogTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={processing}
+            >
+              <Settings className="h-3.5 w-3.5" />
+            </Button>
+          </DialogTrigger>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{t('config.title')}</p>
+        </TooltipContent>
+      </Tooltip>
       <DialogContent className="max-w-2xl max-h-[80vh]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -326,26 +332,6 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
 
           </div>
         </ScrollArea>
-        <DialogFooter className="flex-row justify-end gap-2">
-          <Button
-            variant="outline"
-            onClick={handleImportConfig}
-            disabled={processing}
-            className="flex items-center gap-2"
-          >
-            <Upload className="h-4 w-4" />
-            {t('config.importConfig')}
-          </Button>
-          <Button
-            variant="outline"
-            onClick={handleExportConfig}
-            disabled={processing}
-            className="flex items-center gap-2"
-          >
-            <Download className="h-4 w-4" />
-            {t('config.exportConfig')}
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   )

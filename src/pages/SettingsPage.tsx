@@ -68,9 +68,9 @@ export function SettingsPage() {
   }
 
   return (
-    <div className="flex-1 overflow-auto bg-gray-50">
-      <div className="max-w-4xl mx-auto p-8">
-        <div className="mb-8">
+    <div className="flex-1 overflow-hidden bg-gray-50">
+      <div className="max-w-4xl mx-auto p-8 h-full flex flex-col">
+        <div className="mb-8 flex-shrink-0">
           <h1 className="text-2xl font-semibold text-gray-900 flex items-center gap-3">
             <Settings className="h-6 w-6 text-gray-700" />
             {t('config.title')}
@@ -78,7 +78,7 @@ export function SettingsPage() {
           <p className="text-sm text-gray-500 mt-1">{t('config.description')}</p>
         </div>
 
-        <ScrollArea className="h-[calc(100vh-240px)]">
+        <ScrollArea className="flex-1 h-1">
           <div className="space-y-6 pr-4">
             {/* Interface Language */}
             <div className="p-5 bg-white rounded-xl border border-gray-200">

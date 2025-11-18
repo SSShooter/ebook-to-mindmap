@@ -328,7 +328,7 @@ ${bookSummary.overallSummary}
                   })}
                 </TabsContent>
 
-                <TabsContent value="combined">
+                <TabsContent value="combined" className='grid grid-cols-1'>
                   {bookMindMap.combinedMindMap ? (
                     <MindMapCard
                       id="combined"
