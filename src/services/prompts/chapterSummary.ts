@@ -1,14 +1,21 @@
 // 章节总结相关的prompt模板
 
-export const getFictionChapterSummaryPrompt = (title: string, content: string) => {
-  const userPrompt = `请为以下章节内容生成一个详细总结：
-
-章节标题：${title}
+export const getFictionChapterSummaryPrompt = (title: string, content: string, customPrompt?: string, useCustomOnly: boolean = false) => {
+  // 固定章节内容部分
+  const chapterContent = `章节标题：${title}
 
 章节内容：
-${content}
+${content}`
 
-请用自然流畅的语言总结本章内容，使用以下markdown格式：
+  // 如果只使用自定义提示词
+  if (useCustomOnly && customPrompt && customPrompt.trim()) {
+    return `${chapterContent}
+
+${customPrompt.trim()}`
+  }
+
+  // 默认提示词
+  const defaultPrompt = `请用自然流畅的语言总结本章内容，使用以下markdown格式：
 
 ## 章节总结：${title}
 
@@ -20,19 +27,37 @@ ${content}
 
 ### 关键转折
 [描述本章的关键转折点]`
-  
-  return userPrompt
+
+  // 如果有自定义提示词，拼接到默认提示词后面
+  if (customPrompt && customPrompt.trim()) {
+    return `${chapterContent}
+
+${defaultPrompt}
+
+补充要求：${customPrompt.trim()}`
+  }
+
+  return `${chapterContent}
+
+${defaultPrompt}`
 }
 
-export const getNonFictionChapterSummaryPrompt = (title: string, content: string) => {
-  const userPrompt = `请为以下社科类书籍章节内容生成一个详细总结：
-
-章节标题：${title}
+export const getNonFictionChapterSummaryPrompt = (title: string, content: string, customPrompt?: string, useCustomOnly: boolean = false) => {
+  // 固定章节内容部分
+  const chapterContent = `章节标题：${title}
 
 章节内容：
-${content}
+${content}`
 
-请用自然流畅的语言总结本章内容，使用以下markdown格式：
+  // 如果只使用自定义提示词
+  if (useCustomOnly && customPrompt && customPrompt.trim()) {
+    return `${chapterContent}
+
+${customPrompt.trim()}`
+  }
+
+  // 默认提示词
+  const defaultPrompt = `请用自然流畅的语言总结本章内容，使用以下markdown格式：
 
 ## 章节总结：${title}
 
@@ -47,6 +72,17 @@ ${content}
 
 ### 实际应用
 [给出指导实际生活的建议或应用，必须与此章节内容强关联]`
-  
-  return userPrompt
+
+  // 如果有自定义提示词，拼接到默认提示词后面
+  if (customPrompt && customPrompt.trim()) {
+    return `${chapterContent}
+
+${defaultPrompt}
+
+补充要求：${customPrompt.trim()}`
+  }
+
+  return `${chapterContent}
+
+${defaultPrompt}`
 }

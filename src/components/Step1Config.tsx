@@ -6,7 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Upload, BookOpen, Brain, FileText, Loader2, List, Trash2, Tag, X, RefreshCw } from 'lucide-react'
+import { Upload, BookOpen, Brain, FileText, Loader2, List, Trash2, Tag, X, RefreshCw, Info } from 'lucide-react'
 import { ConfigDialog } from './project/ConfigDialog'
 import { TagDialog } from './TagDialog'
 import { CacheService } from '@/services/cacheService'
@@ -23,7 +23,7 @@ interface Step1ConfigProps {
   onFileChange: (file: File | null) => void
   extractedChapters: ChapterData[] | null
   onChaptersExtracted: (chapters: ChapterData[], bookData: { title: string; author: string }, fullBookData: EpubBookData | PdfBookData) => void
-  onStartProcessing: (selectedChapters: Set<string>, chapterTags: Map<string, string>, customPrompt: string) => void
+  onStartProcessing: (selectedChapters: Set<string>, chapterTags: Map<string, string>, customPrompt: string, useCustomOnly: boolean) => void
   processing: boolean
   onReadChapter: (chapterId: string, chapterIds: string[]) => void
   onError: (error: string) => void
@@ -52,6 +52,7 @@ export function Step1Config({
   const [isDragging, setIsDragging] = useState(false)
   const [extractingChapters, setExtractingChapters] = useState(false)
   const [customPrompt, setCustomPrompt] = useState('')
+  const [useCustomOnly, setUseCustomOnly] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const configStore = useConfigStore()
@@ -146,10 +147,12 @@ export function Step1Config({
     const loadCache = async () => {
       const validChapterIds = extractedChapters.map(chapter => chapter.id)
 
-      // 并行加载选中章节和标签
-      const [cachedSelectedChapters, cachedChapterTags] = await Promise.all([
+      // 并行加载选中章节、标签、自定义提示词和仅使用自定义选项
+      const [cachedSelectedChapters, cachedChapterTags, cachedCustomPrompt, cachedUseCustomOnly] = await Promise.all([
         cacheService.getSelectedChapters(file.name),
-        cacheService.getChapterTags(file.name)
+        cacheService.getChapterTags(file.name),
+        cacheService.getCustomPrompt(file.name),
+        cacheService.getUseCustomOnly(file.name)
       ])
 
       // 处理选中的章节
@@ -158,10 +161,8 @@ export function Step1Config({
         const validSelectedChapters = cachedSelectedChapters.filter((id: string) => validChapterIds.includes(id))
         if (validSelectedChapters.length > 0) {
           newSelectedChapters = new Set(validSelectedChapters)
-          console.log('✅ [DEBUG] 从缓存加载了选中的章节:', validSelectedChapters.length)
         } else {
           newSelectedChapters = new Set(validChapterIds)
-          console.log('⚠️ [DEBUG] 缓存的章节ID无效，使用默认选中所有章节')
         }
       } else {
         newSelectedChapters = new Set(validChapterIds)
@@ -175,10 +176,15 @@ export function Step1Config({
             newChapterTags.set(chapterId, tag)
           }
         })
-        if (newChapterTags.size > 0) {
-          console.log('✅ [DEBUG] 从缓存加载了章节标签:', newChapterTags.size)
-        }
       }
+
+      // 处理自定义提示词
+      if (cachedCustomPrompt) {
+        setCustomPrompt(cachedCustomPrompt)
+      }
+
+      // 处理仅使用自定义选项
+      setUseCustomOnly(cachedUseCustomOnly)
 
       // 一次性更新所有状态，避免多次渲染
       setSelectedChapters(newSelectedChapters)
@@ -186,7 +192,6 @@ export function Step1Config({
 
       // 缓存选中的章节
       await cacheService.setSelectedChapters(file.name, newSelectedChapters)
-      console.log('💾 [DEBUG] 已缓存选中的章节:', newSelectedChapters.size)
     }
 
     loadCache()
@@ -331,6 +336,7 @@ export function Step1Config({
   const bookData = extractedChapters && extractedChapters.length > 0
     ? { title: '已提取章节', author: '' }
     : null
+
   // 监听 Ctrl+G 快捷键打开标签对话框
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -556,30 +562,77 @@ export function Step1Config({
       {/* 底部固定区域 */}
       {extractedChapters && bookData && (
         <div className="shrink-0 space-y-3 p-4 bg-gray-50 rounded-lg">
-          <div>
-            <div className="flex items-center justify-between">
+          <div className='flex items-center gap-2'>
+            <div className="flex items-center gap-2">
               <Label htmlFor="custom-prompt" className="text-sm font-medium">
                 {t('chapters.customPrompt')}
               </Label>
-              <Select value={customPrompt || 'default'} onValueChange={(value) => setCustomPrompt(value === 'default' ? '' : value)} disabled={processing || extractingChapters}>
-                <SelectTrigger className="mt-1">
-                  <SelectValue placeholder={t('chapters.selectCustomPrompt')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="default">{t('chapters.useDefaultPrompt')}</SelectItem>
-                  {prompts.map((prompt) => (
-                    <SelectItem key={prompt.id} value={prompt.content}>
-                      {prompt.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-3.5 w-3.5 text-gray-400 cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{t('chapters.customPromptDescription')}</p>
+                </TooltipContent>
+              </Tooltip>
             </div>
-            <p className="text-xs text-gray-500 mt-1">
-              {t('chapters.customPromptDescription')}
-            </p>
+            <Select
+              value={customPrompt || 'default'}
+              onValueChange={(value) => {
+                const newPrompt = value === 'default' ? '' : value
+                setCustomPrompt(newPrompt)
+                // 事件驱动：用户选择时保存缓存
+                if (file) {
+                  cacheService.setCustomPrompt(file.name, newPrompt).catch(console.error)
+                }
+              }}
+              disabled={processing || extractingChapters}
+            >
+              <SelectTrigger className="mt-1">
+                <SelectValue placeholder={t('chapters.selectCustomPrompt')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="default">{t('chapters.useDefaultPrompt')}</SelectItem>
+                {prompts.map((prompt) => (
+                  <SelectItem key={prompt.id} value={prompt.content}>
+                    {prompt.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {/* Custom Prompt Only Checkbox */}
+            {customPrompt && (
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="use-custom-only"
+                  checked={useCustomOnly}
+                  onCheckedChange={(checked) => {
+                    const newValue = checked as boolean
+                    setUseCustomOnly(newValue)
+                    // 事件驱动：用户勾选时保存缓存
+                    if (file) {
+                      cacheService.setUseCustomOnly(file.name, newValue).catch(console.error)
+                    }
+                  }}
+                  disabled={processing || extractingChapters || processingMode === 'mindmap' || processingMode === 'combined-mindmap'}
+                />
+                <Label
+                  htmlFor="use-custom-only"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  {t('chapters.useCustomPromptOnly')}
+                </Label>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="h-3.5 w-3.5 text-gray-400 cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{t('chapters.useCustomPromptOnlyDescription')}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            )}
           </div>
-
           <Button
             onClick={() => {
               if (!apiKey) {
@@ -589,7 +642,7 @@ export function Step1Config({
                 })
                 return
               }
-              onStartProcessing(selectedChapters, chapterTags, customPrompt)
+              onStartProcessing(selectedChapters, chapterTags, customPrompt, useCustomOnly)
             }}
             disabled={!extractedChapters || processing || extractingChapters || selectedChapters.size === 0}
             className="w-full"

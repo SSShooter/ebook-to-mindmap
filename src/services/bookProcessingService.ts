@@ -100,22 +100,24 @@ export class BookProcessingService {
     bookType: BookType,
     outputLanguage: SupportedLanguage,
     customPrompt: string,
+    useCustomOnly: boolean,
     abortSignal: AbortSignal
   ): Promise<{ group: ChapterGroup; chapters: Chapter[] }> {
     let summary = await this.cacheService.getString(fileName, 'summary', group.groupId)
 
     if (!summary) {
-      const combinedTitle = group.tag 
+      const combinedTitle = group.tag
         ? `${group.tag} (${group.chapters.map(ch => ch.title).join(', ')})`
         : group.chapters[0].title
       const combinedContent = group.chapters.map(ch => `## ${ch.title}\n\n${ch.content}`).join('\n\n')
-      
+
       summary = await this.aiService.summarizeChapter(
         combinedTitle,
         combinedContent,
         bookType,
         outputLanguage,
         customPrompt,
+        useCustomOnly,
         abortSignal
       )
       await this.cacheService.setCache(fileName, 'summary', summary, group.groupId)
@@ -195,7 +197,7 @@ export class BookProcessingService {
     abortSignal: AbortSignal
   ): Promise<string> {
     let connections = await this.cacheService.getString(fileName, 'connections')
-    
+
     if (!connections) {
       console.log('🔄 [DEBUG] 缓存未命中，开始分析章节关联')
       connections = await this.aiService.analyzeConnections(
@@ -225,7 +227,7 @@ export class BookProcessingService {
     abortSignal: AbortSignal
   ): Promise<string> {
     let overallSummary = await this.cacheService.getString(fileName, 'overall_summary')
-    
+
     if (!overallSummary) {
       console.log('🔄 [DEBUG] 缓存未命中，开始生成全书总结')
       overallSummary = await this.aiService.generateOverallSummary(
@@ -253,10 +255,10 @@ export class BookProcessingService {
     chapters: Chapter[]
   ): Promise<MindElixirData> {
     let combinedMindMap = await this.cacheService.getMindMap(fileName, 'merged_mindmap')
-    
+
     if (!combinedMindMap) {
       console.log('🔄 [DEBUG] 缓存未命中，开始合并章节思维导图')
-      
+
       const rootNode = {
         topic: bookTitle,
         id: '0',
@@ -297,7 +299,7 @@ export class BookProcessingService {
     abortSignal: AbortSignal
   ): Promise<MindElixirData> {
     let combinedMindMap = await this.cacheService.getMindMap(fileName, 'combined_mindmap')
-    
+
     if (!combinedMindMap) {
       console.log('🔄 [DEBUG] 缓存未命中，开始生成整书思维导图')
       combinedMindMap = await this.aiService.generateCombinedMindMap(

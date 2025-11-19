@@ -64,16 +64,11 @@ export class AIService {
     return typeof this.config === 'function' ? this.config() : this.config
   }
 
-  async summarizeChapter(title: string, content: string, bookType: 'fiction' | 'non-fiction' = 'non-fiction', outputLanguage: SupportedLanguage = 'en', customPrompt?: string, abortSignal?: AbortSignal): Promise<string> {
+  async summarizeChapter(title: string, content: string, bookType: 'fiction' | 'non-fiction' = 'non-fiction', outputLanguage: SupportedLanguage = 'en', customPrompt?: string, useCustomOnly: boolean = false, abortSignal?: AbortSignal): Promise<string> {
     try {
-      let prompt = bookType === 'fiction'
-        ? getFictionChapterSummaryPrompt(title, content)
-        : getNonFictionChapterSummaryPrompt(title, content)
-
-      // 如果有自定义提示词，则拼接到原始prompt后面
-      if (customPrompt && customPrompt.trim()) {
-        prompt += `\n\n补充要求：${customPrompt.trim()}`
-      }
+      const prompt = bookType === 'fiction'
+        ? getFictionChapterSummaryPrompt(title, content, customPrompt, useCustomOnly)
+        : getNonFictionChapterSummaryPrompt(title, content, customPrompt, useCustomOnly)
 
       const summary = await this.generateContent(prompt, outputLanguage, abortSignal)
 
@@ -223,24 +218,24 @@ export class AIService {
     if (config.provider === 'gemini' && 'generateContent' in this.model) {
       // Gemini API 不直接支持系统提示，将系统提示合并到用户提示前面
       const finalPrompt = `${prompt}\n\n**${systemPrompt}**`
-      
+
       // 检查是否已取消
       if (abortSignal?.aborted) {
         throw new DOMException('Request was aborted', 'AbortError')
       }
-      
+
       const result = await this.model.generateContent({
         contents: [{ role: 'user', parts: [{ text: finalPrompt }] }],
         generationConfig: {
           temperature: config.temperature || 0.7
         }
       })
-      
+
       // 再次检查是否已取消
       if (abortSignal?.aborted) {
         throw new DOMException('Request was aborted', 'AbortError')
       }
-      
+
       const response = result.response
       return response.text()
     } else if ('apiUrl' in this.model) {

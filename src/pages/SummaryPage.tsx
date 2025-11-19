@@ -131,7 +131,7 @@ export function SummaryPage() {
 
 
 
-  const handleStartProcessing = useCallback(async (selectedChapters: Set<string>, chapterTags: Map<string, string>, customPrompt: string) => {
+  const handleStartProcessing = useCallback(async (selectedChapters: Set<string>, chapterTags: Map<string, string>, customPrompt: string, useCustomOnly: boolean) => {
     if (!extractedChapters || !bookData || !apiKey) {
       toast.error(t('chapters.extractAndApiKey'), {
         duration: 3000,
@@ -229,6 +229,7 @@ export function SummaryPage() {
             bookType,
             configStore.processingOptions.outputLanguage,
             customPrompt,
+            useCustomOnly,
             abortSignal
           )
 

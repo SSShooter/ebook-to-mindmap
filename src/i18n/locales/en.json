@@ -33,6 +33,8 @@
     "managePrompts": "Manage Prompts",
     "selectCustomPrompt": "Select custom prompt (optional)",
     "useDefaultPrompt": "Use default prompt",
+    "useCustomPromptOnly": "Use custom prompt only",
+    "useCustomPromptOnlyDescription": "When checked, default prompts will be ignored and only your selected custom prompt will be used (not supported in mind map mode)",
     "startProcessing": "Start Processing",
     "processing": "Processing...",
     "apiKeyRequired": "Please enter API Key in configuration first",

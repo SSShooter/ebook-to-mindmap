@@ -14,9 +14,11 @@ export type CacheKeyType =
   | 'mindmap_arrows'   // 思维导图箭头
   | 'selected_chapters' // 选中的章节
   | 'chapter_tags'     // 章节标签
+  | 'custom_prompt'    // 自定义提示词
+  | 'use_custom_only'  // 仅使用自定义提示词
 
 // 定义缓存值的类型
-export type CacheValue = string | MindElixirData | string[] | Record<string, string> | null
+export type CacheValue = string | MindElixirData | string[] | Record<string, string> | boolean | null
 
 export class CacheService {
   private store: LocalForage
@@ -69,8 +71,8 @@ export class CacheService {
   async getChapterTags(filename: string): Promise<Record<string, string> | null> {
     const key = CacheService.generateKey(filename, 'chapter_tags')
     const value = await this.store.getItem<CacheValue>(key)
-    return value && typeof value === 'object' && !Array.isArray(value) && !('nodeData' in value) 
-      ? value as Record<string, string> 
+    return value && typeof value === 'object' && !Array.isArray(value) && !('nodeData' in value)
+      ? value as Record<string, string>
       : null
   }
 
@@ -92,6 +94,32 @@ export class CacheService {
     const key = CacheService.generateKey(filename, 'chapter_tags')
     const value = Object.fromEntries(chapterTags)
     await this.store.setItem(key, value)
+  }
+
+  // 获取自定义提示词
+  async getCustomPrompt(filename: string): Promise<string | null> {
+    const key = CacheService.generateKey(filename, 'custom_prompt')
+    const value = await this.store.getItem<CacheValue>(key)
+    return typeof value === 'string' ? value : null
+  }
+
+  // 缓存自定义提示词
+  async setCustomPrompt(filename: string, customPrompt: string): Promise<void> {
+    const key = CacheService.generateKey(filename, 'custom_prompt')
+    await this.store.setItem(key, customPrompt)
+  }
+
+  // 获取仅使用自定义提示词选项
+  async getUseCustomOnly(filename: string): Promise<boolean> {
+    const key = CacheService.generateKey(filename, 'use_custom_only')
+    const value = await this.store.getItem<CacheValue>(key)
+    return typeof value === 'boolean' ? value : false
+  }
+
+  // 缓存仅使用自定义提示词选项
+  async setUseCustomOnly(filename: string, useCustomOnly: boolean): Promise<void> {
+    const key = CacheService.generateKey(filename, 'use_custom_only')
+    await this.store.setItem(key, useCustomOnly)
   }
 
   // 删除缓存
@@ -118,7 +146,7 @@ export class CacheService {
 
   // 清除特定类型缓存
   async clearSpecificCache(
-    fileName: string, 
+    fileName: string,
     cacheType: 'connections' | 'overall_summary' | 'combined_mindmap' | 'merged_mindmap' | 'selected_chapters' | 'chapter_tags'
   ): Promise<boolean> {
     const type: CacheKeyType = cacheType
@@ -148,7 +176,7 @@ export class CacheService {
         key.includes('_chapter_') &&
         key.endsWith('_summary')
       )
-      
+
       for (const key of chapterKeys) {
         try {
           await this.store.removeItem(key)
@@ -170,7 +198,7 @@ export class CacheService {
         key.includes('_chapter_') &&
         key.endsWith('_mindmap')
       )
-      
+
       for (const key of chapterKeys) {
         try {
           await this.store.removeItem(key)

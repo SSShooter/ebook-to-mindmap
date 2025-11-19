@@ -131,7 +131,7 @@ ${bookSummary.overallSummary}
     <div className='h-full flex flex-col p-4 gap-3'>
       {/* 顶部固定区域 */}
       <div className="shrink-0">
-        <div className="p-4 bg-gray-50 rounded-lg space-y-4">
+        <div className="p-4 bg-gray-50 rounded-lg space-y-3">
           {/* 头部导航和标题 */}
           <div className="flex items-center justify-between gap-3 overflow-hidden">
             <Tooltip>
