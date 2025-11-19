@@ -93,7 +93,7 @@ export function Step1Config({
 
         chapters = await processor.extractChapters(targetFile, useSmartDetection, skipNonEssentialChapters, maxSubChapterDepth)
       } else {
-        throw new Error('不支持的文件格式')
+        throw new Error(t('upload.unsupportedFormat'))
       }
 
       onChaptersExtracted(chapters, extractedBookData, fullBookData)
@@ -122,23 +122,19 @@ export function Step1Config({
     if (!file) return
     const mode = processingMode === 'combined-mindmap' ? 'combined_mindmap' : processingMode as 'summary' | 'mindmap'
     const deletedCount = await cacheService.clearBookCache(file.name, mode)
-    const modeNames = {
-      'summary': '文字总结',
-      'mindmap': '章节思维导图',
-      'combined-mindmap': '整书思维导图'
-    }
+    const modeKey = t(`cache.modes.${processingMode}`)
     if (deletedCount > 0) {
-      toast.success(`已清除${deletedCount}项${modeNames[processingMode]}缓存，下次处理将重新生成内容`, {
+      toast.success(t('cache.bookCacheCleared', { count: deletedCount, mode: modeKey }), {
         duration: 3000,
         position: 'top-center',
       })
     } else {
-      toast.info(`没有找到可清除的${modeNames[processingMode]}缓存`, {
+      toast.info(t('cache.noCacheFound', { mode: modeKey }), {
         duration: 3000,
         position: 'top-center',
       })
     }
-  }, [file, processingMode])
+  }, [file, processingMode, t])
 
   // 当章节提取完成后，从缓存加载选中状态和标签
   useEffect(() => {
@@ -257,14 +253,14 @@ export function Step1Config({
 
   const handleAddTagsClick = useCallback(() => {
     if (boxSelectedChapters.size === 0) {
-      toast.error('请先框选要添加标签的章节', {
+      toast.error(t('chapters.selectChaptersForTag'), {
         duration: 3000,
         position: 'top-center',
       })
       return
     }
     setShowTagDialog(true)
-  }, [boxSelectedChapters])
+  }, [boxSelectedChapters, t])
 
   const handleChapterSelect = useCallback((chapterId: string, checked: boolean) => {
     setSelectedChapters((prev) => {
@@ -314,11 +310,11 @@ export function Step1Config({
     setShowTagDialog(false)
     setBoxSelectedChapters(new Set())
 
-    toast.success(`已为 ${boxSelectedChapters.size} 个章节设置标签: ${tag}`, {
+    toast.success(t('chapters.tagAdded', { count: boxSelectedChapters.size, tag }), {
       duration: 3000,
       position: 'top-center',
     })
-  }, [boxSelectedChapters, chapterTags, file])
+  }, [boxSelectedChapters, chapterTags, file, t])
 
   const handleRemoveTag = useCallback((chapterId: string) => {
     const newChapterTags = new Map(chapterTags)
@@ -372,7 +368,7 @@ export function Step1Config({
       <h3 className="text-lg font-semibold mb-1">{t('upload.title')}</h3>
       <p className="text-sm text-gray-600 mb-2">{t('upload.description')}</p>
       <p className="text-xs text-gray-500">
-        拖拽文件到此处或点击选择 • 支持 EPUB 和 PDF 格式
+        {t('upload.dragDropHint')}
       </p>
     </div>
   }
@@ -475,7 +471,7 @@ export function Step1Config({
                 className="flex items-center gap-1"
               >
                 <Tag className="h-3.5 w-3.5" />
-                添加标签 {boxSelectedChapters.size > 0 && `(${boxSelectedChapters.size})`}
+                {t('chapters.addTag')} {boxSelectedChapters.size > 0 && `(${boxSelectedChapters.size})`}
               </Button>
             </div>
           </div>
@@ -561,7 +557,7 @@ export function Step1Config({
 
       {/* 底部固定区域 */}
       {extractedChapters && bookData && (
-        <div className="shrink-0 space-y-3 p-4 bg-gray-50 rounded-lg">
+        <div className="shrink-0 space-y-3 p-3 bg-gray-50 rounded-lg">
           <div className='flex items-center gap-2'>
             <div className="flex items-center gap-2">
               <Label htmlFor="custom-prompt" className="text-sm font-medium">

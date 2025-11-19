@@ -20,7 +20,9 @@
     "extractingChapters": "Extracting chapters...",
     "invalidFile": "Please select a valid EPUB or PDF file",
     "pleaseSelectFile": "Please select a file",
-    "reselectFile": "Reselect File"
+    "reselectFile": "Reselect File",
+    "dragDropHint": "Drag and drop file here or click to select • Supports EPUB and PDF formats",
+    "unsupportedFormat": "Unsupported file format"
   },
   "chapters": {
     "title": "Chapter Selection",
@@ -39,7 +41,10 @@
     "processing": "Processing...",
     "apiKeyRequired": "Please enter API Key in configuration first",
     "selectAtLeastOne": "Please select at least one chapter to process",
-    "extractAndApiKey": "Please extract chapters and enter API Key first"
+    "extractAndApiKey": "Please extract chapters and enter API Key first",
+    "addTag": "Add Tag",
+    "selectChaptersForTag": "Please select chapters to add tags first",
+    "tagAdded": "Tag set for {{count}} chapters: {{tag}}"
   },
   "progress": {
     "extractingEpub": "Parsing EPUB file...",
@@ -295,5 +300,13 @@
     "createdAt": "Created At",
     "selectCustomPrompt": "Select custom prompt (optional)",
     "useDefaultPrompt": "Use default prompt"
+  },
+  "tagDialog": {
+    "title": "Add Tag to Selected Chapters",
+    "description": "{{count}} chapters selected. Enter a tag (will override existing tags).",
+    "label": "Tag",
+    "placeholder": "e.g., Important Chapter",
+    "cancel": "Cancel",
+    "confirm": "Confirm"
   }
 }

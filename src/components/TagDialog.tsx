@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -19,6 +20,7 @@ interface TagDialogProps {
 }
 
 export function TagDialog({ open, onOpenChange, selectedCount, onConfirm }: TagDialogProps) {
+  const { t } = useTranslation()
   const [tagInput, setTagInput] = useState('')
 
   const handleConfirm = () => {
@@ -33,17 +35,17 @@ export function TagDialog({ open, onOpenChange, selectedCount, onConfirm }: TagD
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>为框选的章节添加标签</DialogTitle>
+          <DialogTitle>{t('tagDialog.title')}</DialogTitle>
           <DialogDescription>
-            已框选 {selectedCount} 个章节。输入一个标签（会覆盖原有标签）。
+            {t('tagDialog.description', { count: selectedCount })}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="tag-input">标签</Label>
+            <Label htmlFor="tag-input">{t('tagDialog.label')}</Label>
             <Input
               id="tag-input"
-              placeholder="例如: 重点章节"
+              placeholder={t('tagDialog.placeholder')}
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value)}
               onKeyDown={(e) => {
@@ -56,10 +58,10 @@ export function TagDialog({ open, onOpenChange, selectedCount, onConfirm }: TagD
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            取消
+            {t('tagDialog.cancel')}
           </Button>
           <Button onClick={handleConfirm} disabled={!tagInput.trim()}>
-            确认添加
+            {t('tagDialog.confirm')}
           </Button>
         </DialogFooter>
       </DialogContent>

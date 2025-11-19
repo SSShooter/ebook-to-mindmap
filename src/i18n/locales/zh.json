@@ -20,7 +20,9 @@
     "extractingChapters": "提取章节中...",
     "invalidFile": "请选择有效的 EPUB 或 PDF 文件",
     "pleaseSelectFile": "请选择文件",
-    "reselectFile": "重新选择"
+    "reselectFile": "重新选择",
+    "dragDropHint": "拖拽文件到此处或点击选择 • 支持 EPUB 和 PDF 格式",
+    "unsupportedFormat": "不支持的文件格式"
   },
   "chapters": {
     "title": "章节选择",
@@ -39,7 +41,10 @@
     "processing": "处理中...",
     "apiKeyRequired": "请先在配置中填写 API Key",
     "selectAtLeastOne": "请至少选择一个章节进行处理",
-    "extractAndApiKey": "请先提取章节并输入 API Key"
+    "extractAndApiKey": "请先提取章节并输入 API Key",
+    "addTag": "添加标签",
+    "selectChaptersForTag": "请先框选要添加标签的章节",
+    "tagAdded": "已为 {{count}} 个章节设置标签: {{tag}}"
   },
   "progress": {
     "extractingEpub": "正在解析 EPUB 文件...",
@@ -264,5 +269,13 @@
     "createdAt": "创建时间",
     "selectCustomPrompt": "选择自定义提示词（可选）",
     "useDefaultPrompt": "使用默认提示词"
+  },
+  "tagDialog": {
+    "title": "为框选的章节添加标签",
+    "description": "已框选 {{count}} 个章节。输入一个标签（会覆盖原有标签）。",
+    "label": "标签",
+    "placeholder": "例如: 重点章节",
+    "cancel": "取消",
+    "confirm": "确认添加"
   }
 }
