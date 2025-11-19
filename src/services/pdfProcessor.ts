@@ -8,6 +8,15 @@ if (typeof window !== 'undefined') {
   pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc;
 }
 
+interface TextItem {
+  str: string
+  type: 'title' | 'subtitle' | 'list' | 'quote' | 'normal'
+  fontSize: number
+  isBold: boolean
+  x: number
+  y: number
+}
+
 export interface ChapterData {
   id: string
   title: string
@@ -209,28 +218,125 @@ export class PdfProcessor {
     return chapterInfos
   }
 
-  private async extractTextFromPages(pdf: any, startPage: number, endPage: number): Promise<string> {
-    const pageTexts: string[] = []
+  private async extractTextFromPages(pdf: PDFDocumentProxy, startPage: number, endPage: number): Promise<string> {
+    const allStructuredContent: TextItem[][] = []
 
     for (let pageNum = startPage; pageNum <= endPage; pageNum++) {
       try {
         const page = await pdf.getPage(pageNum)
         const textContent = await page.getTextContent()
 
-        const pageText = textContent.items
-          .map((item: any) => item.str)
-          .join(' ')
-          .trim()
+        if (textContent.items.length === 0) continue
 
-        if (pageText.length > 0) {
-          pageTexts.push(pageText)
-        }
+        // 分析字体大小分布，找出标题
+        const fontSizes = textContent.items
+          .filter((item: any) => item.height)
+          .map((item: any) => item.height)
+
+        if (fontSizes.length === 0) continue
+
+        const avgFontSize = fontSizes.reduce((a: number, b: number) => a + b, 0) / fontSizes.length
+
+
+        const pageStructuredContent: TextItem[] = []
+        let prevY = -1
+        let lineItems: any[] = []
+
+        // 将同一行的文本项组合在一起
+        textContent.items.forEach((item: any, index: number) => {
+          const currentY = item.transform[5]
+
+          // 如果Y坐标变化，说明是新的一行
+          if (prevY !== -1 && Math.abs(currentY - prevY) > 2) {
+            if (lineItems.length > 0) {
+              processLine(lineItems, avgFontSize, pageStructuredContent)
+              lineItems = []
+            }
+          }
+
+          lineItems.push(item)
+          prevY = currentY
+
+          // 处理最后一行
+          if (index === textContent.items.length - 1 && lineItems.length > 0) {
+            processLine(lineItems, avgFontSize, pageStructuredContent)
+          }
+        })
+
+        allStructuredContent.push(pageStructuredContent)
       } catch (error) {
         console.warn(`⚠️ [DEBUG] 跳过第${pageNum}页:`, error)
       }
     }
 
-    return pageTexts.join('\n\n')
+    // 辅助函数：处理一行文本
+    function processLine(items: any[], avgSize: number, output: TextItem[]) {
+      if (items.length === 0) return
+
+      // 合并行内所有文本
+      const lineText = items.map((item: any) => item.str).join('').trim()
+      if (!lineText) return
+
+      // 使用行中最大的字体大小和第一个项的属性
+      const maxItemFontSize = Math.max(...items.map((item: any) => item.height || 0))
+      const firstItem = items[0]
+      const fontSize = maxItemFontSize
+      const fontName = firstItem.fontName || ''
+      const isBold = fontName.toLowerCase().includes('bold')
+      const x = firstItem.transform[4]
+      const y = firstItem.transform[5]
+
+      let type: 'title' | 'subtitle' | 'list' | 'quote' | 'normal' = 'normal'
+
+      // 判断是否是标题（字体明显大于平均）
+      if (fontSize > avgSize * 1.4) {
+        type = 'title'
+      } else if (fontSize > avgSize * 1.15 || (isBold && fontSize > avgSize * 1.05)) {
+        type = 'subtitle'
+      }
+
+      // 判断列表（检查常见列表标记）
+      const listPattern = /^[\-\*\•●○◦►▪▫■□☐☑☒✓✔✗✘]|\d+[\.\)、]|[\(（][a-zA-Z0-9一二三四五六七八九十][\)）]|^[a-zA-Z一二三四五六七八九十][\.\)、]/
+      if (listPattern.test(lineText)) {
+        type = 'list'
+      }
+
+      // 判断引用（通常以引号开头或特定标记）
+      const quotePattern = /^[""「『【]/
+      if (quotePattern.test(lineText)) {
+        type = 'quote'
+      }
+
+      output.push({
+        str: lineText,
+        type,
+        fontSize,
+        isBold,
+        x,
+        y
+      })
+
+    }
+
+    // 格式化输出
+    const formattedPages = allStructuredContent.map(pageContent => {
+      return pageContent.map(item => {
+        switch (item.type) {
+          case 'title':
+            return `\n# ${item.str}\n`
+          case 'subtitle':
+            return `\n## ${item.str}\n`
+          case 'list':
+            return `- ${item.str}`
+          case 'quote':
+            return `> ${item.str}`
+          default:
+            return item.str
+        }
+      }).join('\n')
+    })
+
+    return formattedPages.join('\n\n')
   }
 
   private detectChapters(pageTexts: string[]): ChapterData[] {
