@@ -9,6 +9,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Upload, BookOpen, Brain, FileText, Loader2, List, Trash2, Tag, X, RefreshCw, Info } from 'lucide-react'
 import { ConfigDialog } from './project/ConfigDialog'
 import { TagDialog } from './TagDialog'
+import { ViewContentDialog } from './ViewContentDialog'
 import { CacheService } from '@/services/cacheService'
 import { useConfigStore } from '@/stores/configStore'
 import { useCustomPromptStore } from '@/stores/customPromptStore'
@@ -484,7 +485,7 @@ export function Step1Config({
           <ScrollArea className="h-full">
             <div className="pr-2">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {extractedChapters.map((chapter) => {
+                {extractedChapters.map((chapter, index) => {
                   const tag = chapterTags.get(chapter.id)
                   const isBoxSelected = boxSelectedChapters.has(chapter.id)
                   return (
@@ -546,6 +547,13 @@ export function Step1Config({
                       >
                         <BookOpen className="h-3 w-3" />
                       </Button>
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <ViewContentDialog
+                          title={chapter.title}
+                          content={chapter.content}
+                          chapterIndex={index}
+                        />
+                      </div>
                     </div>
                   )
                 })}
