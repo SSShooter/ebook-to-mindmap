@@ -13,7 +13,8 @@ import { CacheService } from '@/services/cacheService'
 import { useConfigStore } from '@/stores/configStore'
 import { useCustomPromptStore } from '@/stores/customPromptStore'
 import { toast } from 'sonner'
-import type { ChapterData } from '@/services/epubProcessor'
+import { EpubProcessor, type ChapterData, type BookData as EpubBookData } from '@/services/epubProcessor'
+import { PdfProcessor, type BookData as PdfBookData } from '@/services/pdfProcessor'
 
 const cacheService = new CacheService()
 
@@ -21,13 +22,11 @@ interface Step1ConfigProps {
   file: File | null
   onFileChange: (file: File | null) => void
   extractedChapters: ChapterData[] | null
-  customPrompt: string
-  onCustomPromptChange: (prompt: string) => void
-  onExtractChapters: () => void
-  onStartProcessing: (selectedChapters: Set<string>, chapterTags: Map<string, string>) => void
-  extractingChapters: boolean
+  onChaptersExtracted: (chapters: ChapterData[], bookData: { title: string; author: string }, fullBookData: EpubBookData | PdfBookData) => void
+  onStartProcessing: (selectedChapters: Set<string>, chapterTags: Map<string, string>, customPrompt: string) => void
   processing: boolean
   onReadChapter: (chapterId: string, chapterIds: string[]) => void
+  onError: (error: string) => void
 }
 
 function getStringSizeInKB(str: string): string {
@@ -35,18 +34,15 @@ function getStringSizeInKB(str: string): string {
   return sizeInKB.toFixed(1)
 }
 
-// TODO: move extractChapters into Step1
 export function Step1Config({
   file,
   onFileChange,
   extractedChapters,
-  customPrompt,
-  onCustomPromptChange,
-  onExtractChapters,
+  onChaptersExtracted,
   onStartProcessing,
-  extractingChapters,
   processing,
-  onReadChapter
+  onReadChapter,
+  onError
 }: Step1ConfigProps) {
   const { t } = useTranslation()
   const [selectedChapters, setSelectedChapters] = useState<Set<string>>(new Set())
@@ -54,24 +50,71 @@ export function Step1Config({
   const [boxSelectedChapters, setBoxSelectedChapters] = useState<Set<string>>(new Set())
   const [showTagDialog, setShowTagDialog] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
+  const [extractingChapters, setExtractingChapters] = useState(false)
+  const [customPrompt, setCustomPrompt] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const configStore = useConfigStore()
   const { apiKey } = configStore.aiConfig
-  const { processingMode } = configStore.processingOptions
+  const { processingMode, useSmartDetection, skipNonEssentialChapters, maxSubChapterDepth, forceUseSpine } = configStore.processingOptions
   const { prompts } = useCustomPromptStore()
+  const abortControllerRef = useRef<AbortController | null>(null)
 
-  // 当文件变化时自动提取章节
-  useEffect(() => {
-    if (file && !extractedChapters && !extractingChapters && !processing) {
-      console.log('🚀 [DEBUG] 文件已更新，开始自动提取章节:', file.name)
-      // 使用小延迟确保状态完全更新
-      const timer = setTimeout(() => {
-        onExtractChapters()
-      }, 100)
-      return () => clearTimeout(timer)
+  const extractChapters = useCallback(async (fileToProcess?: File) => {
+    const targetFile = fileToProcess || file
+    if (!targetFile) return
+
+    setExtractingChapters(true)
+    // Clear error by passing null or empty string if onError supported it, but here we rely on parent or just new attempt
+
+    abortControllerRef.current = new AbortController()
+
+    try {
+      let extractedBookData: { title: string; author: string }
+      let chapters: ChapterData[]
+      let fullBookData: EpubBookData | PdfBookData
+
+      const isEpub = targetFile.name.endsWith('.epub')
+      const isPdf = targetFile.name.endsWith('.pdf')
+
+      if (isEpub) {
+        const processor = new EpubProcessor()
+        const bookData = await processor.parseEpub(targetFile)
+        extractedBookData = { title: bookData.title, author: bookData.author }
+        fullBookData = bookData
+
+        chapters = await processor.extractChapters(bookData.book, useSmartDetection, skipNonEssentialChapters, maxSubChapterDepth, forceUseSpine)
+      } else if (isPdf) {
+        const processor = new PdfProcessor()
+        const bookData = await processor.parsePdf(targetFile)
+        extractedBookData = { title: bookData.title, author: bookData.author }
+        fullBookData = bookData
+
+        chapters = await processor.extractChapters(targetFile, useSmartDetection, skipNonEssentialChapters, maxSubChapterDepth)
+      } else {
+        throw new Error('不支持的文件格式')
+      }
+
+      onChaptersExtracted(chapters, extractedBookData, fullBookData)
+
+      toast.success(t('progress.successfullyExtracted', { count: chapters.length }), {
+        duration: 3000,
+        position: 'top-center',
+      })
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : t('progress.extractionError')
+      onError(errorMessage)
+      toast.error(errorMessage, {
+        duration: 5000,
+        position: 'top-center',
+      })
+    } finally {
+      setExtractingChapters(false)
+      if (abortControllerRef.current) {
+        abortControllerRef.current = null
+      }
     }
-  }, [file, extractedChapters, extractingChapters, processing, onExtractChapters])
+  }, [file, useSmartDetection, skipNonEssentialChapters, maxSubChapterDepth, forceUseSpine, t, onChaptersExtracted, onError])
 
   // 清除整本书缓存的函数
   const clearBookCache = useCallback(async () => {
@@ -153,6 +196,7 @@ export function Step1Config({
     if (selectedFile && (selectedFile.name.endsWith('.epub') || selectedFile.name.endsWith('.pdf'))) {
       console.log('✅ [DEBUG] 文件验证通过:', selectedFile.name)
       onFileChange(selectedFile)
+      extractChapters(selectedFile)
     } else if (selectedFile) {
       console.log('❌ [DEBUG] 文件格式不支持:', selectedFile.name)
       toast.error(t('upload.invalidFile'), {
@@ -160,7 +204,7 @@ export function Step1Config({
         position: 'top-center',
       })
     }
-  }, [onFileChange, t])
+  }, [onFileChange, t, extractChapters])
 
   const handleFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0]
@@ -383,15 +427,15 @@ export function Step1Config({
               </TooltipContent>
             </Tooltip>
             <Button
-              onClick={onExtractChapters}
+              onClick={() => extractChapters()}
               disabled={extractingChapters || processing}
             >
               {extractingChapters ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
-                  <List className="mr-2 h-4 w-4" />
+                <List className="mr-2 h-4 w-4" />
               )}
-                  {t('upload.extractChapters')}
+              {t('upload.extractChapters')}
             </Button>
           </div>
         </div>
@@ -517,7 +561,7 @@ export function Step1Config({
               <Label htmlFor="custom-prompt" className="text-sm font-medium">
                 {t('chapters.customPrompt')}
               </Label>
-              <Select value={customPrompt || 'default'} onValueChange={(value) => onCustomPromptChange(value === 'default' ? '' : value)} disabled={processing || extractingChapters}>
+              <Select value={customPrompt || 'default'} onValueChange={(value) => setCustomPrompt(value === 'default' ? '' : value)} disabled={processing || extractingChapters}>
                 <SelectTrigger className="mt-1">
                   <SelectValue placeholder={t('chapters.selectCustomPrompt')} />
                 </SelectTrigger>
@@ -545,7 +589,7 @@ export function Step1Config({
                 })
                 return
               }
-              onStartProcessing(selectedChapters, chapterTags)
+              onStartProcessing(selectedChapters, chapterTags, customPrompt)
             }}
             disabled={!extractedChapters || processing || extractingChapters || selectedChapters.size === 0}
             className="w-full"

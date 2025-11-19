@@ -40,7 +40,6 @@ interface BookMindMap {
 interface Step2ResultsProps {
   bookData: { title: string; author: string } | null
   processing: boolean
-  extractingChapters: boolean
   progress: number
   currentStep: string
   error: string | null
@@ -58,7 +57,6 @@ interface Step2ResultsProps {
 export function Step2Results({
   bookData,
   processing,
-  extractingChapters,
   progress,
   currentStep,
   error,
@@ -87,7 +85,7 @@ export function Step2Results({
 
     markdownContent += `## ${t('results.tabs.chapterSummary')}\n\n`
     bookSummary.groups.forEach((group) => {
-      const groupTitle = group.tag 
+      const groupTitle = group.tag
         ? `### ${group.tag} (${group.chapterTitles.join(', ')})`
         : `### ${group.chapterTitles[0]}`
       markdownContent += `${groupTitle}\n\n${group.summary || ''}\n\n`
@@ -136,24 +134,24 @@ ${bookSummary.overallSummary}
         <div className="p-4 bg-gray-50 rounded-lg space-y-4">
           {/* 头部导航和标题 */}
           <div className="flex items-center justify-between gap-3 overflow-hidden">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={onBackToConfig}
-                    className="flex items-center gap-2 shrink-0"
-                  >
-                <ArrowLeft className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{t('common.backToConfig')}</p>
-                </TooltipContent>
-              </Tooltip>
-              <div className="text-lg font-medium text-gray-700 truncate">
-                {bookData ? `${bookData.title} - ${bookData.author}` : t('results.processing')}
-              </div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onBackToConfig}
+                  className="flex items-center gap-2 shrink-0"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{t('common.backToConfig')}</p>
+              </TooltipContent>
+            </Tooltip>
+            <div className="text-lg font-medium text-gray-700 truncate">
+              {bookData ? `${bookData.title} - ${bookData.author}` : t('results.processing')}
+            </div>
             {processingMode === 'summary' && bookSummary && (
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -174,7 +172,7 @@ ${bookSummary.overallSummary}
           </div>
 
           {/* 进度条状态 */}
-          {(processing || extractingChapters || error) && (
+          {(processing || error) && (
             <div className="space-y-2">
               <div className="flex justify-between items-center text-sm">
                 <div className="flex items-center gap-2">
@@ -218,163 +216,163 @@ ${bookSummary.overallSummary}
         <div className="flex-1 min-h-0">
           <ScrollArea className="h-full">
             <div className="pr-2">
-            {processingMode === 'summary' && bookSummary ? (
-              <Tabs defaultValue="chapters" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="chapters">{t('results.tabs.chapterSummary')}</TabsTrigger>
-                  <TabsTrigger value="connections">{t('results.tabs.connections')}</TabsTrigger>
-                  <TabsTrigger value="overall">{t('results.tabs.overallSummary')}</TabsTrigger>
-                </TabsList>
+              {processingMode === 'summary' && bookSummary ? (
+                <Tabs defaultValue="chapters" className="w-full">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="chapters">{t('results.tabs.chapterSummary')}</TabsTrigger>
+                    <TabsTrigger value="connections">{t('results.tabs.connections')}</TabsTrigger>
+                    <TabsTrigger value="overall">{t('results.tabs.overallSummary')}</TabsTrigger>
+                  </TabsList>
 
-                <TabsContent value="chapters" className="space-y-3">
-                  {bookSummary.groups.map((group, index) => {
-                    const groupTitle = group.tag 
-                      ? `${group.tag} (${group.chapterTitles.join(', ')})`
-                      : group.chapterTitles[0]
-                    const groupContent = group.chapterIds.map(id => {
-                      const chapter = extractedChapters?.find(ch => ch.id === id)
-                      return chapter ? `## ${chapter.title}\n\n${chapter.content}` : ''
-                    }).join('\n\n')
-                    
-                    return (
-                      <MarkdownCard
-                        key={group.groupId}
-                        id={group.groupId}
-                        title={groupTitle}
-                        content={groupContent}
-                        markdownContent={group.summary || ''}
-                        index={index}
-                        defaultCollapsed={index > 0}
-                        onClearCache={onClearChapterCache}
-                        isLoading={group.isLoading}
-                        onReadChapter={() => {
-                          const chapterIds = group.chapterIds
-                          if (chapterIds.length > 0) {
-                            onReadChapter(chapterIds[0], chapterIds)
-                          }
-                        }}
-                      />
-                    )
-                  })}
-                </TabsContent>
+                  <TabsContent value="chapters" className="space-y-3">
+                    {bookSummary.groups.map((group, index) => {
+                      const groupTitle = group.tag
+                        ? `${group.tag} (${group.chapterTitles.join(', ')})`
+                        : group.chapterTitles[0]
+                      const groupContent = group.chapterIds.map(id => {
+                        const chapter = extractedChapters?.find(ch => ch.id === id)
+                        return chapter ? `## ${chapter.title}\n\n${chapter.content}` : ''
+                      }).join('\n\n')
 
-                <TabsContent value="connections">
-                  <MarkdownCard
-                    id="connections"
-                    title={t('results.tabs.connections')}
-                    content={bookSummary.connections}
-                    markdownContent={bookSummary.connections}
-                    index={0}
-                    showClearCache={true}
-                    showViewContent={false}
-                    showCopyButton={true}
-                    onClearCache={() => onClearSpecificCache('connections')}
-                  />
-                </TabsContent>
+                      return (
+                        <MarkdownCard
+                          key={group.groupId}
+                          id={group.groupId}
+                          title={groupTitle}
+                          content={groupContent}
+                          markdownContent={group.summary || ''}
+                          index={index}
+                          defaultCollapsed={index > 0}
+                          onClearCache={onClearChapterCache}
+                          isLoading={group.isLoading}
+                          onReadChapter={() => {
+                            const chapterIds = group.chapterIds
+                            if (chapterIds.length > 0) {
+                              onReadChapter(chapterIds[0], chapterIds)
+                            }
+                          }}
+                        />
+                      )
+                    })}
+                  </TabsContent>
 
-                <TabsContent value="overall">
-                  <MarkdownCard
-                    id="overall"
-                    title={t('results.tabs.overallSummary')}
-                    content={bookSummary.overallSummary}
-                    markdownContent={bookSummary.overallSummary}
-                    index={0}
-                    showClearCache={true}
-                    showViewContent={false}
-                    showCopyButton={true}
-                    onClearCache={() => onClearSpecificCache('overall_summary')}
-                  />
-                </TabsContent>
-              </Tabs>
-            ) : processingMode === 'mindmap' && bookMindMap ? (
-              <Tabs defaultValue="chapters" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="chapters">{t('results.tabs.chapterMindMaps')}</TabsTrigger>
-                  <TabsTrigger value="combined">{t('results.tabs.combinedMindMap')}</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="chapters" className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {bookMindMap.groups.map((group, index) => {
-                    const groupTitle = group.tag 
-                      ? `${group.tag} (${group.chapterTitles.join(', ')})`
-                      : group.chapterTitles[0]
-                    const groupContent = group.chapterIds.map(id => {
-                      const chapter = extractedChapters?.find(ch => ch.id === id)
-                      return chapter ? `## ${chapter.title}\n\n${chapter.content}` : ''
-                    }).join('\n\n')
-                    
-                    return (
-                      <MindMapCard
-                        key={group.groupId}
-                        id={group.groupId}
-                        title={groupTitle}
-                        isLoading={group.isLoading}
-                        content={groupContent}
-                        mindMapData={group.mindMap || { nodeData: { topic: '', id: '', children: [] } }}
-                        index={index}
-                        showCopyButton={false}
-                        onClearCache={onClearChapterCache}
-                        onOpenInMindElixir={openInMindElixir}
-                        onDownloadMindMap={downloadMindMap}
-                        onReadChapter={() => {
-                          const chapterIds = group.chapterIds
-                          if (chapterIds.length > 0) {
-                            onReadChapter(chapterIds[0], chapterIds)
-                          }
-                        }}
-                        mindElixirOptions={mindElixirOptions}
-                      />
-                    )
-                  })}
-                </TabsContent>
-
-                <TabsContent value="combined" className='grid grid-cols-1'>
-                  {bookMindMap.combinedMindMap ? (
-                    <MindMapCard
-                      id="combined"
-                      title={t('results.tabs.combinedMindMap')}
-                      content=""
-                      mindMapData={bookMindMap.combinedMindMap}
+                  <TabsContent value="connections">
+                    <MarkdownCard
+                      id="connections"
+                      title={t('results.tabs.connections')}
+                      content={bookSummary.connections}
+                      markdownContent={bookSummary.connections}
                       index={0}
-                      onOpenInMindElixir={(mindmapData) => openInMindElixir(mindmapData, t('results.combinedMindMapTitle', { title: bookMindMap.title }))}
-                      onDownloadMindMap={downloadMindMap}
-                      onClearCache={() => onClearSpecificCache('merged_mindmap')}
                       showClearCache={true}
                       showViewContent={false}
-                      showCopyButton={false}
-                      mindMapClassName="w-full h-[600px] mx-auto"
-                      mindElixirOptions={mindElixirOptions}
+                      showCopyButton={true}
+                      onClearCache={() => onClearSpecificCache('connections')}
                     />
-                  ) : (
-                    <div className="text-center text-gray-500 py-8 bg-gray-50 rounded-lg">
-                      {t('results.generatingMindMap')}
-                    </div>
-                  )}
-                </TabsContent>
-              </Tabs>
-            ) : processingMode === 'combined-mindmap' && bookMindMap ? (
-              bookMindMap.combinedMindMap ? (
-                <MindMapCard
-                  id="whole-book"
-                  title={t('results.tabs.combinedMindMap')}
-                  content=""
-                  mindMapData={bookMindMap.combinedMindMap}
-                  index={0}
-                  onOpenInMindElixir={(mindmapData) => openInMindElixir(mindmapData, t('results.combinedMindMapTitle', { title: bookMindMap.title }))}
-                  onDownloadMindMap={downloadMindMap}
-                  onClearCache={() => onClearSpecificCache('combined_mindmap')}
-                  showClearCache={true}
-                  showViewContent={false}
-                  showCopyButton={false}
-                  mindMapClassName="w-full h-[600px] mx-auto"
-                  mindElixirOptions={mindElixirOptions}
-                />
-              ) : (
-                <div className="text-center text-gray-500 py-8 bg-gray-50 rounded-lg">
-                  {t('results.generatingMindMap')}
-                </div>
-              )
-            ) : null}
+                  </TabsContent>
+
+                  <TabsContent value="overall">
+                    <MarkdownCard
+                      id="overall"
+                      title={t('results.tabs.overallSummary')}
+                      content={bookSummary.overallSummary}
+                      markdownContent={bookSummary.overallSummary}
+                      index={0}
+                      showClearCache={true}
+                      showViewContent={false}
+                      showCopyButton={true}
+                      onClearCache={() => onClearSpecificCache('overall_summary')}
+                    />
+                  </TabsContent>
+                </Tabs>
+              ) : processingMode === 'mindmap' && bookMindMap ? (
+                <Tabs defaultValue="chapters" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="chapters">{t('results.tabs.chapterMindMaps')}</TabsTrigger>
+                    <TabsTrigger value="combined">{t('results.tabs.combinedMindMap')}</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="chapters" className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {bookMindMap.groups.map((group, index) => {
+                      const groupTitle = group.tag
+                        ? `${group.tag} (${group.chapterTitles.join(', ')})`
+                        : group.chapterTitles[0]
+                      const groupContent = group.chapterIds.map(id => {
+                        const chapter = extractedChapters?.find(ch => ch.id === id)
+                        return chapter ? `## ${chapter.title}\n\n${chapter.content}` : ''
+                      }).join('\n\n')
+
+                      return (
+                        <MindMapCard
+                          key={group.groupId}
+                          id={group.groupId}
+                          title={groupTitle}
+                          isLoading={group.isLoading}
+                          content={groupContent}
+                          mindMapData={group.mindMap || { nodeData: { topic: '', id: '', children: [] } }}
+                          index={index}
+                          showCopyButton={false}
+                          onClearCache={onClearChapterCache}
+                          onOpenInMindElixir={openInMindElixir}
+                          onDownloadMindMap={downloadMindMap}
+                          onReadChapter={() => {
+                            const chapterIds = group.chapterIds
+                            if (chapterIds.length > 0) {
+                              onReadChapter(chapterIds[0], chapterIds)
+                            }
+                          }}
+                          mindElixirOptions={mindElixirOptions}
+                        />
+                      )
+                    })}
+                  </TabsContent>
+
+                  <TabsContent value="combined" className='grid grid-cols-1'>
+                    {bookMindMap.combinedMindMap ? (
+                      <MindMapCard
+                        id="combined"
+                        title={t('results.tabs.combinedMindMap')}
+                        content=""
+                        mindMapData={bookMindMap.combinedMindMap}
+                        index={0}
+                        onOpenInMindElixir={(mindmapData) => openInMindElixir(mindmapData, t('results.combinedMindMapTitle', { title: bookMindMap.title }))}
+                        onDownloadMindMap={downloadMindMap}
+                        onClearCache={() => onClearSpecificCache('merged_mindmap')}
+                        showClearCache={true}
+                        showViewContent={false}
+                        showCopyButton={false}
+                        mindMapClassName="w-full h-[600px] mx-auto"
+                        mindElixirOptions={mindElixirOptions}
+                      />
+                    ) : (
+                      <div className="text-center text-gray-500 py-8 bg-gray-50 rounded-lg">
+                        {t('results.generatingMindMap')}
+                      </div>
+                    )}
+                  </TabsContent>
+                </Tabs>
+              ) : processingMode === 'combined-mindmap' && bookMindMap ? (
+                bookMindMap.combinedMindMap ? (
+                  <MindMapCard
+                    id="whole-book"
+                    title={t('results.tabs.combinedMindMap')}
+                    content=""
+                    mindMapData={bookMindMap.combinedMindMap}
+                    index={0}
+                    onOpenInMindElixir={(mindmapData) => openInMindElixir(mindmapData, t('results.combinedMindMapTitle', { title: bookMindMap.title }))}
+                    onDownloadMindMap={downloadMindMap}
+                    onClearCache={() => onClearSpecificCache('combined_mindmap')}
+                    showClearCache={true}
+                    showViewContent={false}
+                    showCopyButton={false}
+                    mindMapClassName="w-full h-[600px] mx-auto"
+                    mindElixirOptions={mindElixirOptions}
+                  />
+                ) : (
+                  <div className="text-center text-gray-500 py-8 bg-gray-50 rounded-lg">
+                    {t('results.generatingMindMap')}
+                  </div>
+                )
+              ) : null}
             </div>
           </ScrollArea>
         </div>

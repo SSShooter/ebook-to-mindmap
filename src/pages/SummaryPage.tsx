@@ -2,8 +2,8 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { ChevronUp } from 'lucide-react'
-import { EpubProcessor, type ChapterData, type BookData as EpubBookData } from '../services/epubProcessor'
-import { PdfProcessor, type BookData as PdfBookData } from '../services/pdfProcessor'
+import { type ChapterData, type BookData as EpubBookData } from '@/services/epubProcessor'
+import { type BookData as PdfBookData } from '@/services/pdfProcessor'
 import { AIService } from '../services/aiService'
 import { CacheService } from '../services/cacheService'
 import { BookProcessingService, type Chapter, type ChapterGroup } from '../services/bookProcessingService'
@@ -40,7 +40,6 @@ export function SummaryPage() {
   const [currentStepIndex, setCurrentStepIndex] = useState(1)
   const [file, setFile] = useState<File | null>(null)
   const [processing, setProcessing] = useState(false)
-  const [extractingChapters, setExtractingChapters] = useState(false)
   const [progress, setProgress] = useState(0)
   const [currentStep, setCurrentStep] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -49,7 +48,6 @@ export function SummaryPage() {
   const [extractedChapters, setExtractedChapters] = useState<ChapterData[] | null>(null)
   const [bookData, setBookData] = useState<{ title: string; author: string } | null>(null)
   const [fullBookData, setFullBookData] = useState<EpubBookData | PdfBookData | null>(null)
-  const [customPrompt, setCustomPrompt] = useState('')
   const [showBackToTop, setShowBackToTop] = useState(false)
   const [readingChapterId, setReadingChapterId] = useState<string | null>(null)
   const [readingChapterIds, setReadingChapterIds] = useState<string[]>([])
@@ -57,7 +55,7 @@ export function SummaryPage() {
 
   const configStore = useConfigStore()
   const { apiKey } = configStore.aiConfig
-  const { processingMode, bookType, useSmartDetection, skipNonEssentialChapters, maxSubChapterDepth, forceUseSpine } = configStore.processingOptions
+  const { processingMode, bookType } = configStore.processingOptions
 
   useEffect(() => {
     const scrollContainer = document.querySelector('.scroll-container')
@@ -131,62 +129,9 @@ export function SummaryPage() {
     setError(null)
   }, [])
 
-  const extractChapters = useCallback(async () => {
-    if (!file) return
 
-    setExtractingChapters(true)
-    setError(null)
 
-    abortControllerRef.current = new AbortController()
-
-    try {
-      let extractedBookData: { title: string; author: string }
-      let chapters: ChapterData[]
-
-      const isEpub = file.name.endsWith('.epub')
-      const isPdf = file.name.endsWith('.pdf')
-
-      if (isEpub) {
-        const processor = new EpubProcessor()
-        const bookData = await processor.parseEpub(file)
-        extractedBookData = { title: bookData.title, author: bookData.author }
-        setFullBookData(bookData)
-        
-        chapters = await processor.extractChapters(bookData.book, useSmartDetection, skipNonEssentialChapters, maxSubChapterDepth, forceUseSpine)
-      } else if (isPdf) {
-        const processor = new PdfProcessor()
-        const bookData = await processor.parsePdf(file)
-        extractedBookData = { title: bookData.title, author: bookData.author }
-        setFullBookData(bookData)
-        
-        chapters = await processor.extractChapters(file, useSmartDetection, skipNonEssentialChapters, maxSubChapterDepth)
-      } else {
-        throw new Error('不支持的文件格式')
-      }
-
-      setBookData(extractedBookData)
-      setExtractedChapters(chapters)
-
-      toast.success(t('progress.successfullyExtracted', { count: chapters.length }), {
-        duration: 3000,
-        position: 'top-center',
-      })
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : t('progress.extractionError')
-      setError(errorMessage)
-      toast.error(errorMessage, {
-        duration: 5000,
-        position: 'top-center',
-      })
-    } finally {
-      setExtractingChapters(false)
-      if (abortControllerRef.current) {
-        abortControllerRef.current = null
-      }
-    }
-  }, [file, useSmartDetection, skipNonEssentialChapters, maxSubChapterDepth, forceUseSpine, t])
-
-  const handleStartProcessing = useCallback(async (selectedChapters: Set<string>, chapterTags: Map<string, string>) => {
+  const handleStartProcessing = useCallback(async (selectedChapters: Set<string>, chapterTags: Map<string, string>, customPrompt: string) => {
     if (!extractedChapters || !bookData || !apiKey) {
       toast.error(t('chapters.extractAndApiKey'), {
         duration: 3000,
@@ -230,7 +175,7 @@ export function SummaryPage() {
       const bookProcessingService = new BookProcessingService(aiService, cacheService)
       const chapters = extractedChapters.filter(chapter => selectedChapters.has(chapter.id))
       const groups = bookProcessingService.groupChaptersByTag(chapters, chapterTags)
-      
+
       console.log('groups', groups)
 
       const totalGroups = groups.length
@@ -420,14 +365,14 @@ export function SummaryPage() {
         abortControllerRef.current = null
       }
     }
-  }, [extractedChapters, bookData, apiKey, file, processingMode, bookType, customPrompt, configStore.processingOptions.outputLanguage, t])
+  }, [extractedChapters, bookData, apiKey, file, processingMode, bookType, configStore.processingOptions.outputLanguage, t])
 
   const hasReader = readingChapterId && file && extractedChapters
 
   return (
     <div className="flex-1 flex relative overflow-hidden">
       {/* Left Module - Scrollable */}
-      <div 
+      <div
         className={`
           transition-all duration-300 ease-in-out
           ${hasReader ? 'w-full md:w-1/2' : 'w-full'}
@@ -442,19 +387,20 @@ export function SummaryPage() {
               file={file}
               onFileChange={handleFileChange}
               extractedChapters={extractedChapters}
-              customPrompt={customPrompt}
-              onCustomPromptChange={setCustomPrompt}
-              onExtractChapters={extractChapters}
+              onChaptersExtracted={(chapters, bookData, fullBookData) => {
+                setExtractedChapters(chapters)
+                setBookData(bookData)
+                setFullBookData(fullBookData)
+              }}
               onStartProcessing={handleStartProcessing}
-              extractingChapters={extractingChapters}
               processing={processing}
               onReadChapter={handleReadChapter}
+              onError={setError}
             />
           ) : (
             <Step2Results
               bookData={bookData}
               processing={processing}
-              extractingChapters={extractingChapters}
               progress={progress}
               currentStep={currentStep}
               error={error}
@@ -473,7 +419,7 @@ export function SummaryPage() {
       </div>
 
       {/* Reader - Slides in from right, fixed height 100vh */}
-      <div 
+      <div
         className={`
           fixed lg:absolute top-0 right-0
           h-screen
