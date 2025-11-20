@@ -15,7 +15,7 @@ interface AIConfig {
 interface ProcessingOptions {
   processingMode: 'summary' | 'mindmap' | 'combined-mindmap'
   bookType: 'fiction' | 'non-fiction'
-  useSmartDetection: boolean
+
   skipNonEssentialChapters: boolean
   maxSubChapterDepth: number
   outputLanguage: SupportedLanguage
@@ -31,17 +31,17 @@ interface ConfigState {
   setApiUrl: (apiUrl: string) => void
   setModel: (model: string) => void
   setTemperature: (temperature: number) => void
-  
+
   // 处理选项
   processingOptions: ProcessingOptions
   setProcessingMode: (mode: 'summary' | 'mindmap' | 'combined-mindmap') => void
   setBookType: (type: 'fiction' | 'non-fiction') => void
-  setUseSmartDetection: (enabled: boolean) => void
+
   setSkipNonEssentialChapters: (enabled: boolean) => void
   setMaxSubChapterDepth: (depth: number) => void
   setOutputLanguage: (language: SupportedLanguage) => void
   setForceUseSpine: (enabled: boolean) => void
-  
+
   // 统一导入配置
   importConfig: (config: { aiConfig?: Partial<AIConfig>, processingOptions?: Partial<ProcessingOptions> }) => void
 }
@@ -58,7 +58,7 @@ const defaultAIConfig: AIConfig = {
 const defaultProcessingOptions: ProcessingOptions = {
   processingMode: 'mindmap',
   bookType: 'non-fiction',
-  useSmartDetection: false,
+
   skipNonEssentialChapters: true,
   maxSubChapterDepth: 0,
   outputLanguage: 'en',
@@ -86,7 +86,7 @@ export const useConfigStore = create<ConfigState>()(
       setTemperature: (temperature) => set((state) => ({
         aiConfig: { ...state.aiConfig, temperature }
       })),
-      
+
       // 处理选项
       processingOptions: defaultProcessingOptions,
       setProcessingMode: (processingMode) => set((state) => ({
@@ -95,9 +95,7 @@ export const useConfigStore = create<ConfigState>()(
       setBookType: (bookType) => set((state) => ({
         processingOptions: { ...state.processingOptions, bookType }
       })),
-      setUseSmartDetection: (useSmartDetection) => set((state) => ({
-        processingOptions: { ...state.processingOptions, useSmartDetection }
-      })),
+
       setSkipNonEssentialChapters: (skipNonEssentialChapters) => set((state) => ({
         processingOptions: { ...state.processingOptions, skipNonEssentialChapters }
       })),
@@ -110,7 +108,7 @@ export const useConfigStore = create<ConfigState>()(
       setForceUseSpine: (forceUseSpine) => set((state) => ({
         processingOptions: { ...state.processingOptions, forceUseSpine }
       })),
-      
+
       // 统一导入配置
       importConfig: (config) => set((state) => ({
         aiConfig: config.aiConfig ? { ...state.aiConfig, ...config.aiConfig } : state.aiConfig,
@@ -130,11 +128,11 @@ export const useConfigStore = create<ConfigState>()(
 // Helper to get default model from model store
 const getDefaultModelFromStorage = (): AIConfig | null => {
   if (typeof window === 'undefined') return null
-  
+
   try {
     const modelStore = JSON.parse(localStorage.getItem('ebook-models') || '{"state":{"models":[]}}')
     const defaultModel = modelStore.state.models.find((m: { isDefault: boolean; provider: string; apiKey: string; apiUrl: string; model: string; temperature: number }) => m.isDefault)
-    
+
     if (defaultModel) {
       return {
         provider: defaultModel.provider as AIConfig['provider'],
@@ -147,17 +145,17 @@ const getDefaultModelFromStorage = (): AIConfig | null => {
   } catch (error) {
     console.error('Failed to load default model from storage:', error)
   }
-  
+
   return null
 }
 
 // 导出便捷的选择器
 export const useAIConfig = () => {
   const configStoreAIConfig = useConfigStore((state) => state.aiConfig)
-  
+
   // Try to get default model from model store first
   const defaultModel = getDefaultModelFromStorage()
-  
+
   return defaultModel || configStoreAIConfig
 }
 

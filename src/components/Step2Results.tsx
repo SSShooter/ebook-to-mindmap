@@ -194,16 +194,16 @@ ${bookSummary.overallSummary}
           {/* 结果统计信息 */}
           {(bookSummary || bookMindMap) && (
             <div className="flex items-center justify-between pt-2 border-t border-gray-200">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 min-w-0">
                 {processingMode === 'summary' ? (
-                  <><BookOpen className="h-5 w-5 text-gray-600" /><span className="font-medium text-sm text-gray-700">{t('results.summaryTitle', { title: bookSummary?.title })}</span></>
+                  <><BookOpen className="h-5 w-5 text-gray-600 shrink-0" /><span className="font-medium text-sm text-gray-700 truncate">{t('results.summaryTitle', { title: bookSummary?.title })}</span></>
                 ) : processingMode === 'mindmap' ? (
-                  <><Network className="h-5 w-5 text-gray-600" /><span className="font-medium text-sm text-gray-700">{t('results.chapterMindMapTitle', { title: bookMindMap?.title })}</span></>
+                  <><Network className="h-5 w-5 text-gray-600 shrink-0" /><span className="font-medium text-sm text-gray-700 truncate">{t('results.chapterMindMapTitle', { title: bookMindMap?.title })}</span></>
                 ) : (
-                  <><Network className="h-5 w-5 text-gray-600" /><span className="font-medium text-sm text-gray-700">{t('results.wholeMindMapTitle', { title: bookMindMap?.title })}</span></>
+                  <><Network className="h-5 w-5 text-gray-600 shrink-0" /><span className="font-medium text-sm text-gray-700 truncate">{t('results.wholeMindMapTitle', { title: bookMindMap?.title })}</span></>
                 )}
               </div>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 shrink-0">
                 {t('results.author', { author: bookSummary?.author || bookMindMap?.author })} • {bookSummary ? t('results.groupCount', { count: bookSummary.groups.length }) : bookMindMap ? t('results.groupCount', { count: bookMindMap.groups.length }) : ''}
               </p>
             </div>

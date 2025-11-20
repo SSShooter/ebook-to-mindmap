@@ -58,7 +58,7 @@ export function Step1Config({
 
   const configStore = useConfigStore()
   const { apiKey } = configStore.aiConfig
-  const { processingMode, useSmartDetection, skipNonEssentialChapters, maxSubChapterDepth, forceUseSpine } = configStore.processingOptions
+  const { processingMode, skipNonEssentialChapters, maxSubChapterDepth, forceUseSpine } = configStore.processingOptions
   const { prompts } = useCustomPromptStore()
   const abortControllerRef = useRef<AbortController | null>(null)
 
@@ -85,14 +85,14 @@ export function Step1Config({
         extractedBookData = { title: bookData.title, author: bookData.author }
         fullBookData = bookData
 
-        chapters = await processor.extractChapters(bookData.book, useSmartDetection, skipNonEssentialChapters, maxSubChapterDepth, forceUseSpine)
+        chapters = await processor.extractChapters(bookData.book, skipNonEssentialChapters, maxSubChapterDepth, forceUseSpine)
       } else if (isPdf) {
         const processor = new PdfProcessor()
         const bookData = await processor.parsePdf(targetFile)
         extractedBookData = { title: bookData.title, author: bookData.author }
         fullBookData = bookData
 
-        chapters = await processor.extractChapters(targetFile, useSmartDetection, skipNonEssentialChapters, maxSubChapterDepth)
+        chapters = await processor.extractChapters(targetFile, skipNonEssentialChapters, maxSubChapterDepth)
       } else {
         throw new Error(t('upload.unsupportedFormat'))
       }
@@ -116,7 +116,7 @@ export function Step1Config({
         abortControllerRef.current = null
       }
     }
-  }, [file, useSmartDetection, skipNonEssentialChapters, maxSubChapterDepth, forceUseSpine, t, onChaptersExtracted, onError])
+  }, [file, skipNonEssentialChapters, maxSubChapterDepth, forceUseSpine, t, onChaptersExtracted, onError])
 
   // 清除整本书缓存的函数
   const clearBookCache = useCallback(async () => {

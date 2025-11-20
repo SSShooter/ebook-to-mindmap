@@ -36,10 +36,10 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
   } = useConfigStore()
 
   const { processingMode, bookType, skipNonEssentialChapters, outputLanguage, forceUseSpine } = processingOptions
-  
+
   // Track selected model for this request
   const [selectedModelId, setSelectedModelId] = useState<string>('')
-  
+
   // Initialize with default model
   useEffect(() => {
     const defaultModel = getDefaultModel()
@@ -47,7 +47,7 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
       setSelectedModelId(defaultModel.id)
     }
   }, [getDefaultModel, selectedModelId])
-  
+
   // Update config when model selection changes
   useEffect(() => {
     const selectedModel = models.find(m => m.id === selectedModelId)
@@ -89,7 +89,7 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
       reader.onload = (event) => {
         try {
           const config = JSON.parse(event.target?.result as string)
-          
+
           // 验证配置结构
           if (!config.processingOptions) {
             toast.error(t('config.importError'))
@@ -145,7 +145,7 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
                 <Brain className="h-4 w-4" />
                 <Label className="text-sm font-medium">{t('models.selectModel')}</Label>
               </div>
-              
+
               {models.length === 0 ? (
                 <div className="text-sm text-gray-600 py-2">
                   {t('models.noModelsConfigured')}
@@ -168,7 +168,7 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
                   </SelectContent>
                 </Select>
               )}
-              
+
               {selectedModelId && models.find(m => m.id === selectedModelId) && (
                 <div className="text-xs text-gray-600 mt-2 space-y-1">
                   <div>
@@ -313,22 +313,7 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
               </div>
             </div>
 
-            {/* <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border">
-              <div className="space-y-1">
-                <Label htmlFor="smart-detection" className="text-sm font-medium">
-                  {t('config.smartChapterDetection')}
-                </Label>
-                <p className="text-xs text-gray-600">
-                  {t('config.smartChapterDetectionDescription')}
-                </p>
-              </div>
-              <Switch
-                id="smart-detection"
-                checked={useSmartDetection}
-                onCheckedChange={setUseSmartDetection}
-                disabled={processing}
-              />
-            </div> */}
+
 
           </div>
         </ScrollArea>

@@ -68,7 +68,7 @@ export class PdfProcessor {
     }
   }
 
-  async extractChapters(file: File, useSmartDetection: boolean = false, skipNonEssentialChapters: boolean = true, maxSubChapterDepth: number = 0): Promise<ChapterData[]> {
+  async extractChapters(file: File, skipNonEssentialChapters: boolean = true, maxSubChapterDepth: number = 0): Promise<ChapterData[]> {
     try {
       const arrayBuffer = await file.arrayBuffer()
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
@@ -125,7 +125,7 @@ export class PdfProcessor {
 
       // 如果没有从outline获取到章节，使用备用方法
       if (chapters.length === 0) {
-        console.log(`📖 [DEBUG] 使用备用分章节方法，智能检测: ${useSmartDetection}`)
+        console.log(`📖 [DEBUG] 使用备用分章节方法`)
 
         // 获取所有页面的文本内容
         const allPageTexts: string[] = []
@@ -153,11 +153,7 @@ export class PdfProcessor {
 
         let detectedChapters: ChapterData[] = []
 
-        // 只有在用户启用智能检测时才使用
-        if (useSmartDetection) {
-          console.log(`🧠 [DEBUG] 启用智能章节检测`)
-          detectedChapters = this.detectChapters(allPageTexts)
-        }
+
 
         chapters.push(...detectedChapters)
 
@@ -339,86 +335,7 @@ export class PdfProcessor {
     return formattedPages.join('\n\n')
   }
 
-  private detectChapters(pageTexts: string[]): ChapterData[] {
-    const chapters: ChapterData[] = []
-    const chapterPatterns = [
-      /^第[一二三四五六七八九十\d]+章[\s\S]*$/m,
-      /^Chapter\s+\d+[\s\S]*$/mi,
-      /^第[一二三四五六七八九十\d]+节[\s\S]*$/m,
-      /^\d+\.[\s\S]*$/m,
-      /^[一二三四五六七八九十]、[\s\S]*$/m
-    ]
 
-    let currentChapter: { title: string; content: string; startPage: number } | null = null
-    let chapterCount = 0
-
-    for (let i = 0; i < pageTexts.length; i++) {
-      const pageText = pageTexts[i].trim()
-      if (pageText.length < 50) continue // 跳过内容太少的页面
-
-      // 检查是否是新章节的开始
-      let isNewChapter = false
-      let chapterTitle = ''
-
-      for (const pattern of chapterPatterns) {
-        const match = pageText.match(pattern)
-        if (match) {
-          // 提取章节标题（取前100个字符作为标题）
-          const titleMatch = pageText.match(/^(.{1,100})/)
-          chapterTitle = titleMatch ? titleMatch[1].trim() : `章节 ${chapterCount + 1}`
-          isNewChapter = true
-          break
-        }
-      }
-
-      if (isNewChapter) {
-        // 保存上一个章节
-        if (currentChapter && currentChapter.content.trim().length > 200) {
-          chapters.push({
-            id: `chapter-${chapterCount}`,
-            title: currentChapter.title,
-            content: currentChapter.content.trim(),
-            startPage: currentChapter.startPage
-          })
-        }
-
-        // 开始新章节
-        chapterCount++
-        currentChapter = {
-          title: chapterTitle,
-          content: pageText,
-          startPage: i + 1
-        }
-
-        console.log(`📖 [DEBUG] 检测到新章节: "${chapterTitle}" (第${i + 1}页)`)
-      } else if (currentChapter) {
-        // 添加到当前章节
-        currentChapter.content += '\n\n' + pageText
-      } else {
-        // 如果还没有章节，创建第一个章节
-        chapterCount++
-        currentChapter = {
-          title: `第 ${chapterCount} 章`,
-          content: pageText,
-          startPage: i + 1
-        }
-      }
-    }
-
-    // 保存最后一个章节
-    if (currentChapter && currentChapter.content.trim().length > 200) {
-      chapters.push({
-        id: `chapter-${chapterCount}`,
-        title: currentChapter.title,
-        content: currentChapter.content.trim(),
-        startPage: currentChapter.startPage
-      })
-    }
-
-    console.log(`🔍 [DEBUG] 章节检测完成，找到 ${chapters.length} 个章节`)
-
-    return chapters
-  }
 
   // 检查是否应该跳过某个章节
   private shouldSkipChapter(title: string): boolean {
