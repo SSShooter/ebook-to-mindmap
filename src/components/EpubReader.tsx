@@ -20,7 +20,7 @@ interface EpubReaderProps {
 
 export function EpubReader({ initialChapterId, chapterIds, chapters, bookData, onClose, className }: EpubReaderProps) {
   const { t } = useTranslation()
-  const [currentIndex, setCurrentIndex] = useState(() => 
+  const [currentIndex, setCurrentIndex] = useState(() =>
     chapterIds.indexOf(initialChapterId)
   )
   const [chapterHtmlContent, setChapterHtmlContent] = useState<string>('')
@@ -49,7 +49,7 @@ export function EpubReader({ initialChapterId, chapterIds, chapters, bookData, o
   // 使用 Shadow DOM 来隔离 EPUB 内容样式
   useEffect(() => {
     if (!shadowRef.current) return
-    
+
     const content = chapterHtmlContent || chapter.content
     if (!content) return
 
@@ -127,7 +127,7 @@ export function EpubReader({ initialChapterId, chapterIds, chapters, bookData, o
             <X className="h-4 w-4" />
           </Button>
         </div>
-        
+
         {/* Navigation */}
         {hasMultipleChapters && (
           <div className="flex items-center justify-center gap-2">
@@ -160,7 +160,7 @@ export function EpubReader({ initialChapterId, chapterIds, chapters, bookData, o
       {/* Content */}
       <div className="flex-1 min-h-0 p-2">
         <ScrollArea ref={scrollAreaRef} className="h-full">
-          <div className="prose prose-sm max-w-none px-1">
+          <div className="prose prose-sm max-w-none px-3">
             {isLoadingHtml ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="h-6 w-6 animate-spin mr-2" />

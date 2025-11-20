@@ -108,7 +108,7 @@ export class PdfProcessor {
 
               if (chapterContent.trim().length > 100) {
                 chapters.push({
-                  id: `chapter-${chapters.length + 1}`,
+                  id: chapterInfo.title,
                   title: chapterInfo.title,
                   content: chapterContent,
                   startPage: startPage,

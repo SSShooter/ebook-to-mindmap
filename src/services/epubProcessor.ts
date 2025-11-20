@@ -1,5 +1,6 @@
 import ePub, { Book, type NavItem } from '@ssshooter/epubjs'
 import { SKIP_CHAPTER_KEYWORDS } from './constants'
+import { htmlToMarkdown } from '../utils/htmlToMarkdown'
 import type Section from '@ssshooter/epubjs/types/section'
 
 
@@ -104,7 +105,7 @@ export class EpubProcessor {
               // 如果从HTML中提取到了h2标题，优先使用；否则保留原标题
               const finalTitle = extractedTitle || chapterInfo.title
               chapters.push({
-                id: `chapter-${chapters.length + 1}`,
+                id: finalTitle,
                 title: finalTitle,
                 content: chapterContent,
                 href: chapterInfo.href,
@@ -273,12 +274,10 @@ export class EpubProcessor {
       const scripts = body.querySelectorAll('script, style')
       scripts.forEach(el => el.remove())
 
-      // 获取纯文本内容
-      let textContent = body.textContent || ''
+      // 获取Markdown内容
+      let textContent = htmlToMarkdown(body.innerHTML)
 
-      textContent = textContent.trim()
-
-      console.log(`✨ [DEBUG] 清理后文本长度: ${textContent.length}`)
+      console.log(`✨ [DEBUG] 转换Markdown后文本长度: ${textContent.length}`)
 
       return { title, textContent }
     } catch (error) {

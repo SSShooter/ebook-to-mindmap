@@ -73,7 +73,7 @@ export class BookProcessingService {
         groups.push({
           tag: null,
           chapters: [chapter],
-          groupId: chapter.id
+          groupId: chapter.title
         })
       } else if (!processedTags.has(tag)) {
         // 第一次遇到这个tag，收集所有同tag的章节
