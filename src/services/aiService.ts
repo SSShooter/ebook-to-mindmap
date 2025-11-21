@@ -9,6 +9,8 @@ import {
   getTestConnectionPrompt,
   getChapterMindMapPrompt,
   getMindMapArrowPrompt,
+  getCharacterRelationshipPrompt,
+  getFictionCharacterRelationshipPrompt,
 } from './prompts'
 import type { MindElixirData } from 'mind-elixir'
 import { getLanguageInstruction, type SupportedLanguage } from './prompts/utils'
@@ -133,6 +135,42 @@ export class AIService {
       throw new Error(`全书总结生成失败: ${error instanceof Error ? error.message : '未知错误'}`)
     }
   }
+
+  async generateCharacterRelationship(
+    chapters: Chapter[],
+    outputLanguage: SupportedLanguage = 'en',
+    bookType: 'fiction' | 'non-fiction' = 'non-fiction',
+    abortSignal?: AbortSignal
+  ): Promise<string> {
+    try {
+      // 构建章节摘要信息
+      const chapterSummaries = chapters.map((chapter) =>
+        `${chapter.title}:\n${chapter.summary || '无总结'}`
+      ).join('\n\n')
+
+      const prompt = bookType === 'fiction'
+        ? getFictionCharacterRelationshipPrompt(chapterSummaries)
+        : getCharacterRelationshipPrompt(chapterSummaries)
+
+      const relationship = await this.generateContent(prompt, outputLanguage, abortSignal)
+
+      if (!relationship || relationship.trim().length === 0) {
+        throw new Error('AI返回了空的人物关系图')
+      }
+
+      // 提取mermaid代码块
+      const mermaidMatch = relationship.match(/```mermaid\s*([\s\S]*?)```/)
+      if (mermaidMatch && mermaidMatch[1]) {
+        return mermaidMatch[1].trim()
+      }
+
+      // 如果没有代码块，返回原始内容
+      return relationship.trim()
+    } catch (error) {
+      throw new Error(`人物关系图生成失败: ${error instanceof Error ? error.message : '未知错误'}`)
+    }
+  }
+
 
   async generateChapterMindMap(content: string, outputLanguage: SupportedLanguage = 'en', customPrompt?: string, abortSignal?: AbortSignal) {
     try {

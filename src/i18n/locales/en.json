@@ -73,11 +73,13 @@
     "tabs": {
       "chapterSummary": "Chapter Summary",
       "connections": "Chapter Connections",
+      "characterRelationship": "Character Relationship",
       "overallSummary": "Overall Summary",
       "chapterMindMaps": "Chapter Mind Maps",
       "combinedMindMap": "Chapter Mind Map Integration"
     },
     "generatingMindMap": "Generating mind map...",
+    "generatingCharacterRelationship": "Generating character relationship diagram...",
     "actions": {
       "copyChapterSummary": "Copy Chapter Summary",
       "copyChapterContent": "Copy Chapter Content",
@@ -155,7 +157,13 @@
     "processing": "Processing...",
     "generatingContent": "Generating content, please wait...",
     "generatingMindMap": "Generating mind map, please wait...",
-    "generationCancelled": "Generation cancelled"
+    "generationCancelled": "Generation cancelled",
+    "zoomIn": "Zoom In",
+    "zoomOut": "Zoom Out",
+    "resetZoom": "Reset Zoom",
+    "copyCode": "Copy Code",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit Fullscreen"
   },
   "config": {
     "title": "Configuration",

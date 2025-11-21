@@ -22,3 +22,8 @@ export {
   getChapterMindMapPrompt,
   getMindMapArrowPrompt
 } from './mindmap'
+
+export {
+  getCharacterRelationshipPrompt,
+  getFictionCharacterRelationshipPrompt
+} from './characterRelationship'

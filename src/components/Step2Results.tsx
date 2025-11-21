@@ -6,11 +6,13 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { BookOpen, Network, Loader2, ArrowLeft, Download } from 'lucide-react'
 import { MarkdownCard } from './MarkdownCard'
+import { MermaidDiagram } from './MermaidDiagram'
 import { MindMapCard } from './MindMapCard'
 import { openInMindElixir, downloadMindMap } from '@/utils'
 import type { MindElixirData, Options } from 'mind-elixir'
 import type { ChapterData } from '@/services/epubProcessor'
 import { toast } from 'sonner'
+import { useConfigStore } from '@/stores/configStore'
 
 interface ChapterGroup {
   groupId: string
@@ -27,6 +29,7 @@ interface BookSummary {
   author: string
   groups: ChapterGroup[]
   connections: string
+  characterRelationship: string
   overallSummary: string
 }
 
@@ -49,7 +52,7 @@ interface Step2ResultsProps {
   extractedChapters: ChapterData[] | null
   onBackToConfig: () => void
   onClearChapterCache: (chapterId: string) => void
-  onClearSpecificCache: (cacheType: 'connections' | 'overall_summary' | 'combined_mindmap' | 'merged_mindmap') => void
+  onClearSpecificCache: (cacheType: 'connections' | 'overall_summary' | 'character_relationship' | 'combined_mindmap' | 'merged_mindmap') => void
   onReadChapter: (chapterId: string, chapterIds: string[]) => void
   mindElixirOptions: Options
 }
@@ -70,6 +73,8 @@ export function Step2Results({
   mindElixirOptions
 }: Step2ResultsProps) {
   const { t } = useTranslation()
+  const { bookType } = useConfigStore(state => state.processingOptions)
+  const showCharacterRelationship = bookType !== 'non-fiction'
 
   const downloadAllMarkdown = () => {
     if (!bookSummary) return
@@ -211,10 +216,13 @@ ${bookSummary.overallSummary}
             <div className="pr-2">
               {processingMode === 'summary' && bookSummary ? (
                 <Tabs defaultValue="chapters" className="w-full">
-                  <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="chapters">{t('results.tabs.chapterSummary')}</TabsTrigger>
-                    <TabsTrigger value="connections">{t('results.tabs.connections')}</TabsTrigger>
-                    <TabsTrigger value="overall">{t('results.tabs.overallSummary')}</TabsTrigger>
+                  <TabsList className={`grid w-full ${showCharacterRelationship ? 'grid-cols-4' : 'grid-cols-3'}`}>
+                    <TabsTrigger value="chapters">📑 {t('results.tabs.chapterSummary')}</TabsTrigger>
+                    <TabsTrigger value="connections">🔗 {t('results.tabs.connections')}</TabsTrigger>
+                    {showCharacterRelationship && (
+                      <TabsTrigger value="characterRelationship">👥 {t('results.tabs.characterRelationship')}</TabsTrigger>
+                    )}
+                    <TabsTrigger value="overall">📄 {t('results.tabs.overallSummary')}</TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="chapters" className="space-y-3">
@@ -262,6 +270,33 @@ ${bookSummary.overallSummary}
                       onClearCache={() => onClearSpecificCache('connections')}
                     />
                   </TabsContent>
+
+                  {showCharacterRelationship && (
+                    <TabsContent value="characterRelationship">
+                      <div className="bg-white rounded-lg p-6 border border-gray-200">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-lg font-semibold">{t('results.tabs.characterRelationship')}</h3>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => onClearSpecificCache('character_relationship')}
+                          >
+                            {t('common.clearCache')}
+                          </Button>
+                        </div>
+                        {bookSummary.characterRelationship ? (
+                          <MermaidDiagram
+                            chart={bookSummary.characterRelationship}
+                            className="w-full min-h-[400px] flex items-center justify-center"
+                          />
+                        ) : (
+                          <div className="text-center text-gray-500 py-8">
+                            {t('results.generatingCharacterRelationship')}
+                          </div>
+                        )}
+                      </div>
+                    </TabsContent>
+                  )}
 
                   <TabsContent value="overall">
                     <MarkdownCard

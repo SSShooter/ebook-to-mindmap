@@ -23,6 +23,7 @@ interface BookSummary {
   author: string
   groups: ChapterGroup[]
   connections: string
+  characterRelationship: string
   overallSummary: string
 }
 
@@ -91,11 +92,12 @@ export function SummaryPage() {
     }
   }, [file, processingMode])
 
-  const clearSpecificCache = useCallback(async (cacheType: 'connections' | 'overall_summary' | 'combined_mindmap' | 'merged_mindmap') => {
+  const clearSpecificCache = useCallback(async (cacheType: 'connections' | 'overall_summary' | 'character_relationship' | 'combined_mindmap' | 'merged_mindmap') => {
     if (!file) return
     const displayNames = {
       connections: '章节关联',
       overall_summary: '全书总结',
+      character_relationship: '人物关系图',
       combined_mindmap: '整书思维导图',
       merged_mindmap: '章节思维导图整合'
     }
@@ -188,6 +190,7 @@ export function SummaryPage() {
           author: bookData.author,
           groups: [],
           connections: '',
+          characterRelationship: '',
           overallSummary: ''
         })
       } else if (processingMode === 'mindmap' || processingMode === 'combined-mindmap') {
@@ -301,7 +304,24 @@ export function SummaryPage() {
           ...prevSummary!,
           connections
         }))
-        setProgress(85)
+        setProgress(80)
+
+        if (bookType !== 'non-fiction') {
+          setCurrentStep('正在生成人物关系图...')
+          const characterRelationship = await bookProcessingService.generateCharacterRelationship(
+            file.name,
+            processedChapters,
+            configStore.processingOptions.outputLanguage,
+            bookType,
+            abortSignal
+          )
+
+          setBookSummary(prevSummary => ({
+            ...prevSummary!,
+            characterRelationship
+          }))
+        }
+        setProgress(90)
 
         setCurrentStep('正在生成全书总结...')
         const overallSummary = await bookProcessingService.generateOverallSummary(

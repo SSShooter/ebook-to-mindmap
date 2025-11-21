@@ -9,6 +9,7 @@ export type CacheKeyType =
   // 书籍级缓存
   | 'connections'      // 章节关联分析
   | 'overall_summary'  // 全书总结
+  | 'character_relationship' // 人物关系图
   | 'combined_mindmap' // 整书思维导图（直接从整书内容生成）
   | 'merged_mindmap'   // 合并思维导图（从章节思维导图合并生成）
   | 'mindmap_arrows'   // 思维导图箭头
@@ -147,7 +148,7 @@ export class CacheService {
   // 清除特定类型缓存
   async clearSpecificCache(
     fileName: string,
-    cacheType: 'connections' | 'overall_summary' | 'combined_mindmap' | 'merged_mindmap' | 'selected_chapters' | 'chapter_tags'
+    cacheType: 'connections' | 'overall_summary' | 'character_relationship' | 'combined_mindmap' | 'merged_mindmap' | 'selected_chapters' | 'chapter_tags'
   ): Promise<boolean> {
     const type: CacheKeyType = cacheType
     return await this.deleteCache(fileName, type)
@@ -165,8 +166,9 @@ export class CacheService {
     if (await this.deleteCache(fileName, 'chapter_tags')) deletedCount++
 
     if (processingMode === 'summary') {
-      // 文字总结模式：清除章节总结、章节关联、全书总结相关缓存
+      // 文字总结模式：清除章节总结、章节关联、人物关系图、全书总结相关缓存
       if (await this.deleteCache(fileName, 'connections')) deletedCount++
+      if (await this.deleteCache(fileName, 'character_relationship')) deletedCount++
       if (await this.deleteCache(fileName, 'overall_summary')) deletedCount++
 
       // 清除所有章节的总结缓存

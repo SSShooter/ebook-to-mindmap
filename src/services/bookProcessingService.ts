@@ -247,6 +247,36 @@ export class BookProcessingService {
   }
 
   /**
+   * 生成人物关系图
+   */
+  async generateCharacterRelationship(
+    fileName: string,
+    chapters: Chapter[],
+    outputLanguage: SupportedLanguage,
+    bookType: BookType,
+    abortSignal: AbortSignal
+  ): Promise<string> {
+    let characterRelationship = await this.cacheService.getString(fileName, 'character_relationship')
+
+    if (!characterRelationship) {
+      console.log('🔄 [DEBUG] 缓存未命中，开始生成人物关系图')
+      characterRelationship = await this.aiService.generateCharacterRelationship(
+        chapters,
+        outputLanguage,
+        bookType,
+        abortSignal
+      )
+      await this.cacheService.setCache(fileName, 'character_relationship', characterRelationship)
+      console.log('💾 [DEBUG] 人物关系图已缓存')
+    } else {
+      console.log('✅ [DEBUG] 使用缓存的人物关系图')
+    }
+
+    return characterRelationship
+  }
+
+
+  /**
    * 合并章节思维导图
    */
   async mergeMindMaps(

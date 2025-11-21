@@ -73,11 +73,13 @@
     "tabs": {
       "chapterSummary": "章节总结",
       "connections": "章节关联",
+      "characterRelationship": "人物关系图",
       "overallSummary": "全书总结",
       "chapterMindMaps": "章节思维导图",
       "combinedMindMap": "章节思维导图整合"
     },
     "generatingMindMap": "正在生成思维导图...",
+    "generatingCharacterRelationship": "正在生成人物关系图...",
     "actions": {
       "copyChapterSummary": "复制章节总结",
       "copyChapterContent": "复制章节内容",
@@ -113,13 +115,19 @@
     "copyChapterSummary": "复制章节总结",
     "copyChapterContent": "复制章节内容",
     "copyContent": "复制内容",
+    "copyCode": "复制代码",
     "expand": "展开",
     "collapse": "折叠",
     "error": "未知错误",
     "processing": "正在处理中...",
     "generatingContent": "正在生成内容,请稍候...",
     "generatingMindMap": "正在生成思维导图,请稍候...",
-    "generationCancelled": "生成被取消"
+    "generationCancelled": "生成被取消",
+    "zoomIn": "放大",
+    "zoomOut": "缩小",
+    "resetZoom": "重置缩放",
+    "fullscreen": "全屏",
+    "exitFullscreen": "退出全屏"
   },
   "config": {
     "title": "配置",
