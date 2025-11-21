@@ -108,7 +108,7 @@ export class PdfProcessor {
 
               if (chapterContent.trim().length > 100) {
                 chapters.push({
-                  id: chapterInfo.title,
+                  id: `${i}-${chapterInfo.title}`, // 使用索引和标题组合作为ID，确保唯一性
                   title: chapterInfo.title,
                   content: chapterContent,
                   startPage: startPage,

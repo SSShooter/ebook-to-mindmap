@@ -105,7 +105,7 @@ export class EpubProcessor {
               // 如果从HTML中提取到了h2标题，优先使用；否则保留原标题
               const finalTitle = extractedTitle || chapterInfo.title
               chapters.push({
-                id: finalTitle,
+                id: finalTitle + chapterInfo.href, // 使用href而不是title作为ID，确保唯一性
                 title: finalTitle,
                 content: chapterContent,
                 href: chapterInfo.href,
