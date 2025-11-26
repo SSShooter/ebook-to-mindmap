@@ -6,7 +6,6 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { MessageSquarePlus, Plus, Pencil, Trash2, Copy, Calendar } from 'lucide-react'
 import { toast } from 'sonner'
 import { useCustomPromptStore, type CustomPrompt } from '../stores/customPromptStore'
@@ -183,72 +182,66 @@ export function CustomPromptsPage() {
 
         <ScrollArea className="h-[calc(100vh-240px)]">
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="min-w-[150px] max-w-[250px]">{t('customPrompts.promptName')}</TableHead>
-                  <TableHead className="min-w-[200px]">{t('customPrompts.promptDescription')}</TableHead>
-                  <TableHead className="w-[160px]">{t('customPrompts.createdAt')}</TableHead>
-                  <TableHead className="w-[140px] text-right">{t('customPrompts.actions')}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {prompts.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={4} className="text-center text-gray-500 py-8">
-                      {t('customPrompts.noPrompts')}
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  prompts.map((prompt) => (
-                    <TableRow key={prompt.id}>
-                      <TableCell className="font-medium truncate max-w-[250px]" title={prompt.name}>
+            {prompts.length === 0 ? (
+              <div className="text-center text-gray-500 py-12">
+                {t('customPrompts.noPrompts')}
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-200">
+                {prompts.map((prompt) => (
+                  <div key={prompt.id} className="p-4 hover:bg-gray-50 transition-colors">
+                    {/* 标题和操作按钮 */}
+                    <div className="flex items-start justify-between mb-3">
+                      <h3 className="font-medium text-gray-900 flex-1 pr-2 truncate" title={prompt.name}>
                         {prompt.name}
-                      </TableCell>
-                      <TableCell className="truncate max-w-[300px]" title={prompt.description}>
-                        {prompt.description || '-'}
-                      </TableCell>
-                      <TableCell className="text-sm text-gray-600">
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {formatDate(prompt.createdAt)}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleCopy(prompt)}
-                            title={t('customPrompts.copy')}
-                          >
-                            <Copy className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleOpenDialog(prompt)}
-                            title={t('customPrompts.edit')}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(prompt.id)}
-                            title={t('customPrompts.delete')}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-            </div>
+                      </h3>
+                      <div className="flex gap-1 flex-shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleCopy(prompt)}
+                          className="h-8 w-8 p-0"
+                          title={t('customPrompts.copy')}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleOpenDialog(prompt)}
+                          className="h-8 w-8 p-0"
+                          title={t('customPrompts.edit')}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(prompt.id)}
+                          className="h-8 w-8 p-0"
+                          title={t('customPrompts.delete')}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* 描述 */}
+                    {prompt.description && (
+                      <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                        {prompt.description}
+                      </p>
+                    )}
+
+                    {/* 创建时间 */}
+                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                      <Calendar className="h-3 w-3" />
+                      {formatDate(prompt.createdAt)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </ScrollArea>
       </div>

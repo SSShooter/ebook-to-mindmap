@@ -6,7 +6,6 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Brain, Plus, Pencil, Trash2, Star, ExternalLink, Copy } from 'lucide-react'
 import { toast } from 'sonner'
 import { useModelStore, type AIModel } from '../stores/modelStore'
@@ -16,7 +15,7 @@ export function ModelsPage() {
   const { models, addModel, updateModel, deleteModel, setDefaultModel } = useModelStore()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingModel, setEditingModel] = useState<AIModel | null>(null)
-  
+
   const [formData, setFormData] = useState({
     name: '',
     provider: 'gemini' as AIModel['provider'],
@@ -87,7 +86,7 @@ export function ModelsPage() {
       toast.error(t('models.nameRequired'))
       return
     }
-    
+
     if (!formData.apiKey.trim()) {
       toast.error(t('models.apiKeyRequired'))
       return
@@ -97,7 +96,7 @@ export function ModelsPage() {
     const isDuplicate = models.some(
       model => model.name.trim() === formData.name.trim() && model.id !== editingModel?.id
     )
-    
+
     if (isDuplicate) {
       toast.error(t('models.duplicateName'))
       return
@@ -110,7 +109,7 @@ export function ModelsPage() {
       addModel({ ...formData, isDefault: models.length === 0 })
       toast.success(t('models.addSuccess'))
     }
-    
+
     setIsDialogOpen(false)
   }
 
@@ -160,7 +159,7 @@ export function ModelsPage() {
             </h1>
             <p className="text-sm text-gray-500 mt-1">{t('models.description')}</p>
           </div>
-          
+
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={() => handleOpenDialog()} className="flex items-center gap-2">
@@ -174,7 +173,7 @@ export function ModelsPage() {
                   {editingModel ? t('models.editModel') : t('models.addModel')}
                 </DialogTitle>
               </DialogHeader>
-              
+
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
                   <Label htmlFor="provider">{t('config.aiProvider')}</Label>
@@ -280,88 +279,84 @@ export function ModelsPage() {
 
         <ScrollArea className="h-[calc(100vh-240px)]">
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-12"></TableHead>
-                  <TableHead className="min-w-[120px] max-w-[200px]">{t('models.configName')}</TableHead>
-                  <TableHead className="w-[140px]">{t('config.aiProvider')}</TableHead>
-                  <TableHead className="min-w-[150px] max-w-[250px]">{t('models.modelId')}</TableHead>
-                  <TableHead className="w-[140px] text-right">{t('models.actions')}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {models.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center text-gray-500 py-8">
-                      {t('models.noModels')}
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  models.map((model) => (
-                    <TableRow key={model.id}>
-                      <TableCell>
+            {models.length === 0 ? (
+              <div className="text-center text-gray-500 py-12">
+                {t('models.noModels')}
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-200">
+                {models.map((model) => (
+                  <div key={model.id} className="p-4 hover:bg-gray-50 transition-colors">
+                    {/* 标题行 - 模型名称和默认星标 */}
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => handleSetDefault(model.id)}
-                          className="p-1"
+                          className="p-1 h-6 w-6 flex-shrink-0"
                         >
                           <Star
-                            className={`h-4 w-4 ${
-                              model.isDefault ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400'
-                            }`}
+                            className={`h-4 w-4 ${model.isDefault ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400'
+                              }`}
                           />
                         </Button>
-                      </TableCell>
-                      <TableCell className="font-medium truncate max-w-[200px]" title={model.name}>
-                        {model.name}
-                      </TableCell>
-                      <TableCell>
-                        {model.provider === 'gemini' && 'Google Gemini'}
-                        {model.provider === 'openai' && t('config.openaiCompatible')}
-                        {model.provider === 'ollama' && 'Ollama'}
-                        {model.provider === '302.ai' && '302.AI'}
-                      </TableCell>
-                      <TableCell className="font-mono text-sm truncate max-w-[250px]" title={model.model}>
+                        <h3 className="font-medium text-gray-900 truncate" title={model.name}>
+                          {model.name}
+                        </h3>
+
+                        {/* 提供商信息 */}
+                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 hidden md:block">
+                          {model.provider === 'gemini' && 'Google Gemini'}
+                          {model.provider === 'openai' && t('config.openaiCompatible')}
+                          {model.provider === 'ollama' && 'Ollama'}
+                          {model.provider === '302.ai' && '302.AI'}
+                        </span>
+                      </div>
+                      <div className="flex gap-1 flex-shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleCopy(model)}
+                          className="h-8 w-8 p-0"
+                          title={t('models.copy')}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleOpenDialog(model)}
+                          className="h-8 w-8 p-0"
+                          title={t('models.edit')}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(model.id)}
+                          disabled={models.length === 1}
+                          className="h-8 w-8 p-0"
+                          title={t('models.delete')}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+
+
+                    {/* 模型ID */}
+                    <div className="text-sm text-gray-600">
+                      <span className="text-gray-500">{t('models.modelId')}: </span>
+                      <span className="font-mono text-xs bg-gray-100 px-1 rounded truncate" title={model.model}>
                         {model.model}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleCopy(model)}
-                            title={t('models.copy')}
-                          >
-                            <Copy className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleOpenDialog(model)}
-                            title={t('models.edit')}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(model.id)}
-                            disabled={models.length === 1}
-                            title={t('models.delete')}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-            </div>
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </ScrollArea>
       </div>

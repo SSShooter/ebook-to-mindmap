@@ -217,12 +217,12 @@ ${bookSummary.overallSummary}
               {processingMode === 'summary' && bookSummary ? (
                 <Tabs defaultValue="chapters" className="w-full">
                   <TabsList className={`grid w-full ${showCharacterRelationship ? 'grid-cols-4' : 'grid-cols-3'}`}>
-                    <TabsTrigger value="chapters">📑 {t('results.tabs.chapterSummary')}</TabsTrigger>
-                    <TabsTrigger value="connections">🔗 {t('results.tabs.connections')}</TabsTrigger>
+                    <TabsTrigger value="chapters">📑 <span className="hidden md:inline">{t('results.tabs.chapterSummary')}</span></TabsTrigger>
+                    <TabsTrigger value="connections">🔗 <span className="hidden md:inline">{t('results.tabs.connections')}</span></TabsTrigger>
                     {showCharacterRelationship && (
-                      <TabsTrigger value="characterRelationship">👥 {t('results.tabs.characterRelationship')}</TabsTrigger>
+                      <TabsTrigger value="characterRelationship">👥 <span className="hidden md:inline">{t('results.tabs.characterRelationship')}</span></TabsTrigger>
                     )}
-                    <TabsTrigger value="overall">📄 {t('results.tabs.overallSummary')}</TabsTrigger>
+                    <TabsTrigger value="overall">📄 <span className="hidden md:inline">{t('results.tabs.overallSummary')}</span></TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="chapters" className="space-y-3">
@@ -315,8 +315,8 @@ ${bookSummary.overallSummary}
               ) : processingMode === 'mindmap' && bookMindMap ? (
                 <Tabs defaultValue="chapters" className="w-full">
                   <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="chapters">{t('results.tabs.chapterMindMaps')}</TabsTrigger>
-                    <TabsTrigger value="combined">{t('results.tabs.combinedMindMap')}</TabsTrigger>
+                    <TabsTrigger value="chapters">🧩 <span className="hidden md:inline">{t('results.tabs.chapterMindMaps')}</span></TabsTrigger>
+                    <TabsTrigger value="combined">🌳 <span className="hidden md:inline">{t('results.tabs.combinedMindMap')}</span></TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="chapters" className="grid grid-cols-1 md:grid-cols-2 gap-3">
