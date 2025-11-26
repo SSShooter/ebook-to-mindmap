@@ -19,6 +19,7 @@ interface Chapter {
   title: string
   content: string
   summary?: string
+  reasoning?: string
 }
 
 interface AIConfig {
@@ -75,19 +76,36 @@ export class AIService {
     return typeof this.config === 'function' ? this.config() : this.config
   }
 
-  async summarizeChapter(title: string, content: string, bookType: 'fiction' | 'non-fiction' = 'non-fiction', outputLanguage: SupportedLanguage = 'en', customPrompt?: string, useCustomOnly: boolean = false, abortSignal?: AbortSignal): Promise<string> {
+  async summarizeChapter(
+    title: string,
+    content: string,
+    bookType: 'fiction' | 'non-fiction' = 'non-fiction',
+    outputLanguage: SupportedLanguage = 'en',
+    customPrompt?: string,
+    useCustomOnly: boolean = false,
+    abortSignal?: AbortSignal,
+    onStreamUpdate?: (data: { content: string; reasoning?: string }) => void
+  ): Promise<{ content: string; reasoning: string }> {
     try {
       const prompt = bookType === 'fiction'
         ? getFictionChapterSummaryPrompt(title, content, customPrompt, useCustomOnly)
         : getNonFictionChapterSummaryPrompt(title, content, customPrompt, useCustomOnly)
 
-      const summary = await this.generateContent(prompt, outputLanguage, abortSignal)
+      let result: { content: string; reasoning: string }
+      if (onStreamUpdate) {
+        result = await this.generateContentStream(prompt, onStreamUpdate, outputLanguage, abortSignal)
+      } else {
+        result = await this.generateContent(prompt, outputLanguage, abortSignal)
+      }
 
-      if (!summary || summary.trim().length === 0) {
+      if (!result.content || result.content.trim().length === 0) {
         throw new Error('AI返回了空的总结')
       }
 
-      return summary.trim()
+      return {
+        content: result.content.trim(),
+        reasoning: result.reasoning.trim()
+      }
     } catch (error) {
       throw new Error(`${error instanceof Error ? error.message : 'Unknown error'}`)
     }
@@ -104,7 +122,8 @@ export class AIService {
         ? getFictionChapterConnectionsAnalysisPrompt(chapterSummaries)
         : getChapterConnectionsAnalysisPrompt(chapterSummaries)
 
-      const connections = await this.generateContent(prompt, outputLanguage, abortSignal)
+      const result = await this.generateContent(prompt, outputLanguage, abortSignal)
+      const connections = result.content
 
       if (!connections || connections.trim().length === 0) {
         throw new Error('AI返回了空的关联分析')
@@ -133,7 +152,8 @@ export class AIService {
         ? getFictionOverallSummaryPrompt(bookTitle, chapterInfo)
         : getOverallSummaryPrompt(bookTitle, chapterInfo)
 
-      const summary = await this.generateContent(prompt, outputLanguage, abortSignal)
+      const result = await this.generateContent(prompt, outputLanguage, abortSignal)
+      const summary = result.content
 
       if (!summary || summary.trim().length === 0) {
         throw new Error('AI返回了空的全书总结')
@@ -161,7 +181,8 @@ export class AIService {
         ? getFictionCharacterRelationshipPrompt(chapterSummaries)
         : getCharacterRelationshipPrompt(chapterSummaries)
 
-      const relationship = await this.generateContent(prompt, outputLanguage, abortSignal)
+      const result = await this.generateContent(prompt, outputLanguage, abortSignal)
+      const relationship = result.content
 
       if (!relationship || relationship.trim().length === 0) {
         throw new Error('AI返回了空的人物关系图')
@@ -191,7 +212,8 @@ export class AIService {
         prompt += `\n\n补充要求：${customPrompt.trim()}`
       }
 
-      const mindMapJson = await this.generateContent(prompt, outputLanguage, abortSignal)
+      const result = await this.generateContent(prompt, outputLanguage, abortSignal)
+      const mindMapJson = result.content
 
       return this.parseJsonResponse(mindMapJson, "思维导图") as MindElixirData
     } catch (error) {
@@ -204,7 +226,8 @@ export class AIService {
       const basePrompt = getMindMapArrowPrompt()
       const prompt = basePrompt + `\n\n当前思维导图数据：\n${JSON.stringify(combinedMindMapData, null, 2)}`
 
-      const arrowsJson = await this.generateContent(prompt, outputLanguage, abortSignal)
+      const result = await this.generateContent(prompt, outputLanguage, abortSignal)
+      const arrowsJson = result.content
 
       return this.parseJsonResponse(arrowsJson, "箭头") as MindElixirData['arrows']
     } catch (error) {
@@ -225,7 +248,8 @@ export class AIService {
         prompt += `\n\n补充要求：${customPrompt.trim()}`
       }
 
-      const mindMapJson = await this.generateContent(prompt, 'en', abortSignal)
+      const result = await this.generateContent(prompt, 'en', abortSignal)
+      const mindMapJson = result.content
 
       return this.parseJsonResponse(mindMapJson, "思维导图") as MindElixirData
     } catch (error) {
@@ -257,7 +281,7 @@ export class AIService {
   }
 
   // 统一的内容生成方法
-  private async generateContent(prompt: string, outputLanguage?: SupportedLanguage, abortSignal?: AbortSignal): Promise<string> {
+  private async generateContent(prompt: string, outputLanguage?: SupportedLanguage, abortSignal?: AbortSignal): Promise<{ content: string; reasoning: string }> {
     const config = this.getCurrentConfig()
     const language = outputLanguage || 'en'
     const systemPrompt = getLanguageInstruction(language)
@@ -295,14 +319,113 @@ export class AIService {
     }
 
     const data = await response.json()
-    return data.choices[0]?.message?.content || ''
+    return {
+      content: data.choices[0]?.message?.content || '',
+      reasoning: data.choices[0]?.message?.reasoning_content || ''
+    }
+  }
+
+  // 流式内容生成方法
+  private async generateContentStream(
+    prompt: string,
+    onUpdate: (data: { content: string; reasoning?: string }) => void,
+    outputLanguage?: SupportedLanguage,
+    abortSignal?: AbortSignal
+  ): Promise<{ content: string; reasoning: string }> {
+    const config = this.getCurrentConfig()
+    const language = outputLanguage || 'en'
+    const systemPrompt = getLanguageInstruction(language)
+
+    const messages: Array<{ role: 'system' | 'user', content: string }> = [
+      {
+        role: 'user',
+        content: prompt + '\n\n' + systemPrompt
+      }
+    ]
+
+    if (abortSignal?.aborted) {
+      throw new DOMException('Request was aborted', 'AbortError')
+    }
+
+    try {
+      const response = await fetch(`${this.model.apiUrl}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.model.apiKey}`
+        },
+        body: JSON.stringify({
+          model: this.model.model,
+          messages,
+          temperature: config.temperature || 0.7,
+          stream: true // 开启流式传输
+        }),
+        signal: abortSignal
+      })
+
+      if (!response.ok) {
+        const errorBody = await response.text()
+        throw new Error(`Error: ${response.status} ${response.statusText} - ${errorBody}`)
+      }
+
+      if (!response.body) {
+        throw new Error('Response body is null')
+      }
+
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder('utf-8')
+      let fullContent = ''
+      let fullReasoning = ''
+      let buffer = ''
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+
+        // 保留最后一个可能不完整的行
+        buffer = lines.pop() || ''
+
+        for (const line of lines) {
+          const trimmedLine = line.trim()
+          if (!trimmedLine || trimmedLine === 'data: [DONE]') continue
+
+          if (trimmedLine.startsWith('data: ')) {
+            try {
+              const jsonStr = trimmedLine.slice(6)
+              const json = JSON.parse(jsonStr)
+              const delta = json.choices?.[0]?.delta
+              const contentChunk = delta?.content || ''
+              const reasoningChunk = delta?.reasoning_content || delta?.reasoning || ''
+
+              if (contentChunk || reasoningChunk) {
+                fullContent += contentChunk
+                fullReasoning += reasoningChunk
+                onUpdate({ content: contentChunk, reasoning: reasoningChunk })
+              }
+            } catch (e) {
+              console.warn('Error parsing stream chunk:', e)
+            }
+          }
+        }
+      }
+
+      return { content: fullContent, reasoning: fullReasoning }
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw error
+      }
+      throw new Error(`Stream generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
   }
 
   // 辅助方法：检查API连接
   async testConnection(): Promise<boolean> {
     try {
-      const text = await this.generateContent(getTestConnectionPrompt())
-      return text.includes('连接成功') || text.includes('成功')
+      const result = await this.generateContent(getTestConnectionPrompt())
+      return result.content.includes('连接成功') || result.content.includes('成功')
     } catch {
       return false
     }

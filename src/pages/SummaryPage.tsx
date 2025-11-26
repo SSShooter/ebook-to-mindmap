@@ -233,7 +233,25 @@ export function SummaryPage() {
             configStore.processingOptions.outputLanguage,
             customPrompt,
             useCustomOnly,
-            abortSignal
+            abortSignal,
+            (data) => {
+              setBookSummary(prevSummary => {
+                if (!prevSummary) return null
+                const newGroups = [...prevSummary.groups]
+                const targetGroupIndex = newGroups.findIndex(g => g.groupId === group.groupId)
+                if (targetGroupIndex !== -1) {
+                  newGroups[targetGroupIndex] = {
+                    ...newGroups[targetGroupIndex],
+                    summary: data.summary,
+                    reasoning: data.reasoning
+                  }
+                }
+                return {
+                  ...prevSummary,
+                  groups: newGroups
+                }
+              })
+            }
           )
 
           processedGroups.push(result.group)

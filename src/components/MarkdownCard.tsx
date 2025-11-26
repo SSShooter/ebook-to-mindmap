@@ -19,6 +19,8 @@ interface MarkdownCardProps {
   content: string
   /** Markdown格式的总结内容 */
   markdownContent: string
+  /** 思考过程内容 */
+  reasoning?: string
   /** 章节索引 */
   index: number
   /** 清除缓存的回调函数 */
@@ -46,6 +48,7 @@ export const MarkdownCard: React.FC<MarkdownCardProps> = ({
   title,
   content,
   markdownContent,
+  reasoning,
   index,
   onClearCache,
   onReadChapter,
@@ -122,16 +125,29 @@ export const MarkdownCard: React.FC<MarkdownCardProps> = ({
       </CardHeader>
       {!isCollapsed && (
         <CardContent>
-          {isLoading ? (
+          {isLoading && !markdownContent && !reasoning ? (
             <div className="text-center text-gray-500 py-8">
               <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
               <p>{t('common.generatingContent')}</p>
             </div>
           ) : (
             <div className="text-gray-700 leading-relaxed prose prose-sm max-w-none">
-              <ReactMarkdown remarkPlugins={[remarkGfm,remarkCjkFriendly]}>
+              {reasoning && !markdownContent && (
+                <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200 text-sm text-gray-600">
+                  <div className="font-medium mb-2 flex items-center gap-2">
+                    <span className="text-xs uppercase tracking-wider text-gray-400">{t('common.reasoning')}</span>
+                  </div>
+                  <div className="whitespace-pre-wrap font-mono text-xs">{reasoning}</div>
+                </div>
+              )}
+              <ReactMarkdown remarkPlugins={[remarkGfm, remarkCjkFriendly]}>
                 {markdownContent || ''}
               </ReactMarkdown>
+              {isLoading && (
+                <div className="flex justify-center py-4">
+                  <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                </div>
+              )}
             </div>
           )}
         </CardContent>

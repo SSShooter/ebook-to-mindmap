@@ -20,6 +20,7 @@ interface ChapterGroup {
   chapterIds: string[]
   chapterTitles: string[]
   summary?: string
+  reasoning?: string
   mindMap?: MindElixirData
   isLoading?: boolean
 }
@@ -242,6 +243,7 @@ ${bookSummary.overallSummary}
                           title={groupTitle}
                           content={groupContent}
                           markdownContent={group.summary || ''}
+                          reasoning={group.reasoning}
                           index={index}
                           defaultCollapsed={index > 0}
                           onClearCache={onClearChapterCache}

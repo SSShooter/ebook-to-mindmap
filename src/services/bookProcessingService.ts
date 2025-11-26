@@ -23,6 +23,7 @@ export interface Chapter {
   title: string
   content: string
   summary?: string
+  reasoning?: string
   mindMap?: MindElixirData
   isLoading?: boolean
   tags?: string[]
@@ -34,6 +35,7 @@ export interface ChapterGroup {
   chapterIds: string[]
   chapterTitles: string[]
   summary?: string
+  reasoning?: string
   mindMap?: MindElixirData
   isLoading?: boolean
 }
@@ -101,9 +103,15 @@ export class BookProcessingService {
     outputLanguage: SupportedLanguage,
     customPrompt: string,
     useCustomOnly: boolean,
-    abortSignal: AbortSignal
+    abortSignal: AbortSignal,
+    onStreamUpdate?: (data: { summary: string; reasoning?: string }) => void
   ): Promise<{ group: ChapterGroup; chapters: Chapter[] }> {
     let summary = await this.cacheService.getString(fileName, 'summary', group.groupId)
+    // TODO: Cache reasoning too if needed, for now we might lose reasoning on cache hit unless we cache it separately.
+    // Let's assume we don't cache reasoning for now or we need to update cache service.
+    // For this task, let's focus on streaming display.
+
+    let reasoning = ''
 
     if (!summary) {
       const combinedTitle = group.tag
@@ -111,16 +119,48 @@ export class BookProcessingService {
         : group.chapters[0].title
       const combinedContent = group.chapters.map(ch => `## ${ch.title}\n\n${ch.content}`).join('\n\n')
 
-      summary = await this.aiService.summarizeChapter(
+      let currentSummary = ''
+      let currentReasoning = ''
+      let lastUpdateTime = 0
+
+      const handleStreamUpdate = (data: { content: string; reasoning?: string }) => {
+        currentSummary += data.content
+        if (data.reasoning) {
+          currentReasoning += data.reasoning
+        }
+        const now = Date.now()
+        // 每5秒更新一次，或者如果是第一批数据也更新
+        if (onStreamUpdate && (now - lastUpdateTime >= 1000 || lastUpdateTime === 0)) {
+          onStreamUpdate({ summary: currentSummary, reasoning: currentReasoning })
+          lastUpdateTime = now
+        }
+      }
+
+      const result = await this.aiService.summarizeChapter(
         combinedTitle,
         combinedContent,
         bookType,
         outputLanguage,
         customPrompt,
         useCustomOnly,
-        abortSignal
+        abortSignal,
+        onStreamUpdate ? handleStreamUpdate : undefined
       )
+
+      summary = result.content
+      reasoning = result.reasoning
+
+      // 确保最后一次更新包含完整内容
+      if (onStreamUpdate) {
+        onStreamUpdate({ summary, reasoning })
+      }
+
       await this.cacheService.setCache(fileName, 'summary', summary, group.groupId)
+    } else {
+      // 如果命中缓存，也通知一下（可选，视UI需求而定，这里为了统一行为可以调用一次）
+      if (onStreamUpdate) {
+        onStreamUpdate({ summary })
+      }
     }
 
     const processedGroup: ChapterGroup = {
@@ -129,12 +169,14 @@ export class BookProcessingService {
       chapterIds: group.chapters.map(ch => ch.id),
       chapterTitles: group.chapters.map(ch => ch.title),
       summary,
+      reasoning: reasoning || undefined,
       isLoading: false
     }
 
     const processedChapters: Chapter[] = group.chapters.map(chapter => ({
       ...chapter,
       summary,
+      reasoning: reasoning || undefined,
       isLoading: false
     }))
 
