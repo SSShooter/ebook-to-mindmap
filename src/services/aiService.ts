@@ -1,4 +1,3 @@
-import { GenerativeModel, GoogleGenerativeAI } from '@google/generative-ai'
 import {
   getFictionChapterSummaryPrompt,
   getNonFictionChapterSummaryPrompt,
@@ -30,35 +29,45 @@ interface AIConfig {
   temperature?: number
 }
 
+interface ModelConfig {
+  apiUrl: string
+  apiKey: string
+  model: string
+}
+
 export class AIService {
   private config: AIConfig | (() => AIConfig)
-  private genAI?: GoogleGenerativeAI
-  private model!: GenerativeModel | { apiUrl: string; apiKey: string; model: string }
+  private model!: ModelConfig
 
   constructor(config: AIConfig | (() => AIConfig)) {
     this.config = config
-
     const currentConfig = typeof config === 'function' ? config() : config
+    this.model = this.getModelConfig(currentConfig)
+  }
 
-    if (currentConfig.provider === 'gemini') {
-      this.genAI = new GoogleGenerativeAI(currentConfig.apiKey)
-      this.model = this.genAI.getGenerativeModel({
-        model: currentConfig.model || 'gemini-1.5-flash'
-      })
-    } else if (currentConfig.provider === 'openai' || currentConfig.provider === '302.ai') {
-      // OpenAI兼容的配置
-      this.model = {
-        apiUrl: currentConfig.apiUrl || 'https://api.openai.com/v1',
-        apiKey: currentConfig.apiKey,
-        model: currentConfig.model || 'gpt-3.5-turbo'
-      }
-    } else if (currentConfig.provider === 'ollama') {
-      // Ollama配置
-      this.model = {
-        apiUrl: currentConfig.apiUrl || 'http://localhost:11434',
-        apiKey: currentConfig.apiKey || '', // Ollama通常不需要API密钥
-        model: currentConfig.model || 'llama2'
-      }
+  private getModelConfig(config: AIConfig): ModelConfig {
+    switch (config.provider) {
+      case 'gemini':
+        return {
+          apiUrl: config.apiUrl || 'https://generativelanguage.googleapis.com/v1beta/openai',
+          apiKey: config.apiKey,
+          model: config.model || 'gemini-1.5-flash'
+        }
+      case 'openai':
+      case '302.ai':
+        return {
+          apiUrl: config.apiUrl || 'https://api.openai.com/v1',
+          apiKey: config.apiKey,
+          model: config.model || 'gpt-3.5-turbo'
+        }
+      case 'ollama':
+        return {
+          apiUrl: config.apiUrl || 'http://localhost:11434/v1',
+          apiKey: config.apiKey || '',
+          model: config.model || 'llama2'
+        }
+      default:
+        throw new Error(`Unsupported provider: ${config.provider}`)
     }
   }
 
@@ -248,69 +257,45 @@ export class AIService {
   }
 
   // 统一的内容生成方法
-  private async generateContent(prompt: string, outputLanguage?: SupportedLanguage, abortSignal?: AbortSignal) {
+  private async generateContent(prompt: string, outputLanguage?: SupportedLanguage, abortSignal?: AbortSignal): Promise<string> {
     const config = this.getCurrentConfig()
     const language = outputLanguage || 'en'
     const systemPrompt = getLanguageInstruction(language)
 
-    if (config.provider === 'gemini' && 'generateContent' in this.model) {
-      // Gemini API 不直接支持系统提示，将系统提示合并到用户提示前面
-      const finalPrompt = `${prompt}\n\n**${systemPrompt}**`
-
-      // 检查是否已取消
-      if (abortSignal?.aborted) {
-        throw new DOMException('Request was aborted', 'AbortError')
+    // 合并系统提示和用户提示
+    const messages: Array<{ role: 'system' | 'user', content: string }> = [
+      {
+        role: 'user',
+        content: prompt + '\n\n' + systemPrompt
       }
+    ]
 
-      const result = await this.model.generateContent({
-        contents: [{ role: 'user', parts: [{ text: finalPrompt }] }],
-        generationConfig: {
-          temperature: config.temperature || 0.7
-        }
-      })
-
-      // 再次检查是否已取消
-      if (abortSignal?.aborted) {
-        throw new DOMException('Request was aborted', 'AbortError')
-      }
-
-      const response = result.response
-      return response.text()
-    } else if ('apiUrl' in this.model) {
-      const messages: Array<{ role: 'system' | 'user', content: string }> = [
-        {
-          role: 'user',
-          content: prompt + '\n\n' + systemPrompt
-        }
-      ]
-
-      // 检查是否已取消
-      if (abortSignal?.aborted) {
-        throw new DOMException('Request was aborted', 'AbortError')
-      }
-
-      const response = await fetch(`${this.model.apiUrl}/chat/completions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.model.apiKey}`
-        },
-        body: JSON.stringify({
-          model: this.model.model,
-          messages,
-          temperature: config.temperature || 0.7
-        }),
-        signal: abortSignal
-      })
-
-      if (!response.ok) {
-        const errorBody = await response.text()
-        throw new Error(`Error: ${response.status} ${response.statusText} - ${errorBody}`)
-      }
-
-      const data = await response.json()
-      return data.choices[0]?.message?.content || ''
+    // 检查是否已取消
+    if (abortSignal?.aborted) {
+      throw new DOMException('Request was aborted', 'AbortError')
     }
+
+    const response = await fetch(`${this.model.apiUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.model.apiKey}`
+      },
+      body: JSON.stringify({
+        model: this.model.model,
+        messages,
+        temperature: config.temperature || 0.7
+      }),
+      signal: abortSignal
+    })
+
+    if (!response.ok) {
+      const errorBody = await response.text()
+      throw new Error(`Error: ${response.status} ${response.statusText} - ${errorBody}`)
+    }
+
+    const data = await response.json()
+    return data.choices[0]?.message?.content || ''
   }
 
   // 辅助方法：检查API连接

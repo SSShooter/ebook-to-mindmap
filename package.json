@@ -10,7 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.24.1",
     "@hookform/resolvers": "^5.1.1",
     "@mind-elixir/export-mindmap": "^0.0.3",
     "@mind-elixir/open-desktop": "^0.0.1",

@@ -20,8 +20,8 @@ export function ModelsPage() {
     name: '',
     provider: 'gemini' as AIModel['provider'],
     apiKey: '',
-    apiUrl: 'https://api.openai.com/v1',
-    model: 'gemini-1.5-flash',
+    apiUrl: '',
+    model: '',
     temperature: 0.7
   })
 
@@ -73,7 +73,7 @@ export function ModelsPage() {
         name: '',
         provider: 'gemini',
         apiKey: '',
-        apiUrl: 'https://api.openai.com/v1',
+        apiUrl: 'https://generativelanguage.googleapis.com/v1beta/openai',
         model: 'gemini-1.5-flash',
         temperature: 0.7
       })
@@ -181,10 +181,16 @@ export function ModelsPage() {
                     <Select
                       value={formData.provider}
                       onValueChange={(value: AIModel['provider']) => {
+                        const defaultApiUrls: Record<AIModel['provider'], string> = {
+                          'gemini': 'https://generativelanguage.googleapis.com/v1beta/openai',
+                          'openai': 'https://api.openai.com/v1',
+                          'ollama': 'http://localhost:11434/v1',
+                          '302.ai': 'https://api.302.ai/v1'
+                        }
                         setFormData({
                           ...formData,
                           provider: value,
-                          apiUrl: value === '302.ai' ? 'https://api.302.ai/v1' : formData.apiUrl
+                          apiUrl: defaultApiUrls[value]
                         })
                       }}
                     >
