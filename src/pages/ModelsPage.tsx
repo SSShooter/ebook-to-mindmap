@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -6,7 +6,8 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
-import { Brain, Plus, Pencil, Trash2, Star, ExternalLink, Copy } from 'lucide-react'
+import { Combobox } from '@/components/ui/combobox'
+import { Brain, Plus, Pencil, Trash2, Star, ExternalLink, Copy, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
 import { useModelStore, type AIModel } from '../stores/modelStore'
 
@@ -25,12 +26,68 @@ export function ModelsPage() {
     temperature: 0.7
   })
 
-  const providerSettings = {
+  const [availableModels, setAvailableModels] = useState<string[]>([])
+  const [isLoadingModels, setIsLoadingModels] = useState(false)
+
+  // Fetch available models from OpenAI Compatible API
+  const fetchAvailableModels = async () => {
+    if (!formData.apiUrl || !formData.apiKey) {
+      setAvailableModels([])
+      return
+    }
+
+    // Only fetch for openai compatible providers
+    if (!['openai', 'ollama', '302.ai', 'gemini'].includes(formData.provider)) {
+      setAvailableModels([])
+      return
+    }
+
+    setIsLoadingModels(true)
+    try {
+      const response = await fetch(`${formData.apiUrl}/models`, {
+        headers: {
+          'Authorization': `Bearer ${formData.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const data = await response.json()
+      const models = data.data?.map((model: any) => model.id) || []
+      setAvailableModels(models)
+    } catch (error) {
+      console.error('Failed to fetch models:', error)
+      setAvailableModels([])
+      toast.error(t('models.fetchModelsFailed', 'Failed to fetch models'))
+    } finally {
+      setIsLoadingModels(false)
+    }
+  }
+
+  // Fetch models when API URL or API Key changes
+  useEffect(() => {
+    if (isDialogOpen && (formData.provider === 'openai' || formData.provider === 'ollama' || formData.provider === '302.ai' || formData.provider === 'gemini')) {
+      fetchAvailableModels()
+    } else {
+      setAvailableModels([])
+    }
+  }, [formData.apiUrl, formData.apiKey, formData.provider, isDialogOpen])
+
+  const providerSettings: Record<AIModel['provider'], {
+    apiKeyLabel: string
+    apiKeyPlaceholder: string
+    apiUrlPlaceholder: string
+    modelPlaceholder: string
+    url: string
+  }> = {
     gemini: {
       apiKeyLabel: 'Gemini API Key',
       apiKeyPlaceholder: t('config.enterGeminiApiKey'),
       modelPlaceholder: t('config.geminiModelPlaceholder'),
-      apiUrlPlaceholder: '',
+      apiUrlPlaceholder: 'https://generativelanguage.googleapis.com/v1beta/openai',
       url: 'https://aistudio.google.com/',
     },
     openai: {
@@ -43,7 +100,7 @@ export function ModelsPage() {
     ollama: {
       apiKeyLabel: 'API Token',
       apiKeyPlaceholder: 'API Token',
-      apiUrlPlaceholder: 'http://localhost:11434',
+      apiUrlPlaceholder: 'http://localhost:11434/v1',
       modelPlaceholder: 'llama2, mistral, codellama...',
       url: 'https://ollama.com/',
     },
@@ -232,28 +289,57 @@ export function ModelsPage() {
                   />
                 </div>
 
-                {(formData.provider === 'openai' || formData.provider === 'ollama' || formData.provider === '302.ai') && (
+                {(formData.provider === 'openai' || formData.provider === 'ollama' || formData.provider === '302.ai' || formData.provider === 'gemini') && (
                   <div className="space-y-2">
                     <Label htmlFor="api-url">{t('config.apiUrl')}</Label>
                     <Input
                       id="api-url"
                       type="url"
-                      placeholder={providerSettings[formData.provider].apiUrlPlaceholder}
+                      placeholder={providerSettings[formData.provider].apiUrlPlaceholder || 'https://api.example.com/v1'}
                       value={formData.apiUrl}
                       onChange={(e) => setFormData({ ...formData, apiUrl: e.target.value })}
-                      disabled={formData.provider === '302.ai'}
+                      disabled={formData.provider === 'gemini' || formData.provider === '302.ai'}
                     />
                   </div>
                 )}
 
                 <div className="space-y-2">
                   <Label htmlFor="model-id">{t('models.modelId')}</Label>
-                  <Input
-                    id="model-id"
-                    placeholder={providerSettings[formData.provider].modelPlaceholder}
-                    value={formData.model}
-                    onChange={(e) => setFormData({ ...formData, model: e.target.value })}
-                  />
+                  {(formData.provider === 'openai' || formData.provider === 'ollama' || formData.provider === '302.ai' || formData.provider === 'gemini') ? (
+                    <div className="flex gap-2">
+                      <div className="flex-1">
+                        <Combobox
+                          options={availableModels}
+                          value={formData.model}
+                          onValueChange={(value) => setFormData({ ...formData, model: value })}
+                          placeholder={providerSettings[formData.provider].modelPlaceholder}
+                          searchPlaceholder={t('models.searchModels', 'Search models...')}
+                          emptyText={availableModels.length === 0 ? 'Type model name and press Enter' : 'No matching models found.'}
+                          allowCustomInput={true}
+                        />
+                      </div>
+                      {(formData.apiUrl && formData.apiKey) && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={fetchAvailableModels}
+                          disabled={isLoadingModels}
+                          title={t('models.refreshModels', 'Refresh models')}
+                          className="px-3"
+                        >
+                          <RefreshCw className={`h-4 w-4 ${isLoadingModels ? 'animate-spin' : ''}`} />
+                        </Button>
+                      )}
+                    </div>
+                  ) : (
+                    <Input
+                      id="model-id"
+                      placeholder={providerSettings[formData.provider].modelPlaceholder}
+                      value={formData.model}
+                      onChange={(e) => setFormData({ ...formData, model: e.target.value })}
+                    />
+                  )}
                 </div>
 
                 <div className="space-y-2">
