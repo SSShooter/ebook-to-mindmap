@@ -6,7 +6,6 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Settings, Brain } from 'lucide-react'
-import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
 import { useConfigStore, useProcessingOptions } from '../../stores/configStore'
 import { useModelStore } from '../../stores/modelStore'
@@ -59,55 +58,6 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
       setTemperature(selectedModel.temperature)
     }
   }, [selectedModelId, models, setAiProvider, setApiKey, setApiUrl, setModel, setTemperature])
-
-  // 导出配置
-  const handleExportConfig = () => {
-    const config = {
-      processingOptions
-    }
-    const dataStr = JSON.stringify(config, null, 2)
-    const dataBlob = new Blob([dataStr], { type: 'application/json' })
-    const url = URL.createObjectURL(dataBlob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `ebook-mindmap-config-${new Date().toISOString().split('T')[0]}.json`
-    link.click()
-    URL.revokeObjectURL(url)
-    toast.success(t('config.exportSuccess'))
-  }
-
-  // 导入配置
-  const handleImportConfig = () => {
-    const input = document.createElement('input')
-    input.type = 'file'
-    input.accept = 'application/json'
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0]
-      if (!file) return
-
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        try {
-          const config = JSON.parse(event.target?.result as string)
-
-          // 验证配置结构
-          if (!config.processingOptions) {
-            toast.error(t('config.importError'))
-            return
-          }
-
-          // 使用统一的导入方法
-          useConfigStore.getState().importConfig(config)
-          toast.success(t('config.importSuccess'))
-        } catch (error) {
-          console.error('Failed to import config:', error)
-          toast.error(t('config.importError'))
-        }
-      }
-      reader.readAsText(file)
-    }
-    input.click()
-  }
 
   return (
     <Dialog>
