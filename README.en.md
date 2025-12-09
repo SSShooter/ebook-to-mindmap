@@ -12,7 +12,9 @@
 
 An intelligent e-book parsing tool powered by AI technology that converts EPUB and PDF format e-books into structured mind maps and text summaries.
 
-Try it now: https://ebook2me.mind-elixir.com/
+Try it now: https://ebook2me-next.mind-elixir.com/
+
+[Use Legacy Version](https://ebook2me.mind-elixir.com/)
 
 ## ✨ Features
 
@@ -60,35 +62,28 @@ First-time use requires AI service configuration:
 > **🔒 Privacy Protection Note**: This tool uses the BYOK (Bring Your Own Key) mode, requiring you to use your own API Key. All AI requests are made directly from your browser to the AI providers (Google or OpenAI), never through any third-party proxy or intermediary servers, ensuring your data security and privacy.
 
 1. Click the "Configure" button
-2. Select AI service provider:
-   - **Google Gemini** (recommended): Requires Gemini API Key
-   - **OpenAI GPT**: Requires OpenAI API Key and API address
+2. Select AI service provider, **Google Gemini** is recommended for trial
 3. Enter the corresponding API Key
-4. Select model (optional, default model works fine)
+4. Fill in the model
 
 #### Getting API Keys
 
-**Google Gemini API Key**:
+Using **Google Gemini** as an example:
 
 1. Visit [Google AI Studio](https://aistudio.google.com/)
-2. Sign in with Google account
+2. Sign in with your Google account
 3. Create a new API Key
 4. Copy the API Key to configuration
 
-**OpenAI API Key**:
-
-1. Visit [OpenAI Platform](https://platform.openai.com/)
-2. Sign in and go to API Keys page
-3. Create a new API Key
-4. Copy the API Key to configuration
-
-Here are some [free alternatives](https://github.com/SSShooter/Video-Summary/blob/master/guide/index.md) for reference.
+For more information on AI provider options, refer to: [Free and Paid AI API Selection Guide](https://ssshooter.com/en/ai-services-guide/)
 
 ### 2. Upload E-book File
 
 1. Click "Select EPUB or PDF File" button
 2. Choose the e-book file to process
 3. Supported formats: `.epub`, `.pdf`
+
+You can get free e-books from websites like [Project Gutenberg](https://www.gutenberg.org/) and [Standard Ebooks](https://standardebooks.org/).
 
 ### 3. Configure Processing Options
 
@@ -98,7 +93,7 @@ Set processing parameters in the configuration dialog:
 
 - **Text Summary Mode**: Suitable for scenarios requiring text summaries
 - **Chapter Mind Map Mode**: Generate independent mind maps for each chapter
-- **Whole Book Mind Map Mode**: Generate unified mind map for the entire book
+- **Whole Book Mind Map Mode**: Generate unified mind map for the entire book (may fail due to insufficient model context if the book content is too long)
 
 #### Book Type
 
@@ -116,7 +111,7 @@ Set processing parameters in the configuration dialog:
 1. Click "Extract Chapters" button
 2. System will automatically parse the file and extract chapter structure
 3. After extraction, chapter list will be displayed
-4. You can select chapters to process (all selected by default)
+4. You can select chapters to process
 
 ### 5. Start Processing
 

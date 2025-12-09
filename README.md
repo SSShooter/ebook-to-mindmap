@@ -5,14 +5,15 @@
   <h1 align="center">电子书转思维导图</h1>
 </p>
 
-
 [English](README.en.md) | 中文
 
 ![电子书转思维导图 截图1](/img/screenshot1.jpg)
 
 一个基于 AI 技术的智能电子书解析工具，支持将 EPUB 和 PDF 格式的电子书转换为结构化的思维导图和文字总结。
 
-立即试用：https://ebook2me.mind-elixir.com/
+立即试用：https://ebook2me-next.mind-elixir.com/
+
+[使用旧版](https://ebook2me.mind-elixir.com/)
 
 ## ✨ 功能特性
 
@@ -73,7 +74,7 @@
 3. 创建新的 API Key
 4. 复制 API Key 到配置中
 
-这里还有一些[免费方案](https://github.com/SSShooter/Video-Summary/blob/master/guide/index.md)可供参考。
+获取更多 AI 运营商选择资讯，可以参考：[免费和付费 AI API 选择指南](https://ssshooter.com/ai-services-guide/)
 
 ### 2. 上传电子书文件
 
@@ -168,6 +169,6 @@
 
 ---
 
-如有问题或建议，欢迎提交 Issue 或联系开发者（微信👇）
+如有问题或建议，欢迎提交 Issue 或联系开发者（微信 👇）
 
 <img width="220" alt="WeChat" src="/img/wechat.JPG" />
