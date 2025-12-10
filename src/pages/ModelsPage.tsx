@@ -305,41 +305,32 @@ export function ModelsPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="model-id">{t('models.modelId')}</Label>
-                  {(formData.provider === 'openai' || formData.provider === 'ollama' || formData.provider === '302.ai' || formData.provider === 'gemini') ? (
-                    <div className="flex gap-2">
-                      <div className="flex-1">
-                        <Combobox
-                          options={availableModels}
-                          value={formData.model}
-                          onValueChange={(value) => setFormData({ ...formData, model: value })}
-                          placeholder={providerSettings[formData.provider].modelPlaceholder}
-                          searchPlaceholder={t('models.searchModels', 'Search models...')}
-                          emptyText={availableModels.length === 0 ? 'Type model name and press Enter' : 'No matching models found.'}
-                          allowCustomInput={true}
-                        />
-                      </div>
-                      {(formData.apiUrl && formData.apiKey) && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={fetchAvailableModels}
-                          disabled={isLoadingModels}
-                          title={t('models.refreshModels', 'Refresh models')}
-                          className="px-3"
-                        >
-                          <RefreshCw className={`h-4 w-4 ${isLoadingModels ? 'animate-spin' : ''}`} />
-                        </Button>
-                      )}
+                  <div className="flex gap-2">
+                    <div className="flex-1">
+                      <Combobox
+                        options={availableModels}
+                        value={formData.model}
+                        onValueChange={(value) => setFormData({ ...formData, model: value })}
+                        placeholder={providerSettings[formData.provider].modelPlaceholder}
+                        searchPlaceholder={t('models.searchModels', 'Search models...')}
+                        emptyText={availableModels.length === 0 ? 'Type model name and press Enter' : 'No matching models found.'}
+                        allowCustomInput={true}
+                      />
                     </div>
-                  ) : (
-                    <Input
-                      id="model-id"
-                      placeholder={providerSettings[formData.provider].modelPlaceholder}
-                      value={formData.model}
-                      onChange={(e) => setFormData({ ...formData, model: e.target.value })}
-                    />
-                  )}
+                    {(formData.apiUrl && formData.apiKey) && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={fetchAvailableModels}
+                        disabled={isLoadingModels}
+                        title={t('models.refreshModels', 'Refresh models')}
+                        className="px-3"
+                      >
+                        <RefreshCw className={`h-4 w-4 ${isLoadingModels ? 'animate-spin' : ''}`} />
+                      </Button>
+                    )}
+                  </div>
                 </div>
 
                 <div className="space-y-2">
