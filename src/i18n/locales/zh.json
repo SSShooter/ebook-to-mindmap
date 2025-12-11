@@ -7,6 +7,7 @@
     "summary": "AI 总结",
     "models": "模型管理",
     "customPrompts": "自定义提示词",
+    "cacheManagement": "内容管理",
     "settings": "设置"
   },
   "upload": {
@@ -285,5 +286,44 @@
     "placeholder": "例如: 重点章节",
     "cancel": "取消",
     "confirm": "确认添加"
+  },
+  "cacheManagement": {
+    "title": "内容管理",
+    "description": "查看和管理缓存的书籍内容",
+    "noCache": "暂无缓存内容",
+    "noContent": "无内容",
+    "noPreviewableContent": "没有可预览的内容",
+    "preview": "预览",
+    "deleteEntry": "删除此缓存",
+    "deleteBook": "删除全部",
+    "deleteConfirmTitle": "确认删除",
+    "deleteEntryConfirm": "确定要删除此缓存吗？删除后将无法恢复。",
+    "deleteBookConfirm": "确定要删除「{{bookName}}」的所有缓存吗？删除后将无法恢复。",
+    "deleteSuccess": "缓存已删除",
+    "deleteBookSuccess": "已删除 {{count}} 项缓存",
+    "items": "项",
+    "modeSummary": "文字总结",
+    "modeMindmap": "思维导图",
+    "hasSummary": "总结",
+    "hasMindmap": "思维导图",
+    "tabs": {
+      "summary": "文字总结",
+      "mindmap": "思维导图",
+      "character": "人物关系"
+    },
+    "types": {
+      "summary": "章节总结",
+      "mindmap": "章节思维导图",
+      "connections": "章节关联",
+      "overallSummary": "全书总结",
+      "characterRelationship": "人物关系图",
+      "combinedMindmap": "整书思维导图",
+      "mergedMindmap": "合并思维导图",
+      "mindmapArrows": "思维导图箭头",
+      "selectedChapters": "选中章节",
+      "chapterTags": "章节标签",
+      "customPrompt": "自定义提示词",
+      "useCustomOnly": "仅用自定义"
+    }
   }
 }

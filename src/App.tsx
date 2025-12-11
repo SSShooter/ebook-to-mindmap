@@ -5,6 +5,7 @@ import { SummaryPage } from './pages/SummaryPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { ModelsPage } from './pages/ModelsPage'
 import { CustomPromptsPage } from './pages/CustomPromptsPage'
+import { CacheManagementPage } from './pages/CacheManagementPage'
 import { Menu } from 'lucide-react'
 import { useState } from 'react'
 
@@ -46,6 +47,7 @@ function App() {
           <Route path="/" component={SummaryPage} />
           <Route path="/models" component={ModelsPage} />
           <Route path="/custom-prompts" component={CustomPromptsPage} />
+          <Route path="/cache" component={CacheManagementPage} />
           <Route path="/settings" component={SettingsPage} />
         </Switch>
       </div>

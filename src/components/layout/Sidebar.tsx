@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Link, useLocation } from 'wouter'
-import { BookOpen, Settings, Brain, MessageSquarePlus, X } from 'lucide-react'
+import { BookOpen, Settings, Brain, MessageSquarePlus, X, Database } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Footer } from '../Footer'
 
@@ -31,6 +31,11 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
       label: t('nav.customPrompts'),
     },
     {
+      path: '/cache',
+      icon: Database,
+      label: t('nav.cacheManagement'),
+    },
+    {
       path: '/settings',
       icon: Settings,
       label: t('nav.settings'),
@@ -45,8 +50,8 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
     isMobile && isOpen
       ? 'translate-x-0'
       : isMobile
-      ? '-translate-x-full'
-      : ''
+        ? '-translate-x-full'
+        : ''
   )
 
   const handleLinkClick = () => {

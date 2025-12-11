@@ -7,6 +7,7 @@
     "summary": "AI Summary",
     "models": "Models",
     "customPrompts": "Custom Prompts",
+    "cacheManagement": "Cache",
     "settings": "Settings"
   },
   "upload": {
@@ -316,5 +317,44 @@
     "placeholder": "e.g., Important Chapter",
     "cancel": "Cancel",
     "confirm": "Confirm"
+  },
+  "cacheManagement": {
+    "title": "Content Management",
+    "description": "View and manage cached book content",
+    "noCache": "No cached content",
+    "noContent": "No content",
+    "noPreviewableContent": "No previewable content",
+    "preview": "Preview",
+    "deleteEntry": "Delete cache",
+    "deleteBook": "Delete all",
+    "deleteConfirmTitle": "Confirm Delete",
+    "deleteEntryConfirm": "Are you sure you want to delete this cache? This action cannot be undone.",
+    "deleteBookConfirm": "Are you sure you want to delete all cache for \"{{bookName}}\"? This action cannot be undone.",
+    "deleteSuccess": "Cache deleted",
+    "deleteBookSuccess": "Deleted {{count}} cache items",
+    "items": "items",
+    "modeSummary": "Text Summary",
+    "modeMindmap": "Mind Map",
+    "hasSummary": "Summary",
+    "hasMindmap": "Mind Map",
+    "tabs": {
+      "summary": "Summary",
+      "mindmap": "Mind Map",
+      "character": "Characters"
+    },
+    "types": {
+      "summary": "Chapter Summary",
+      "mindmap": "Chapter Mind Map",
+      "connections": "Connections",
+      "overallSummary": "Overall Summary",
+      "characterRelationship": "Character Relationship",
+      "combinedMindmap": "Combined Mind Map",
+      "mergedMindmap": "Merged Mind Map",
+      "mindmapArrows": "Mind Map Arrows",
+      "selectedChapters": "Selected Chapters",
+      "chapterTags": "Chapter Tags",
+      "customPrompt": "Custom Prompt",
+      "useCustomOnly": "Custom Only"
+    }
   }
 }

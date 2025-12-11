@@ -228,4 +228,94 @@ export class CacheService {
     const keys = await this.store.keys()
     return keys.length
   }
+
+  // 解析缓存键，提取书籍名称和缓存类型
+  static parseKey(key: string): { bookName: string; type: CacheKeyType; chapterId?: string } | null {
+    // 匹配模式: book_${cleanFilename}_chapter_${chapterId}_${type} 或 book_${cleanFilename}_${type}
+    const chapterMatch = key.match(/^book_(.+)_chapter_(.+)_(summary|mindmap)$/)
+    if (chapterMatch) {
+      return {
+        bookName: chapterMatch[1],
+        chapterId: chapterMatch[2],
+        type: chapterMatch[3] as CacheKeyType
+      }
+    }
+
+    const bookMatch = key.match(/^book_(.+)_(connections|overall_summary|character_relationship|combined_mindmap|merged_mindmap|mindmap_arrows|selected_chapters|chapter_tags|custom_prompt|use_custom_only)$/)
+    if (bookMatch) {
+      return {
+        bookName: bookMatch[1],
+        type: bookMatch[2] as CacheKeyType
+      }
+    }
+
+    return null
+  }
+
+  // 获取所有缓存条目
+  async getAllCacheEntries(): Promise<{ key: string; bookName: string; type: CacheKeyType; chapterId?: string }[]> {
+    const keys = await this.store.keys()
+    const entries: { key: string; bookName: string; type: CacheKeyType; chapterId?: string }[] = []
+
+    for (const key of keys) {
+      const parsed = CacheService.parseKey(key)
+      if (parsed) {
+        entries.push({
+          key,
+          ...parsed
+        })
+      }
+    }
+
+    return entries
+  }
+
+  // 按书籍分组获取缓存条目
+  async getCacheEntriesByBook(): Promise<Map<string, { key: string; type: CacheKeyType; chapterId?: string }[]>> {
+    const entries = await this.getAllCacheEntries()
+    const grouped = new Map<string, { key: string; type: CacheKeyType; chapterId?: string }[]>()
+
+    for (const entry of entries) {
+      const existing = grouped.get(entry.bookName) || []
+      existing.push({
+        key: entry.key,
+        type: entry.type,
+        chapterId: entry.chapterId
+      })
+      grouped.set(entry.bookName, existing)
+    }
+
+    return grouped
+  }
+
+  // 根据键获取缓存值
+  async getCacheValueByKey(key: string): Promise<CacheValue> {
+    return await this.store.getItem<CacheValue>(key)
+  }
+
+  // 根据键删除缓存
+  async deleteCacheByKey(key: string): Promise<boolean> {
+    try {
+      await this.store.removeItem(key)
+      return true
+    } catch {
+      return false
+    }
+  }
+
+  // 删除指定书籍的所有缓存
+  async deleteBookAllCache(bookName: string): Promise<number> {
+    const entries = await this.getAllCacheEntries()
+    let deletedCount = 0
+
+    for (const entry of entries) {
+      if (entry.bookName === bookName) {
+        if (await this.deleteCacheByKey(entry.key)) {
+          deletedCount++
+        }
+      }
+    }
+
+    return deletedCount
+  }
 }
