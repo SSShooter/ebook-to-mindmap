@@ -16,7 +16,7 @@ import { toast } from 'sonner'
 import { scrollToTop } from '../utils'
 import { useConfigStore } from '../stores/configStore'
 
-const options = { direction: 1, alignment: 'nodes' } as Options
+const options = { direction: 1, alignment: 'nodes', editable: false } as Options
 
 interface BookSummary {
   title: string
@@ -52,6 +52,12 @@ export function SummaryPage() {
   const [showBackToTop, setShowBackToTop] = useState(false)
   const [readingChapterId, setReadingChapterId] = useState<string | null>(null)
   const [readingChapterIds, setReadingChapterIds] = useState<string[]>([])
+  const [retryParams, setRetryParams] = useState<{
+    selectedChapters: Set<string>
+    chapterTags: Map<string, string>
+    customPrompt: string
+    useCustomOnly: boolean
+  } | null>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
 
   const configStore = useConfigStore()
@@ -129,9 +135,8 @@ export function SummaryPage() {
     setProgress(0)
     setCurrentStep('')
     setError(null)
+    setRetryParams(null)
   }, [])
-
-
 
   const handleStartProcessing = useCallback(async (selectedChapters: Set<string>, chapterTags: Map<string, string>, customPrompt: string, useCustomOnly: boolean) => {
     if (!extractedChapters || !bookData || !apiKey) {
@@ -149,6 +154,14 @@ export function SummaryPage() {
       })
       return
     }
+
+    // Store retry parameters
+    setRetryParams({
+      selectedChapters: new Set(selectedChapters),
+      chapterTags: new Map(chapterTags),
+      customPrompt,
+      useCustomOnly
+    })
 
     setCurrentStepIndex(2)
     setBookSummary(null)
@@ -406,6 +419,24 @@ export function SummaryPage() {
     }
   }, [extractedChapters, bookData, apiKey, file, processingMode, bookType, configStore.processingOptions.outputLanguage, t])
 
+  const handleRetry = useCallback(() => {
+    if (!retryParams) return
+
+    // Cancel any ongoing processing
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+      abortControllerRef.current = null
+    }
+
+    // Start processing again with stored parameters
+    handleStartProcessing(
+      retryParams.selectedChapters,
+      retryParams.chapterTags,
+      retryParams.customPrompt,
+      retryParams.useCustomOnly
+    )
+  }, [retryParams, handleStartProcessing])
+
   const hasReader = readingChapterId && file && extractedChapters
 
   return (
@@ -451,6 +482,7 @@ export function SummaryPage() {
               onClearChapterCache={clearChapterCache}
               onClearSpecificCache={clearSpecificCache}
               onReadChapter={handleReadChapter}
+              onRetry={error && retryParams ? handleRetry : undefined}
               mindElixirOptions={options}
             />
           )}

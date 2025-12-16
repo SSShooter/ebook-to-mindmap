@@ -95,7 +95,7 @@ export class AIService {
       if (onStreamUpdate) {
         result = await this.generateContentStream(prompt, onStreamUpdate, outputLanguage, abortSignal)
       } else {
-        result = await this.generateContent(prompt, outputLanguage, abortSignal)
+        result = await this.generateContent(prompt, outputLanguage, abortSignal, false)
       }
 
       if (!result.content || result.content.trim().length === 0) {
@@ -122,7 +122,7 @@ export class AIService {
         ? getFictionChapterConnectionsAnalysisPrompt(chapterSummaries)
         : getChapterConnectionsAnalysisPrompt(chapterSummaries)
 
-      const result = await this.generateContent(prompt, outputLanguage, abortSignal)
+      const result = await this.generateContent(prompt, outputLanguage, abortSignal, false)
       const connections = result.content
 
       if (!connections || connections.trim().length === 0) {
@@ -152,7 +152,7 @@ export class AIService {
         ? getFictionOverallSummaryPrompt(bookTitle, chapterInfo)
         : getOverallSummaryPrompt(bookTitle, chapterInfo)
 
-      const result = await this.generateContent(prompt, outputLanguage, abortSignal)
+      const result = await this.generateContent(prompt, outputLanguage, abortSignal, false)
       const summary = result.content
 
       if (!summary || summary.trim().length === 0) {
@@ -181,7 +181,7 @@ export class AIService {
         ? getFictionCharacterRelationshipPrompt(chapterSummaries)
         : getCharacterRelationshipPrompt(chapterSummaries)
 
-      const result = await this.generateContent(prompt, outputLanguage, abortSignal)
+      const result = await this.generateContent(prompt, outputLanguage, abortSignal, false)
       const relationship = result.content
 
       if (!relationship || relationship.trim().length === 0) {
@@ -212,7 +212,7 @@ export class AIService {
         prompt += `\n\n补充要求：${customPrompt.trim()}`
       }
 
-      const result = await this.generateContent(prompt, outputLanguage, abortSignal)
+      const result = await this.generateContent(prompt, outputLanguage, abortSignal, true)
       const mindMapJson = result.content
 
       return this.parseJsonResponse(mindMapJson, "思维导图") as MindElixirData
@@ -226,7 +226,7 @@ export class AIService {
       const basePrompt = getMindMapArrowPrompt()
       const prompt = basePrompt + `\n\n当前思维导图数据：\n${JSON.stringify(combinedMindMapData, null, 2)}`
 
-      const result = await this.generateContent(prompt, outputLanguage, abortSignal)
+      const result = await this.generateContent(prompt, outputLanguage, abortSignal, true)
       const arrowsJson = result.content
 
       return this.parseJsonResponse(arrowsJson, "箭头") as MindElixirData['arrows']
@@ -248,7 +248,7 @@ export class AIService {
         prompt += `\n\n补充要求：${customPrompt.trim()}`
       }
 
-      const result = await this.generateContent(prompt, 'en', abortSignal)
+      const result = await this.generateContent(prompt, 'en', abortSignal, true)
       const mindMapJson = result.content
 
       return this.parseJsonResponse(mindMapJson, "思维导图") as MindElixirData
@@ -281,7 +281,12 @@ export class AIService {
   }
 
   // 统一的内容生成方法
-  private async generateContent(prompt: string, outputLanguage?: SupportedLanguage, abortSignal?: AbortSignal): Promise<{ content: string; reasoning: string }> {
+  private async generateContent(
+    prompt: string,
+    outputLanguage?: SupportedLanguage,
+    abortSignal?: AbortSignal,
+    requireJsonFormat: boolean = false
+  ): Promise<{ content: string; reasoning: string }> {
     const config = this.getCurrentConfig()
     const language = outputLanguage || 'en'
     const systemPrompt = getLanguageInstruction(language)
@@ -299,17 +304,32 @@ export class AIService {
       throw new DOMException('Request was aborted', 'AbortError')
     }
 
+    // 构建请求体，只在需要JSON格式时添加response_format
+    const requestBody: {
+      model: string
+      messages: Array<{ role: 'system' | 'user', content: string }>
+      temperature: number
+      response_format?: { type: string }
+    } = {
+      model: this.model.model,
+      messages,
+      temperature: config.temperature || 0.7
+    }
+
+    // 只有在生成思维导图时才要求JSON格式
+    if (requireJsonFormat) {
+      requestBody.response_format = {
+        "type": "json_object"
+      }
+    }
+
     const response = await fetch(`${this.model.apiUrl}/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${this.model.apiKey}`
       },
-      body: JSON.stringify({
-        model: this.model.model,
-        messages,
-        temperature: config.temperature || 0.7
-      }),
+      body: JSON.stringify(requestBody),
       signal: abortSignal
     })
 
@@ -424,7 +444,7 @@ export class AIService {
   // 辅助方法：检查API连接
   async testConnection(): Promise<boolean> {
     try {
-      const result = await this.generateContent(getTestConnectionPrompt())
+      const result = await this.generateContent(getTestConnectionPrompt(), undefined, undefined, false)
       return result.content.includes('连接成功') || result.content.includes('成功')
     } catch {
       return false

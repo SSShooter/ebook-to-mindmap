@@ -4,7 +4,7 @@ import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { BookOpen, Network, Loader2, ArrowLeft, Download } from 'lucide-react'
+import { BookOpen, Network, Loader2, ArrowLeft, Download, RefreshCw } from 'lucide-react'
 import { MarkdownCard } from './MarkdownCard'
 import { MermaidDiagram } from './MermaidDiagram'
 import { MindMapCard } from './MindMapCard'
@@ -55,6 +55,7 @@ interface Step2ResultsProps {
   onClearChapterCache: (chapterId: string) => void
   onClearSpecificCache: (cacheType: 'connections' | 'overall_summary' | 'character_relationship' | 'combined_mindmap' | 'merged_mindmap') => void
   onReadChapter: (chapterId: string, chapterIds: string[]) => void
+  onRetry?: () => void
   mindElixirOptions: Options
 }
 
@@ -71,6 +72,7 @@ export function Step2Results({
   onClearChapterCache,
   onClearSpecificCache,
   onReadChapter,
+  onRetry,
   mindElixirOptions
 }: Step2ResultsProps) {
   const { t } = useTranslation()
@@ -193,7 +195,20 @@ ${bookSummary.overallSummary}
               <div className="flex justify-between items-center text-sm">
                 <div className="flex items-center gap-2">
                   {error ? (
-                    <span className="text-red-500 font-medium">Error: {error}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-red-500 font-medium">Error: {error}</span>
+                      {onRetry && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={onRetry}
+                          className="flex items-center gap-1 text-xs"
+                        >
+                          <RefreshCw className="h-3 w-3" />
+                          {t('common.retry')}
+                        </Button>
+                      )}
+                    </div>
                   ) : (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />

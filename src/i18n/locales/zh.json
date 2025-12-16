@@ -129,7 +129,8 @@
     "resetZoom": "重置缩放",
     "fullscreen": "全屏",
     "exitFullscreen": "退出全屏",
-    "reasoning": "思考过程"
+    "reasoning": "思考过程",
+    "retry": "重试"
   },
   "config": {
     "title": "配置",
