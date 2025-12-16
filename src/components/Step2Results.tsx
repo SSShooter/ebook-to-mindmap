@@ -32,6 +32,8 @@ interface BookSummary {
   connections: string
   characterRelationship: string
   overallSummary: string
+  connectionsLoading?: boolean
+  overallSummaryLoading?: boolean
 }
 
 interface BookMindMap {
@@ -285,6 +287,7 @@ ${bookSummary.overallSummary}
                       showViewContent={false}
                       showCopyButton={true}
                       onClearCache={() => onClearSpecificCache('connections')}
+                      isLoading={bookSummary.connectionsLoading}
                     />
                   </TabsContent>
 
@@ -326,6 +329,7 @@ ${bookSummary.overallSummary}
                       showViewContent={false}
                       showCopyButton={true}
                       onClearCache={() => onClearSpecificCache('overall_summary')}
+                      isLoading={bookSummary.overallSummaryLoading}
                     />
                   </TabsContent>
                 </Tabs>

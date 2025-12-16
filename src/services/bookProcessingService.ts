@@ -236,22 +236,48 @@ export class BookProcessingService {
     chapters: Chapter[],
     outputLanguage: SupportedLanguage,
     bookType: BookType,
-    abortSignal: AbortSignal
+    abortSignal: AbortSignal,
+    onStreamUpdate?: (data: { content: string }) => void
   ): Promise<string> {
     let connections = await this.cacheService.getString(fileName, 'connections')
 
     if (!connections) {
       console.log('🔄 [DEBUG] 缓存未命中，开始分析章节关联')
+
+      let currentContent = ''
+      let lastUpdateTime = 0
+
+      const handleStreamUpdate = onStreamUpdate ? (data: { content: string; reasoning?: string }) => {
+        currentContent += data.content
+        const now = Date.now()
+        // 每1秒更新一次，或者如果是第一批数据也更新
+        if (now - lastUpdateTime >= 1000 || lastUpdateTime === 0) {
+          onStreamUpdate({ content: currentContent })
+          lastUpdateTime = now
+        }
+      } : undefined
+
       connections = await this.aiService.analyzeConnections(
         chapters,
         outputLanguage,
         bookType,
-        abortSignal
+        abortSignal,
+        handleStreamUpdate
       )
+
+      // 确保最后一次更新包含完整内容
+      if (onStreamUpdate) {
+        onStreamUpdate({ content: connections })
+      }
+
       await this.cacheService.setCache(fileName, 'connections', connections)
       console.log('💾 [DEBUG] 章节关联已缓存')
     } else {
       console.log('✅ [DEBUG] 使用缓存的章节关联')
+      // 如果命中缓存，也通知一下
+      if (onStreamUpdate) {
+        onStreamUpdate({ content: connections })
+      }
     }
 
     return connections
@@ -266,23 +292,49 @@ export class BookProcessingService {
     chapters: Chapter[],
     outputLanguage: SupportedLanguage,
     bookType: BookType,
-    abortSignal: AbortSignal
+    abortSignal: AbortSignal,
+    onStreamUpdate?: (data: { content: string }) => void
   ): Promise<string> {
     let overallSummary = await this.cacheService.getString(fileName, 'overall_summary')
 
     if (!overallSummary) {
       console.log('🔄 [DEBUG] 缓存未命中，开始生成全书总结')
+
+      let currentContent = ''
+      let lastUpdateTime = 0
+
+      const handleStreamUpdate = onStreamUpdate ? (data: { content: string; reasoning?: string }) => {
+        currentContent += data.content
+        const now = Date.now()
+        // 每1秒更新一次，或者如果是第一批数据也更新
+        if (now - lastUpdateTime >= 1000 || lastUpdateTime === 0) {
+          onStreamUpdate({ content: currentContent })
+          lastUpdateTime = now
+        }
+      } : undefined
+
       overallSummary = await this.aiService.generateOverallSummary(
         bookTitle,
         chapters,
         outputLanguage,
         bookType,
-        abortSignal
+        abortSignal,
+        handleStreamUpdate
       )
+
+      // 确保最后一次更新包含完整内容
+      if (onStreamUpdate) {
+        onStreamUpdate({ content: overallSummary })
+      }
+
       await this.cacheService.setCache(fileName, 'overall_summary', overallSummary)
       console.log('💾 [DEBUG] 全书总结已缓存')
     } else {
       console.log('✅ [DEBUG] 使用缓存的全书总结')
+      // 如果命中缓存，也通知一下
+      if (onStreamUpdate) {
+        onStreamUpdate({ content: overallSummary })
+      }
     }
 
     return overallSummary

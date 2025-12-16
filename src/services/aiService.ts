@@ -111,7 +111,13 @@ export class AIService {
     }
   }
 
-  async analyzeConnections(chapters: Chapter[], outputLanguage: SupportedLanguage = 'en', bookType: 'fiction' | 'non-fiction' = 'non-fiction', abortSignal?: AbortSignal): Promise<string> {
+  async analyzeConnections(
+    chapters: Chapter[],
+    outputLanguage: SupportedLanguage = 'en',
+    bookType: 'fiction' | 'non-fiction' = 'non-fiction',
+    abortSignal?: AbortSignal,
+    onStreamUpdate?: (data: { content: string; reasoning?: string }) => void
+  ): Promise<string> {
     try {
       // 构建章节摘要信息
       const chapterSummaries = chapters.map((chapter) =>
@@ -122,7 +128,12 @@ export class AIService {
         ? getFictionChapterConnectionsAnalysisPrompt(chapterSummaries)
         : getChapterConnectionsAnalysisPrompt(chapterSummaries)
 
-      const result = await this.generateContent(prompt, outputLanguage, abortSignal, false)
+      let result: { content: string; reasoning: string }
+      if (onStreamUpdate) {
+        result = await this.generateContentStream(prompt, onStreamUpdate, outputLanguage, abortSignal)
+      } else {
+        result = await this.generateContent(prompt, outputLanguage, abortSignal)
+      }
       const connections = result.content
 
       if (!connections || connections.trim().length === 0) {
@@ -140,7 +151,8 @@ export class AIService {
     chapters: Chapter[],
     outputLanguage: SupportedLanguage = 'en',
     bookType: 'fiction' | 'non-fiction' = 'non-fiction',
-    abortSignal?: AbortSignal
+    abortSignal?: AbortSignal,
+    onStreamUpdate?: (data: { content: string; reasoning?: string }) => void
   ): Promise<string> {
     try {
       // 构建简化的章节信息
@@ -152,7 +164,12 @@ export class AIService {
         ? getFictionOverallSummaryPrompt(bookTitle, chapterInfo)
         : getOverallSummaryPrompt(bookTitle, chapterInfo)
 
-      const result = await this.generateContent(prompt, outputLanguage, abortSignal, false)
+      let result: { content: string; reasoning: string }
+      if (onStreamUpdate) {
+        result = await this.generateContentStream(prompt, onStreamUpdate, outputLanguage, abortSignal)
+      } else {
+        result = await this.generateContent(prompt, outputLanguage, abortSignal)
+      }
       const summary = result.content
 
       if (!summary || summary.trim().length === 0) {

@@ -25,6 +25,8 @@ interface BookSummary {
   connections: string
   characterRelationship: string
   overallSummary: string
+  connectionsLoading?: boolean
+  overallSummaryLoading?: boolean
 }
 
 interface BookMindMap {
@@ -323,17 +325,33 @@ export function SummaryPage() {
 
       if (processingMode === 'summary') {
         setCurrentStep('正在分析章节关联...')
+
+        // Mark connections as loading
+        setBookSummary(prevSummary => ({
+          ...prevSummary!,
+          connections: '',
+          connectionsLoading: true
+        }))
+
         const connections = await bookProcessingService.generateConnections(
           file.name,
           processedChapters,
           configStore.processingOptions.outputLanguage,
           bookType,
-          abortSignal
+          abortSignal,
+          (data) => {
+            setBookSummary(prevSummary => ({
+              ...prevSummary!,
+              connections: data.content,
+              connectionsLoading: true
+            }))
+          }
         )
 
         setBookSummary(prevSummary => ({
           ...prevSummary!,
-          connections
+          connections,
+          connectionsLoading: false
         }))
         setProgress(80)
 
@@ -355,18 +373,34 @@ export function SummaryPage() {
         setProgress(90)
 
         setCurrentStep('正在生成全书总结...')
+
+        // Mark overallSummary as loading
+        setBookSummary(prevSummary => ({
+          ...prevSummary!,
+          overallSummary: '',
+          overallSummaryLoading: true
+        }))
+
         const overallSummary = await bookProcessingService.generateOverallSummary(
           file.name,
           bookData.title,
           processedChapters,
           configStore.processingOptions.outputLanguage,
           bookType,
-          abortSignal
+          abortSignal,
+          (data) => {
+            setBookSummary(prevSummary => ({
+              ...prevSummary!,
+              overallSummary: data.content,
+              overallSummaryLoading: true
+            }))
+          }
         )
 
         setBookSummary(prevSummary => ({
           ...prevSummary!,
-          overallSummary
+          overallSummary,
+          overallSummaryLoading: false
         }))
       } else if (processingMode === 'mindmap') {
         setCurrentStep('正在合并章节思维导图...')
