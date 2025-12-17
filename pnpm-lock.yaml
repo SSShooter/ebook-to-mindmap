@@ -144,8 +144,8 @@ importers:
         specifier: ^11.12.1
         version: 11.12.1
       mind-elixir:
-        specifier: ^5.3.5
-        version: 5.3.5
+        specifier: ^5.3.8
+        version: 5.3.8
       next-themes:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -2767,8 +2767,8 @@ packages:
   mind-elixir@4.6.2:
     resolution: {integrity: sha512-KjIjInLbMtW7J68Hm+oJ/+g/fhG+h6kkJkU5HL1LgqLSIyKFQM4V5xogibbqm+9ycBmKu2TTOlE+5O2/3VZPtA==}
 
-  mind-elixir@5.3.5:
-    resolution: {integrity: sha512-GKYTqU7qsbmPmdTvJlM0g/chrHIkikV7sYhQIz4GTa7Xp8H7hqL5y8gMeJLeR2gdJi3sLUyoVUzBwF7tmKIffw==}
+  mind-elixir@5.3.8:
+    resolution: {integrity: sha512-p5TuyTCgVZhaCjDi3JjH+Gpz4nL95/9C5nJqYyoxAIEqs3F5r92U7BdP6LPs9oii2kGJbcRBtIEQU6hefADqLQ==}
 
   minimatch@3.1.2:
     resolution: {integrity: sha512-J7p63hRiAjw1NDEww1W7i37+ByIrOWO5XQQAzZ3VOcL0PNybwpfmV/N05zFAzwQ9USyEcX6t3UO+K5aqBQOIHw==}
@@ -6128,7 +6128,7 @@ snapshots:
 
   mind-elixir@4.6.2: {}
 
-  mind-elixir@5.3.5: {}
+  mind-elixir@5.3.8: {}
 
   minimatch@3.1.2:
     dependencies:

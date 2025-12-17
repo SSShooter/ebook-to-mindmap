@@ -4,7 +4,9 @@
       "Bash(pnpm build:*)",
       "Bash(pnpm install:*)",
       "Bash(pnpm dlx shadcn@latest add:*)",
-      "Bash(npx shadcn@latest add:*)"
+      "Bash(npx shadcn@latest add:*)",
+      "Bash(powershell:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []

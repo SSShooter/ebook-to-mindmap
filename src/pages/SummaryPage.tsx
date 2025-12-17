@@ -16,7 +16,7 @@ import { toast } from 'sonner'
 import { scrollToTop } from '../utils'
 import { useConfigStore } from '../stores/configStore'
 
-const options = { direction: 1, alignment: 'nodes', editable: false } as Options
+const options = { direction: 1, alignment: 'nodes', editable: false, draggable:false } as Options
 
 interface BookSummary {
   title: string
