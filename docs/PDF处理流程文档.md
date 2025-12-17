@@ -72,7 +72,7 @@ const pageText = textContent.items
 
 ### 3. AI章节总结阶段
 
-**文件**: `src/services/geminiService.ts` - `summarizeChapter()` 方法
+**文件**: `src/services/aiService.ts` - `summarizeChapter()` 方法
 
 **处理流程**:
 - 逐章节调用Gemini API
@@ -96,7 +96,7 @@ const pageText = textContent.items
 
 ### 4. 章节关联分析阶段
 
-**文件**: `src/services/geminiService.ts` - `analyzeConnections()` 方法
+**文件**: `src/services/aiService.ts` - `analyzeConnections()` 方法
 
 **分析维度**:
 - 章节间的逻辑递进关系
@@ -110,7 +110,7 @@ const pageText = textContent.items
 
 ### 5. 全书总结生成阶段
 
-**文件**: `src/services/geminiService.ts` - `generateOverallSummary()` 方法
+**文件**: `src/services/aiService.ts` - `generateOverallSummary()` 方法
 
 **生成内容**:
 - **核心主题**: 书籍的主要思想和核心观点
@@ -194,7 +194,7 @@ src/
 ├── App.tsx                 # 主应用组件和流程控制
 ├── services/
 │   ├── pdfProcessor.ts     # PDF解析和章节提取
-│   ├── geminiService.ts    # AI总结和分析服务
+│   ├── aiService.ts    # AI总结和分析服务
 │   └── cacheService.ts     # 缓存管理服务
 └── lib/
     ├── pdf.worker.min.mjs  # PDF.js Worker文件

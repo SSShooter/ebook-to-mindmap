@@ -1,22 +1,38 @@
 import * as pdfjsLib from 'pdfjs-dist'
 import workerSrc from 'pdfjs-dist/build/pdf.worker?worker&url'
 import { SKIP_CHAPTER_KEYWORDS } from './constants'
+import type { PDFDocumentProxy } from 'pdfjs-dist';
 
 // 设置 PDF.js worker - 使用本地文件
 if (typeof window !== 'undefined') {
   pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc;
 }
 
+interface TextItem {
+  str: string
+  type: 'title' | 'subtitle' | 'list' | 'quote' | 'normal'
+  fontSize: number
+  isBold: boolean
+  x: number
+  y: number
+}
+
 export interface ChapterData {
   id: string
   title: string
   content: string
+  // PDF特有的页面信息
+  startPage?: number
+  endPage?: number
+  pageIndex?: number
 }
 
 export interface BookData {
   title: string
   author: string
   totalPages: number
+  // 保存PDF文档实例用于后续页面渲染
+  pdfDocument?: any
 }
 
 export class PdfProcessor {
@@ -44,14 +60,15 @@ export class PdfProcessor {
       return {
         title,
         author,
-        totalPages: pdf.numPages
+        totalPages: pdf.numPages,
+        pdfDocument: pdf
       }
     } catch (error) {
       throw new Error(`解析PDF文件失败: ${error instanceof Error ? error.message : '未知错误'}`)
     }
   }
 
-  async extractChapters(file: File, useSmartDetection: boolean = false, skipNonEssentialChapters: boolean = true, maxSubChapterDepth: number = 0): Promise<ChapterData[]> {
+  async extractChapters(file: File, skipNonEssentialChapters: boolean = true, maxSubChapterDepth: number = 0): Promise<ChapterData[]> {
     try {
       const arrayBuffer = await file.arrayBuffer()
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
@@ -64,6 +81,7 @@ export class PdfProcessor {
       // 首先尝试使用PDF的outline（书签/目录）来获取章节
       try {
         const outline = await pdf.getOutline()
+        console.log(`📚 [DEBUG] 获取到PDF目录:`, outline)
         if (outline && outline.length > 0) {
           // 获取章节信息
           const chapterInfos = await this.extractChaptersFromOutline(pdf, outline, 0, maxSubChapterDepth)
@@ -90,9 +108,12 @@ export class PdfProcessor {
 
               if (chapterContent.trim().length > 100) {
                 chapters.push({
-                  id: `chapter-${chapters.length + 1}`,
+                  id: `${i}-${chapterInfo.title}`, // 使用索引和标题组合作为ID，确保唯一性
                   title: chapterInfo.title,
-                  content: chapterContent
+                  content: chapterContent,
+                  startPage: startPage,
+                  endPage: endPage,
+                  pageIndex: chapterInfo.pageIndex
                 })
               }
             }
@@ -104,7 +125,7 @@ export class PdfProcessor {
 
       // 如果没有从outline获取到章节，使用备用方法
       if (chapters.length === 0) {
-        console.log(`📖 [DEBUG] 使用备用分章节方法，智能检测: ${useSmartDetection}`)
+        console.log(`📖 [DEBUG] 使用备用分章节方法`)
 
         // 获取所有页面的文本内容
         const allPageTexts: string[] = []
@@ -132,35 +153,10 @@ export class PdfProcessor {
 
         let detectedChapters: ChapterData[] = []
 
-        // 只有在用户启用智能检测时才使用
-        if (useSmartDetection) {
-          console.log(`🧠 [DEBUG] 启用智能章节检测`)
-          detectedChapters = this.detectChapters(allPageTexts)
-        }
 
-        if (detectedChapters.length === 0) {
-          // 如果没有检测到章节，按页面分组
-          const pagesPerChapter = Math.max(1, Math.floor(totalPages / 10)) // 每章最多10页
 
-          for (let i = 0; i < totalPages; i += pagesPerChapter) {
-            const endPage = Math.min(i + pagesPerChapter, totalPages)
-            const chapterContent = allPageTexts
-              .slice(i, endPage)
-              .join('\n\n')
-              .trim()
+        chapters.push(...detectedChapters)
 
-            if (chapterContent.length > 100) {
-              chapters.push({
-                id: `chapter-${Math.floor(i / pagesPerChapter) + 1}`,
-                title: `第 ${Math.floor(i / pagesPerChapter) + 1} 部分 (第${i + 1}-${endPage}页)`,
-                content: chapterContent
-              })
-            }
-          }
-        } else {
-          // 使用检测到的章节
-          chapters.push(...detectedChapters)
-        }
       }
 
       console.log(`📊 [DEBUG] 最终提取到 ${chapters.length} 个章节`)
@@ -182,12 +178,10 @@ export class PdfProcessor {
     for (const item of outline) {
       try {
         // 递归处理子章节
-        if (item.items && item.items.length > 0) {
-          // 只有当maxDepth大于0且当前深度小于最大深度时才递归处理子章节
-          if (maxDepth > 0 && currentDepth < maxDepth) {
-            const subChapters = await this.extractChaptersFromOutline(pdf, item.items, currentDepth + 1, maxDepth)
-            chapterInfos.push(...subChapters)
-          }
+        // 只有当maxDepth大于0且当前深度小于最大深度时才递归处理子章节
+        if (item.items && item.items.length > 0 && maxDepth > 0 && currentDepth < maxDepth) {
+          const subChapters = await this.extractChaptersFromOutline(pdf, item.items, currentDepth + 1, maxDepth)
+          chapterInfos.push(...subChapters)
         } else if (item.dest) {
           // 处理目标引用
           let destArray
@@ -220,108 +214,128 @@ export class PdfProcessor {
     return chapterInfos
   }
 
-  private async extractTextFromPages(pdf: any, startPage: number, endPage: number): Promise<string> {
-    const pageTexts: string[] = []
+  private async extractTextFromPages(pdf: PDFDocumentProxy, startPage: number, endPage: number): Promise<string> {
+    const allStructuredContent: TextItem[][] = []
 
     for (let pageNum = startPage; pageNum <= endPage; pageNum++) {
       try {
         const page = await pdf.getPage(pageNum)
         const textContent = await page.getTextContent()
 
-        const pageText = textContent.items
-          .map((item: any) => item.str)
-          .join(' ')
-          .trim()
+        if (textContent.items.length === 0) continue
 
-        if (pageText.length > 0) {
-          pageTexts.push(pageText)
-        }
+        // 分析字体大小分布，找出标题
+        const fontSizes = textContent.items
+          .filter((item: any) => item.height)
+          .map((item: any) => item.height)
+
+        if (fontSizes.length === 0) continue
+
+        const avgFontSize = fontSizes.reduce((a: number, b: number) => a + b, 0) / fontSizes.length
+
+
+        const pageStructuredContent: TextItem[] = []
+        let prevY = -1
+        let lineItems: any[] = []
+
+        // 将同一行的文本项组合在一起
+        textContent.items.forEach((item: any, index: number) => {
+          const currentY = item.transform[5]
+
+          // 如果Y坐标变化，说明是新的一行
+          if (prevY !== -1 && Math.abs(currentY - prevY) > 2) {
+            if (lineItems.length > 0) {
+              processLine(lineItems, avgFontSize, pageStructuredContent)
+              lineItems = []
+            }
+          }
+
+          lineItems.push(item)
+          prevY = currentY
+
+          // 处理最后一行
+          if (index === textContent.items.length - 1 && lineItems.length > 0) {
+            processLine(lineItems, avgFontSize, pageStructuredContent)
+          }
+        })
+
+        allStructuredContent.push(pageStructuredContent)
       } catch (error) {
         console.warn(`⚠️ [DEBUG] 跳过第${pageNum}页:`, error)
       }
     }
 
-    return pageTexts.join('\n\n')
-  }
+    // 辅助函数：处理一行文本
+    function processLine(items: any[], avgSize: number, output: TextItem[]) {
+      if (items.length === 0) return
 
-  private detectChapters(pageTexts: string[]): ChapterData[] {
-    const chapters: ChapterData[] = []
-    const chapterPatterns = [
-      /^第[一二三四五六七八九十\d]+章[\s\S]*$/m,
-      /^Chapter\s+\d+[\s\S]*$/mi,
-      /^第[一二三四五六七八九十\d]+节[\s\S]*$/m,
-      /^\d+\.[\s\S]*$/m,
-      /^[一二三四五六七八九十]、[\s\S]*$/m
-    ]
+      // 合并行内所有文本
+      const lineText = items.map((item: any) => item.str).join('').trim()
+      if (!lineText) return
 
-    let currentChapter: { title: string; content: string; startPage: number } | null = null
-    let chapterCount = 0
+      // 使用行中最大的字体大小和第一个项的属性
+      const maxItemFontSize = Math.max(...items.map((item: any) => item.height || 0))
+      const firstItem = items[0]
+      const fontSize = maxItemFontSize
+      const fontName = firstItem.fontName || ''
+      const isBold = fontName.toLowerCase().includes('bold')
+      const x = firstItem.transform[4]
+      const y = firstItem.transform[5]
 
-    for (let i = 0; i < pageTexts.length; i++) {
-      const pageText = pageTexts[i].trim()
-      if (pageText.length < 50) continue // 跳过内容太少的页面
+      let type: 'title' | 'subtitle' | 'list' | 'quote' | 'normal' = 'normal'
 
-      // 检查是否是新章节的开始
-      let isNewChapter = false
-      let chapterTitle = ''
-
-      for (const pattern of chapterPatterns) {
-        const match = pageText.match(pattern)
-        if (match) {
-          // 提取章节标题（取前100个字符作为标题）
-          const titleMatch = pageText.match(/^(.{1,100})/)
-          chapterTitle = titleMatch ? titleMatch[1].trim() : `章节 ${chapterCount + 1}`
-          isNewChapter = true
-          break
-        }
+      // 判断是否是标题（字体明显大于平均）
+      if (fontSize > avgSize * 1.4) {
+        type = 'title'
+      } else if (fontSize > avgSize * 1.15 || (isBold && fontSize > avgSize * 1.05)) {
+        type = 'subtitle'
       }
 
-      if (isNewChapter) {
-        // 保存上一个章节
-        if (currentChapter && currentChapter.content.trim().length > 200) {
-          chapters.push({
-            id: `chapter-${chapterCount}`,
-            title: currentChapter.title,
-            content: currentChapter.content.trim()
-          })
-        }
-
-        // 开始新章节
-        chapterCount++
-        currentChapter = {
-          title: chapterTitle,
-          content: pageText,
-          startPage: i + 1
-        }
-
-        console.log(`📖 [DEBUG] 检测到新章节: "${chapterTitle}" (第${i + 1}页)`)
-      } else if (currentChapter) {
-        // 添加到当前章节
-        currentChapter.content += '\n\n' + pageText
-      } else {
-        // 如果还没有章节，创建第一个章节
-        chapterCount++
-        currentChapter = {
-          title: `第 ${chapterCount} 章`,
-          content: pageText,
-          startPage: i + 1
-        }
+      // 判断列表（检查常见列表标记）
+      const listPattern = /^[\-\*\•●○◦►▪▫■□☐☑☒✓✔✗✘]|\d+[\.\)、]|[\(（][a-zA-Z0-9一二三四五六七八九十][\)）]|^[a-zA-Z一二三四五六七八九十][\.\)、]/
+      if (listPattern.test(lineText)) {
+        type = 'list'
       }
-    }
 
-    // 保存最后一个章节
-    if (currentChapter && currentChapter.content.trim().length > 200) {
-      chapters.push({
-        id: `chapter-${chapterCount}`,
-        title: currentChapter.title,
-        content: currentChapter.content.trim()
+      // 判断引用（通常以引号开头或特定标记）
+      const quotePattern = /^[""「『【]/
+      if (quotePattern.test(lineText)) {
+        type = 'quote'
+      }
+
+      output.push({
+        str: lineText,
+        type,
+        fontSize,
+        isBold,
+        x,
+        y
       })
+
     }
 
-    console.log(`🔍 [DEBUG] 章节检测完成，找到 ${chapters.length} 个章节`)
+    // 格式化输出
+    const formattedPages = allStructuredContent.map(pageContent => {
+      return pageContent.map(item => {
+        switch (item.type) {
+          case 'title':
+            return `\n# ${item.str}\n`
+          case 'subtitle':
+            return `\n## ${item.str}\n`
+          case 'list':
+            return `- ${item.str}`
+          case 'quote':
+            return `> ${item.str}`
+          default:
+            return item.str
+        }
+      }).join('\n')
+    })
 
-    return chapters
+    return formattedPages.join('\n\n')
   }
+
+
 
   // 检查是否应该跳过某个章节
   private shouldSkipChapter(title: string): boolean {
@@ -329,5 +343,59 @@ export class PdfProcessor {
     return SKIP_CHAPTER_KEYWORDS.some(keyword =>
       normalizedTitle.includes(keyword.toLowerCase())
     )
+  }
+
+  // 新增方法：获取PDF页面的渲染内容（用于阅读器显示）
+  async getPageContent(pdfDocument: PDFDocumentProxy, pageNumber: number): Promise<{ textContent: string; canvas?: HTMLCanvasElement }> {
+    try {
+      const page = await pdfDocument.getPage(pageNumber)
+
+      // 获取文本内容
+      const textContent = await page.getTextContent()
+      const pageText = textContent.items
+        .map((item: any) => item.str)
+        .join(' ')
+        .trim()
+
+      // 创建canvas用于渲染PDF页面
+      const viewport = page.getViewport({ scale: 1.5 })
+      const canvas = document.createElement('canvas')
+      const context = canvas.getContext('2d')
+
+      canvas.height = viewport.height
+      canvas.width = viewport.width
+
+      if (context) {
+        const renderContext = {
+          canvasContext: context,
+          viewport: viewport
+        }
+        await page.render(renderContext).promise
+      }
+
+      return {
+        textContent: pageText,
+        canvas: canvas
+      }
+    } catch (error) {
+      console.warn(`❌ [DEBUG] 获取页面内容失败 (页面 ${pageNumber}):`, error)
+      return { textContent: '' }
+    }
+  }
+
+  // 新增方法：获取章节的所有页面内容（用于阅读器显示）
+  async getChapterPages(pdfDocument: any, chapter: ChapterData): Promise<{ textContent: string; canvas?: HTMLCanvasElement }[]> {
+    const pages: { textContent: string; canvas?: HTMLCanvasElement }[] = []
+
+    if (!chapter.startPage || !chapter.endPage) {
+      return pages
+    }
+
+    for (let pageNum = chapter.startPage; pageNum <= chapter.endPage; pageNum++) {
+      const pageContent = await this.getPageContent(pdfDocument, pageNum)
+      pages.push(pageContent)
+    }
+
+    return pages
   }
 }

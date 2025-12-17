@@ -1,6 +1,4 @@
-
-
-export const getChapterMindMapPrompt = ()=> {
+export const getChapterMindMapPrompt = () => {
   const userPrompt = `\`\`\`ts
 export interface NodeObj {
   topic: string
@@ -37,15 +35,14 @@ export interface Summary {
 **严格遵守**：
 - 节点 ID 使用递增数字即可
 - 注意不要一昧使用兄弟节点关系，适当应用父子级别的分层
-- 向节点插入 tags 可选：核心、案例、实践、金句
+- 如果内容为社科类书籍，向节点插入 tags 可选：核心、案例、实践、金句
 - Summary 是总结多个同父节点的子节点的工具，会使用花括号把总结文本显示在指定子节点侧边，因为节点存在两侧分布的情况，禁止总结根节点
 - 适当添加 Summary，不要添加多余的 Summary
 - 最后添加一个金句节点记录几句本章金句
 - 适当添加表达该节点内涵的 emoji
 - 确保JSON格式正确，不要返回任何JSON以外的内容
-- 如果内容是致谢、目录、前言、序言、参考文献、出版社介绍、引用说明等的页面，请直接回复"{nodeData:null}"
 `
-  
+
   return userPrompt
 }
 
@@ -105,6 +102,6 @@ export interface Arrow {
 - 只能添加 6 条以下 Arrow，请对最关键的节点关系进行链接
 - 确保JSON格式正确，不要返回任何JSON以外的内容
 `
-  
+
   return userPrompt
 }

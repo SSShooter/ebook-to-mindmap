@@ -1,14 +1,16 @@
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Settings } from 'lucide-react'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Settings, Brain } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { useConfigStore, useAIConfig, useProcessingOptions } from '../../stores/configStore'
+import { useConfigStore, useProcessingOptions } from '../../stores/configStore'
+import { useModelStore } from '../../stores/modelStore'
 import type { SupportedLanguage } from '../../services/prompts/utils'
+import { useState, useEffect } from 'react'
 
 interface ConfigDialogProps {
   processing: boolean
@@ -17,44 +19,69 @@ interface ConfigDialogProps {
 
 export function ConfigDialog({ processing }: ConfigDialogProps) {
   const { t } = useTranslation()
-  // 使用zustand store管理配置
-  const aiConfig = useAIConfig()
   const processingOptions = useProcessingOptions()
+  const { models, getDefaultModel } = useModelStore()
   const {
+    setProcessingMode,
+    setBookType,
+    setSkipNonEssentialChapters,
+    setOutputLanguage,
+    setForceUseSpine,
     setAiProvider,
     setApiKey,
     setApiUrl,
     setModel,
-    setTemperature,
-    setProcessingMode,
-    setBookType,
-    setUseSmartDetection,
-    setSkipNonEssentialChapters,
-    setOutputLanguage
+    setTemperature
   } = useConfigStore()
 
-  // 从store中解构状态值
-  const { provider: aiProvider, apiKey, apiUrl, model, temperature } = aiConfig
-  const { processingMode, bookType, useSmartDetection, skipNonEssentialChapters, outputLanguage } = processingOptions
+  const { processingMode, bookType, skipNonEssentialChapters, outputLanguage, forceUseSpine } = processingOptions
+
+  // Track selected model for this request
+  const [selectedModelId, setSelectedModelId] = useState<string>('')
+
+  // Initialize with default model
+  useEffect(() => {
+    const defaultModel = getDefaultModel()
+    if (defaultModel && !selectedModelId) {
+      setSelectedModelId(defaultModel.id)
+    }
+  }, [getDefaultModel, selectedModelId])
+
+  // Update config when model selection changes
+  useEffect(() => {
+    const selectedModel = models.find(m => m.id === selectedModelId)
+    if (selectedModel) {
+      setAiProvider(selectedModel.provider)
+      setApiKey(selectedModel.apiKey)
+      setApiUrl(selectedModel.apiUrl)
+      setModel(selectedModel.model)
+      setTemperature(selectedModel.temperature)
+    }
+  }, [selectedModelId, models, setAiProvider, setApiKey, setApiUrl, setModel, setTemperature])
 
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={processing}
-          className="flex items-center gap-1"
-        >
-          <Settings className="h-3.5 w-3.5" />
-          {t('config.title')}
-        </Button>
-      </DialogTrigger>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <DialogTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={processing}
+            >
+              <Settings className="h-3.5 w-3.5" />
+            </Button>
+          </DialogTrigger>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{t('config.title')}</p>
+        </TooltipContent>
+      </Tooltip>
       <DialogContent className="max-w-2xl max-h-[80vh]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Settings className="h-5 w-5" />
-            {t('config.aiServiceConfig')}
+            {t('config.title')}
           </DialogTitle>
           <DialogDescription>
             {t('config.description')}
@@ -62,121 +89,74 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
         </DialogHeader>
         <ScrollArea className="max-h-[60vh] pr-4">
           <div className="space-y-4">
-            {/* AI 服务配置 */}
-            <div className="space-y-4 p-4 bg-gray-50 rounded-lg border">
-              <div className="flex items-center gap-2 mb-3">
-                <Settings className="h-4 w-4" />
-                <Label className="text-sm font-medium">{t('config.aiServiceConfig')}</Label>
+            {/* Model Selection */}
+            <div className="space-y-3 p-4 bg-gray-50 rounded-lg border">
+              <div className="flex items-center gap-2 mb-2">
+                <Brain className="h-4 w-4" />
+                <Label className="text-sm font-medium">{t('models.selectModel')}</Label>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="ai-provider">{t('config.aiProvider')}</Label>
-                  <Select value={aiProvider} onValueChange={(value: 'gemini' | 'openai') => setAiProvider(value)} disabled={processing}>
-                    <SelectTrigger>
-                      <SelectValue placeholder={t('config.selectAiProvider')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="gemini">Google Gemini</SelectItem>
-                      <SelectItem value="openai">{t('config.openaiCompatible')}</SelectItem>
-                    </SelectContent>
-                  </Select>
+              {models.length === 0 ? (
+                <div className="text-sm text-gray-600 py-2">
+                  {t('models.noModelsConfigured')}
                 </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="apikey">
-                    {aiProvider === 'gemini' ? 'Gemini API Key' : 'API Token'}
-                  </Label>
-                  <Input
-                    id="apikey"
-                    type="password"
-                    placeholder={aiProvider === 'gemini' ? t('config.enterGeminiApiKey') : t('config.enterApiToken')}
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
-                    disabled={processing}
-                  />
-                </div>
-              </div>
-
-              {aiProvider === 'openai' && (
-                <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="api-url">{t('config.apiUrl')}</Label>
-                      <Input
-                        id="api-url"
-                        type="url"
-                        placeholder="https://api.openai.com/v1"
-                        value={apiUrl}
-                        onChange={(e) => setApiUrl(e.target.value)}
-                        disabled={processing}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="model">{t('config.modelName')}</Label>
-                      <Input
-                        id="model"
-                        type="text"
-                        placeholder={t('config.modelPlaceholder')}
-                        value={model}
-                        onChange={(e) => setModel(e.target.value)}
-                        disabled={processing}
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="openai-temperature">{t('config.temperature')}</Label>
-                    <Input
-                      id="openai-temperature"
-                      type="number"
-                      min="0"
-                      max="2"
-                      step="0.1"
-                      placeholder="0.7"
-                      value={temperature}
-                      onChange={(e) => setTemperature(parseFloat(e.target.value))}
-                      disabled={processing}
-                    />
-                    <p className="text-xs text-gray-600">
-                      {t('config.temperatureDescription')}
-                    </p>
-                  </div>
-                </>
+              ) : (
+                <Select
+                  value={selectedModelId}
+                  onValueChange={setSelectedModelId}
+                  disabled={processing}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('models.selectModelPlaceholder')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {models.map((model) => (
+                      <SelectItem key={model.id} value={model.id}>
+                        {model.name} {model.isDefault && '⭐'}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               )}
 
-              {aiProvider === 'gemini' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="gemini-model">{t('config.modelName')}</Label>
-                    <Input
-                      id="gemini-model"
-                      type="text"
-                      placeholder={t('config.geminiModelPlaceholder')}
-                      value={model}
-                      onChange={(e) => setModel(e.target.value)}
-                      disabled={processing}
-                    />
+              {selectedModelId && models.find(m => m.id === selectedModelId) && (
+                <div className="text-xs text-gray-600 mt-2 space-y-1">
+                  <div>
+                    <span className="font-medium">{t('config.aiProvider')}:</span>{' '}
+                    {models.find(m => m.id === selectedModelId)?.provider}
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="gemini-temperature">{t('config.temperature')}</Label>
-                    <Input
-                      id="gemini-temperature"
-                      type="number"
-                      min="0"
-                      max="2"
-                      step="0.1"
-                      placeholder="0.7"
-                      value={temperature}
-                      onChange={(e) => setTemperature(parseFloat(e.target.value) || 0.7)}
-                      disabled={processing}
-                    />
-                    <p className="text-xs text-gray-600">
-                      {t('config.temperatureDescription')}
-                    </p>
+                  <div>
+                    <span className="font-medium">{t('config.modelName')}:</span>{' '}
+                    {models.find(m => m.id === selectedModelId)?.model}
                   </div>
                 </div>
               )}
+            </div>
+
+            <div className="p-3 bg-indigo-50 rounded-lg border">
+              <div className="space-y-2">
+                <Label htmlFor="output-language" className="text-sm font-medium">
+                  {t('config.outputLanguage')}
+                </Label>
+                <Select value={outputLanguage} onValueChange={(value: SupportedLanguage) => setOutputLanguage(value)} disabled={processing}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('config.selectOutputLanguage')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="auto">{t('config.outputLanguageAuto')}</SelectItem>
+                    <SelectItem value="en">English</SelectItem>
+                    <SelectItem value="zh">中文</SelectItem>
+                    <SelectItem value="ja">日本語</SelectItem>
+                    <SelectItem value="fr">Français</SelectItem>
+                    <SelectItem value="de">Deutsch</SelectItem>
+                    <SelectItem value="es">Español</SelectItem>
+                    <SelectItem value="ru">Русский</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-gray-600">
+                  {t('config.outputLanguageDescription')}
+                </p>
+              </div>
             </div>
 
             <div className="p-3 bg-purple-50 rounded-lg border">
@@ -220,22 +200,6 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
               </div>
             </div>
 
-            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border">
-              <div className="space-y-1">
-                <Label htmlFor="smart-detection" className="text-sm font-medium">
-                  {t('config.smartChapterDetection')}
-                </Label>
-                <p className="text-xs text-gray-600">
-                  {t('config.smartChapterDetectionDescription')}
-                </p>
-              </div>
-              <Switch
-                id="smart-detection"
-                checked={useSmartDetection}
-                onCheckedChange={setUseSmartDetection}
-                disabled={processing}
-              />
-            </div>
 
             <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border">
               <div className="space-y-1">
@@ -254,7 +218,24 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
               />
             </div>
 
-            <div className="p-3 bg-amber-50 rounded-lg border">
+            <div className="flex items-center justify-between p-3 bg-cyan-50 rounded-lg border">
+              <div className="space-y-1">
+                <Label htmlFor="force-use-spine" className="text-sm font-medium">
+                  {t('config.forceUseSpine')}
+                </Label>
+                <p className="text-xs text-gray-600">
+                  {t('config.forceUseSpineDescription')}
+                </p>
+              </div>
+              <Switch
+                id="force-use-spine"
+                checked={forceUseSpine}
+                onCheckedChange={setForceUseSpine}
+                disabled={processing}
+              />
+            </div>
+
+            <div className="p-3 bg-amber-50 rounded-lg border mb-4">
               <div className="space-y-2">
                 <Label htmlFor="max-sub-chapter-depth" className="text-sm font-medium">
                   {t('config.recursionDepth')}
@@ -282,31 +263,8 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
               </div>
             </div>
 
-            <div className="p-3 bg-indigo-50 rounded-lg border">
-              <div className="space-y-2">
-                <Label htmlFor="output-language" className="text-sm font-medium">
-                  {t('config.outputLanguage')}
-                </Label>
-                <Select value={outputLanguage} onValueChange={(value: SupportedLanguage) => setOutputLanguage(value)} disabled={processing}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('config.selectOutputLanguage')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="auto">{t('config.outputLanguageAuto')}</SelectItem>
-                    <SelectItem value="en">English</SelectItem>
-                    <SelectItem value="zh">中文</SelectItem>
-                    <SelectItem value="ja">日本語</SelectItem>
-                    <SelectItem value="fr">Français</SelectItem>
-                    <SelectItem value="de">Deutsch</SelectItem>
-                    <SelectItem value="es">Español</SelectItem>
-                    <SelectItem value="ru">Русский</SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-gray-600">
-                  {t('config.outputLanguageDescription')}
-                </p>
-              </div>
-            </div>
+
+
           </div>
         </ScrollArea>
       </DialogContent>

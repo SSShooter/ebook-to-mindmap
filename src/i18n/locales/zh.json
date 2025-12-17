@@ -1,7 +1,14 @@
 {
   "app": {
     "title": "电子书转思维导图",
-    "description": "使用 AI 技术按章节解析 EPUB 和 PDF 电子书并生成智能总结"
+    "description": "Mindmap powered by MindElixir"
+  },
+  "nav": {
+    "summary": "AI 总结",
+    "models": "模型管理",
+    "customPrompts": "自定义提示词",
+    "cacheManagement": "内容管理",
+    "settings": "设置"
   },
   "upload": {
     "title": "文件上传与配置",
@@ -13,21 +20,32 @@
     "extractChapters": "获取章节",
     "extractingChapters": "提取章节中...",
     "invalidFile": "请选择有效的 EPUB 或 PDF 文件",
-    "pleaseSelectFile": "请选择文件"
+    "pleaseSelectFile": "请选择文件",
+    "reselectFile": "重新选择",
+    "dragDropHint": "拖拽文件到此处或点击选择 • 支持 EPUB 和 PDF 格式",
+    "unsupportedFormat": "不支持的文件格式"
   },
   "chapters": {
     "title": "章节选择",
     "selectAll": "全选",
     "totalChapters": "共 {{count}} 章",
     "selectedChapters": "已选择 {{count}} 章",
-    "customPrompt": "补充提示词",
+    "customPrompt": "自定义提示词",
     "customPromptPlaceholder": "在此输入自定义提示词，将会拼接到AI请求中...",
     "customPromptDescription": "可选：添加自定义提示词来指导AI生成更符合您需求的内容",
+    "managePrompts": "管理提示词",
+    "selectCustomPrompt": "选择自定义提示词（可选）",
+    "useDefaultPrompt": "使用默认提示词",
+    "useCustomPromptOnly": "仅使用自定义提示词",
+    "useCustomPromptOnlyDescription": "勾选后将忽略默认提示词，仅使用您选择的自定义提示词（思维导图模式不支持）",
     "startProcessing": "开始解析",
     "processing": "处理中...",
     "apiKeyRequired": "请先在配置中填写 API Key",
     "selectAtLeastOne": "请至少选择一个章节进行处理",
-    "extractAndApiKey": "请先提取章节并输入 API Key"
+    "extractAndApiKey": "请先提取章节并输入 API Key",
+    "addTag": "添加标签",
+    "selectChaptersForTag": "请先框选要添加标签的章节",
+    "tagAdded": "已为 {{count}} 个章节设置标签: {{tag}}"
   },
   "progress": {
     "extractingEpub": "正在解析 EPUB 文件...",
@@ -51,14 +69,18 @@
     "combinedMindMapTitle": "《{{title}}》章节思维导图整合",
     "author": "作者: {{author}}",
     "chapterCount": "共 {{count}} 章",
+    "groupCount": "{{count}} 个分组",
+    "processing": "处理中...",
     "tabs": {
       "chapterSummary": "章节总结",
       "connections": "章节关联",
+      "characterRelationship": "人物关系图",
       "overallSummary": "全书总结",
       "chapterMindMaps": "章节思维导图",
       "combinedMindMap": "章节思维导图整合"
     },
     "generatingMindMap": "正在生成思维导图...",
+    "generatingCharacterRelationship": "正在生成人物关系图...",
     "actions": {
       "copyChapterSummary": "复制章节总结",
       "copyChapterContent": "复制章节内容",
@@ -81,22 +103,42 @@
     }
   },
   "common": {
+    "cancel": "取消",
+    "save": "保存",
     "copy": "复制",
     "delete": "删除",
     "viewContent": "查看内容",
     "backToTop": "回到顶部",
+    "backToConfig": "返回配置",
     "openInMindElixir": "在 Mind Elixir Desktop 中打开",
     "clearCache": "清除缓存",
     "copiedToClipboard": "已复制到剪贴板",
     "copyChapterSummary": "复制章节总结",
     "copyChapterContent": "复制章节内容",
     "copyContent": "复制内容",
-    "error": "未知错误"
+    "copyCode": "复制代码",
+    "expand": "展开",
+    "collapse": "折叠",
+    "error": "未知错误",
+    "processing": "正在处理中...",
+    "generatingContent": "正在生成内容,请稍候...",
+    "generatingMindMap": "正在生成思维导图,请稍候...",
+    "generationCancelled": "生成被取消",
+    "zoomIn": "放大",
+    "zoomOut": "缩小",
+    "resetZoom": "重置缩放",
+    "fullscreen": "全屏",
+    "exitFullscreen": "退出全屏",
+    "reasoning": "思考过程",
+    "retry": "重试"
   },
   "config": {
     "title": "配置",
     "aiServiceConfig": "AI 服务配置",
     "description": "配置 AI 服务和处理选项",
+    "interfaceLanguage": "界面语言",
+    "selectInterfaceLanguage": "选择界面语言",
+    "interfaceLanguageDescription": "选择应用程序界面的显示语言",
     "aiProvider": "AI 提供商",
     "selectAiProvider": "选择 AI 提供商",
     "openaiCompatible": "OpenAI 兼容",
@@ -125,6 +167,8 @@
     "smartChapterDetectionDescription": "当文档没有目录时，尝试智能识别章节标题（如\"第X章\"、\"Chapter X\"等）",
     "skipIrrelevantChapters": "跳过无关键内容章节",
     "skipIrrelevantChaptersDescription": "自动跳过致谢、推荐阅读、作者简介等非核心内容章节",
+    "forceUseSpine": "强制使用Spine获取EPUB章节",
+    "forceUseSpineDescription": "如果EPUB文件无法正常获取章节，可以尝试打开此开关强制使用Spine方式提取章节",
     "recursionDepth": "递归处理子章节层数",
     "selectRecursionDepth": "选择递归层数",
     "noRecursion": "不递归处理子章节",
@@ -133,32 +177,155 @@
     "recursion3Layers": "递归3层子章节",
     "recursion4Layers": "递归4层子章节",
     "recursion5Layers": "递归5层子章节",
-    "recursionDepthDescription": "仅适用于PDF文件。设置为0表示不递归处理子章节，仅处理顶层章节；设置为大于0的值表示递归处理指定层数的子章节。",
+    "recursionDepthDescription": "设置为0表示不递归处理子章节，仅处理顶层章节；设置为大于0的值表示递归处理指定层数的子章节。",
     "outputLanguage": "输出语言",
     "selectOutputLanguage": "选择输出语言",
     "outputLanguageAuto": "自动（跟随界面语言）",
     "outputLanguageEn": "英文",
     "outputLanguageZh": "中文",
-    "outputLanguageDescription": "控制AI生成内容的语言。自动模式将跟随当前界面语言。"
+    "outputLanguageDescription": "控制AI生成内容的语言。自动模式将跟随当前界面语言。",
+    "visitSite": "访问官网",
+    "importConfig": "导入配置",
+    "exportConfig": "导出配置",
+    "importSuccess": "配置导入成功",
+    "exportSuccess": "配置导出成功",
+    "importError": "导入配置文件失败,请检查文件格式"
   },
   "download": {
     "title": "下载思维导图",
-    "formats": {
-      "png": "下载为 PNG",
-      "jpeg": "下载为 JPEG",
-      "svg": "下载为 SVG",
-      "pdf": "下载为 PDF",
-      "xmind": "下载为 XMind",
-      "json": "下载为 JSON"
-    }
+    "downloadAs": "下载",
+    "downloadAllMarkdown": "下载完整 Markdown",
+    "markdownDownloaded": "Markdown 文件已下载"
   },
   "viewContent": {
     "originalText": "原文内容",
     "chapterContent": "第 {{chapter}} 章的完整原文内容"
   },
+  "reader": {
+    "pdf": {
+      "page": "第{{startPage}}-{{endPage}}页",
+      "close": "关闭",
+      "previousPage": "上一页",
+      "nextPage": "下一页",
+      "pageInfo": "第 {{current}} 页，共 {{total}} 页",
+      "pdfPageInfo": "PDF第{{page}}页",
+      "loadingPages": "正在加载PDF页面...",
+      "previousChapter": "上一章",
+      "nextChapter": "下一章",
+      "chapterInfo": "第 {{current}} 章，共 {{total}} 章"
+    },
+    "epub": {
+      "close": "关闭",
+      "loadingContent": "正在加载章节内容...",
+      "previousChapter": "上一章",
+      "nextChapter": "下一章",
+      "chapterInfo": "第 {{current}} 章，共 {{total}} 章"
+    }
+  },
   "mindElixir": {
     "launchSuccess": "已成功发送到 Mind Elixir Desktop",
     "launchError": "启动 Mind Elixir Desktop 失败",
     "exportError": "导出思维导图失败"
+  },
+  "models": {
+    "title": "模型管理",
+    "description": "管理 AI 模型并设置默认模型",
+    "addModel": "添加模型",
+    "editModel": "编辑模型",
+    "configName": "配置名称",
+    "modelName": "模型名称",
+    "modelNamePlaceholder": "例如：我的 GPT-4 模型",
+    "modelId": "模型 ID",
+    "actions": "操作",
+    "copy": "复制",
+    "edit": "编辑",
+    "delete": "删除",
+    "noModels": "暂无配置的模型。点击「添加模型」开始配置。",
+    "nameRequired": "模型名称不能为空",
+    "apiKeyRequired": "API Key 不能为空",
+    "duplicateName": "配置名称已存在，请使用其他名称",
+    "addSuccess": "模型添加成功",
+    "updateSuccess": "模型更新成功",
+    "deleteSuccess": "模型删除成功",
+    "defaultSet": "默认模型设置成功",
+    "cannotDeleteLast": "不能删除最后一个模型",
+    "selectModel": "选择本次请求的模型",
+    "noModelsConfigured": "暂无配置的模型。请先前往模型管理添加模型。",
+    "selectModelPlaceholder": "选择一个模型"
+  },
+  "customPrompts": {
+    "title": "自定义提示词",
+    "description": "管理和自定义AI处理提示词模板",
+    "addPrompt": "添加提示词",
+    "editPrompt": "编辑提示词",
+    "promptName": "提示词名称",
+    "promptNamePlaceholder": "输入提示词名称",
+    "promptContent": "提示词内容",
+    "promptContentPlaceholder": "输入完整的提示词内容...",
+    "promptDescription": "描述（可选）",
+    "promptDescriptionPlaceholder": "简单描述这个提示词的用途",
+    "promptContentDescription": "提示词将用于指导AI如何处理电子书内容，例如总结、分析或生成思维导图的具体要求",
+    "actions": "操作",
+    "copy": "复制",
+    "edit": "编辑",
+    "delete": "删除",
+    "noPrompts": "暂无自定义提示词",
+    "nameRequired": "请输入提示词名称",
+    "contentRequired": "请输入提示词内容",
+    "duplicateName": "提示词名称已存在",
+    "addSuccess": "提示词添加成功",
+    "updateSuccess": "提示词更新成功",
+    "deleteSuccess": "提示词删除成功",
+    "managePrompts": "管理提示词",
+    "createdAt": "创建时间",
+    "selectCustomPrompt": "选择自定义提示词（可选）",
+    "useDefaultPrompt": "使用默认提示词"
+  },
+  "tagDialog": {
+    "title": "为框选的章节添加标签",
+    "description": "已框选 {{count}} 个章节。输入一个标签（会覆盖原有标签）。",
+    "label": "标签",
+    "placeholder": "例如: 重点章节",
+    "cancel": "取消",
+    "confirm": "确认添加"
+  },
+  "cacheManagement": {
+    "title": "内容管理",
+    "description": "查看和管理缓存的书籍内容",
+    "noCache": "暂无缓存内容",
+    "noContent": "无内容",
+    "noPreviewableContent": "没有可预览的内容",
+    "preview": "预览",
+    "deleteEntry": "删除此缓存",
+    "deleteBook": "删除全部",
+    "deleteConfirmTitle": "确认删除",
+    "deleteEntryConfirm": "确定要删除此缓存吗？删除后将无法恢复。",
+    "deleteBookConfirm": "确定要删除「{{bookName}}」的所有缓存吗？删除后将无法恢复。",
+    "deleteSuccess": "缓存已删除",
+    "deleteBookSuccess": "已删除 {{count}} 项缓存",
+    "items": "项",
+    "modeSummary": "文字总结",
+    "modeMindmap": "思维导图",
+    "hasSummary": "总结",
+    "hasMindmap": "思维导图",
+    "tabs": {
+      "summary": "文字总结",
+      "mindmap": "思维导图",
+      "character": "人物关系"
+    },
+    "types": {
+      "summary": "章节总结",
+      "mindmap": "章节思维导图",
+      "connections": "章节关联",
+      "overallSummary": "全书总结",
+      "characterRelationship": "人物关系图",
+      "combinedMindmap": "整书思维导图",
+      "mergedMindmap": "合并思维导图",
+      "mindmapArrows": "思维导图箭头",
+      "selectedChapters": "选中章节",
+      "chapterTags": "章节标签",
+      "customPrompt": "自定义提示词",
+      "useCustomOnly": "仅用自定义"
+    }
   }
 }

@@ -1,36 +1,91 @@
 // 章节总结相关的prompt模板
 
-export const getFictionChapterSummaryPrompt = (title: string, content: string) => {
-  const userPrompt = `请为以下章节内容生成一个详细总结：
-
-章节标题：${title}
+export const getFictionChapterSummaryPrompt = (title: string, content: string, customPrompt?: string, useCustomOnly: boolean = false) => {
+  // 固定章节内容部分
+  const chapterContent = `章节标题：${title}
 
 章节内容：
-${content}
+${content}`
 
-请用自然流畅的语言总结本章内容，包括主要情节发展、重要人物表现、关键观点或转折，以及本章在整个故事中的作用和意义。总结应该详细但简洁，大约200-300字。
+  // 如果只使用自定义提示词
+  if (useCustomOnly && customPrompt && customPrompt.trim()) {
+    return `${chapterContent}
 
-注意：如果内容是致谢、目录、前言、序言等无实质故事内容的页面，请直接回复"无需总结"。`
-  
-  return userPrompt
+${customPrompt.trim()}`
+  }
+
+  // 默认提示词
+  const defaultPrompt = `请用自然流畅的语言总结本章内容，使用以下markdown格式：
+
+## 章节总结：${title}
+
+### 人物及关系
+[列出所有出现的人物（路人或只有短暂互动者可不提及）及其关系]
+
+### 章节内容
+
+提供一个详细的总结。总结应包括：
+
+- 主要情节的概述，包含重要事件的顺序
+- 关键的冲突和转折点
+- 章节中的重要对话和情感变化
+- 任何象征性或主题性的元素（如果有）`
+
+  // 如果有自定义提示词，拼接到默认提示词后面
+  if (customPrompt && customPrompt.trim()) {
+    return `${chapterContent}
+
+${defaultPrompt}
+
+补充要求：${customPrompt.trim()}`
+  }
+
+  return `${chapterContent}
+
+${defaultPrompt}`
 }
 
-export const getNonFictionChapterSummaryPrompt = (title: string, content: string) => {
-  const userPrompt = `请为以下社科类书籍章节内容生成一个详细总结：
-
-章节标题：${title}
+export const getNonFictionChapterSummaryPrompt = (title: string, content: string, customPrompt?: string, useCustomOnly: boolean = false) => {
+  // 固定章节内容部分
+  const chapterContent = `章节标题：${title}
 
 章节内容：
-${content}
+${content}`
 
-请用自然流畅的语言总结本章内容，包括：
+  // 如果只使用自定义提示词
+  if (useCustomOnly && customPrompt && customPrompt.trim()) {
+    return `${chapterContent}
 
-- 主要观点、关键概念
-- 重要的数据、案例或研究发现
-- 保留几句有洞见的观点原文
-- 给出指导实际生活的建议或应用
+${customPrompt.trim()}`
+  }
 
-注意：如果内容是致谢、目录、前言、序言、参考文献等无实质学术内容的页面，请直接回复"无需总结"。`
-  
-  return userPrompt
+  // 默认提示词
+  const defaultPrompt = `请用自然流畅的语言总结本章内容，使用以下markdown格式：
+
+## 章节总结：${title}
+
+### 主要观点
+[列出本章的主要观点，以及支持这个观点的案例或研究发现]
+
+### 关键概念
+[列出并解释本章的关键概念]
+
+### 洞见原文
+[列出几句有洞见的观点原文]
+
+### 实际应用
+[给出指导实际生活的建议或应用，必须与此章节内容强关联]`
+
+  // 如果有自定义提示词，拼接到默认提示词后面
+  if (customPrompt && customPrompt.trim()) {
+    return `${chapterContent}
+
+${defaultPrompt}
+
+补充要求：${customPrompt.trim()}`
+  }
+
+  return `${chapterContent}
+
+${defaultPrompt}`
 }

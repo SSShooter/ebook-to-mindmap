@@ -6,11 +6,13 @@ export {
 } from './chapterSummary'
 
 export {
-  getChapterConnectionsAnalysisPrompt
+  getChapterConnectionsAnalysisPrompt,
+  getFictionChapterConnectionsAnalysisPrompt
 } from './connectionAnalysis'
 
 export {
-  getOverallSummaryPrompt
+  getOverallSummaryPrompt,
+  getFictionOverallSummaryPrompt
 } from './overallSummary'
 
 // 测试连接的prompt
@@ -20,3 +22,8 @@ export {
   getChapterMindMapPrompt,
   getMindMapArrowPrompt
 } from './mindmap'
+
+export {
+  getCharacterRelationshipPrompt,
+  getFictionCharacterRelationshipPrompt
+} from './characterRelationship'

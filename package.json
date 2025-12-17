@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "packageManager": "pnpm@9.15.2",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -10,7 +11,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.24.1",
     "@hookform/resolvers": "^5.1.1",
     "@mind-elixir/export-mindmap": "^0.0.3",
     "@mind-elixir/open-desktop": "^0.0.1",
@@ -53,8 +53,10 @@
     "i18next-browser-languagedetector": "^8.2.0",
     "input-otp": "^1.4.2",
     "jszip": "^3.10.1",
+    "localforage": "^1.10.0",
     "lucide-react": "^0.525.0",
-    "mind-elixir": "^5.0.4",
+    "mermaid": "^11.12.1",
+    "mind-elixir": "^5.3.5",
     "next-themes": "^0.4.6",
     "pdfjs-dist": "^5.3.93",
     "react": "^19.1.0",
@@ -65,11 +67,13 @@
     "react-markdown": "^10.1.0",
     "react-resizable-panels": "^3.0.3",
     "recharts": "2.15.4",
+    "remark-cjk-friendly": "^1.2.1",
     "remark-gfm": "^4.0.1",
     "sonner": "^2.0.6",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.11",
     "vaul": "^1.1.2",
+    "wouter": "^3.7.1",
     "xmldom": "^0.6.0",
     "zod": "^4.0.5",
     "zustand": "^5.0.6"

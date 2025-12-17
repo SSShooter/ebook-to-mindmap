@@ -1,7 +1,7 @@
 import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Trash2, ExternalLink } from 'lucide-react'
+import { Trash2, ExternalLink, BookOpen, Loader2 } from 'lucide-react'
 import { CopyButton } from '@/components/ui/copy-button'
 import { ViewContentDialog } from './ViewContentDialog'
 import { DownloadMindMapButton } from './DownloadMindMapButton'
@@ -24,6 +24,8 @@ interface MindMapCardProps {
 
   /** 清除缓存的回调函数 */
   onClearCache?: (chapterId: string) => void
+  /** 阅读章节的回调函数 */
+  onReadChapter?: () => void
   /** 在MindElixir中打开的回调函数 */
   onOpenInMindElixir?: (mindmapData: MindElixirData, title: string) => void
   /** 下载思维导图的回调函数 */
@@ -38,12 +40,16 @@ interface MindMapCardProps {
   showOpenInMindElixir?: boolean
   /** 是否显示下载按钮 */
   showDownloadButton?: boolean
+  /** 是否显示阅读按钮 */
+  showReadButton?: boolean
   /** 自定义类名 */
   className?: string
   /** 思维导图容器的自定义类名 */
   mindMapClassName?: string
   /** MindElixir选项 */
   mindElixirOptions?: Partial<Options>
+  /** 是否为加载状态 */
+  isLoading?: boolean
 }
 
 export const MindMapCard: React.FC<MindMapCardProps> = ({
@@ -54,6 +60,7 @@ export const MindMapCard: React.FC<MindMapCardProps> = ({
   index,
 
   onClearCache,
+  onReadChapter,
   onOpenInMindElixir,
   onDownloadMindMap,
   showClearCache = true,
@@ -61,9 +68,11 @@ export const MindMapCard: React.FC<MindMapCardProps> = ({
   showCopyButton = true,
   showOpenInMindElixir = true,
   showDownloadButton = true,
+  showReadButton = true,
   className = '',
   mindMapClassName = 'aspect-square w-full max-w-[500px] mx-auto',
-  mindElixirOptions = { direction: 1, alignment: 'nodes' }
+  mindElixirOptions = { direction: 1, alignment: 'nodes', editable:false },
+  isLoading = false,
 }) => {
   const { t } = useTranslation()
   const localMindElixirRef = React.useRef<MindElixirReactRef | null>(null)
@@ -75,61 +84,80 @@ export const MindMapCard: React.FC<MindMapCardProps> = ({
           <div className="truncate w-full">
             {title}
           </div>
-          <div className="flex items-center gap-2 mt-2">
-            {showOpenInMindElixir && onOpenInMindElixir && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onOpenInMindElixir(mindMapData, title)}
-                title={t('common.openInMindElixir')}
-              >
-                <ExternalLink className="h-4 w-4 mr-1" />
-              </Button>
-            )}
-            {showDownloadButton && onDownloadMindMap && (
-              <DownloadMindMapButton
-                mindElixirRef={() => localMindElixirRef.current}
-                title={title}
-                downloadMindMap={onDownloadMindMap}
-              />
-            )}
-            {showCopyButton && (
-              <CopyButton
-                content={content}
-                successMessage={t('common.copiedToClipboard')}
-                title={t('common.copyChapterContent')}
-              />
-            )}
-            {showClearCache && onClearCache && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onClearCache(id)}
-                title={t('common.clearCache')}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            )}
-            {showViewContent && (
-              <ViewContentDialog
-                title={title}
-                content={content}
-                chapterIndex={index}
-              />
-            )}
-          </div>
+          {isLoading ? (
+            <div className="flex items-center gap-2 mt-2 text-sm text-gray-500">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>{t('common.processing')}</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 mt-2">
+              {showOpenInMindElixir && onOpenInMindElixir && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onOpenInMindElixir(mindMapData, title)}
+                  title={t('common.openInMindElixir')}
+                >
+                  <ExternalLink className="h-4 w-4 mr-1" />
+                </Button>
+              )}
+              {showCopyButton && (
+                <CopyButton
+                  content={content}
+                  successMessage={t('common.copiedToClipboard')}
+                  title={t('common.copyChapterContent')}
+                />
+              )}
+              {showClearCache && onClearCache && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onClearCache(id)}
+                  title={t('common.clearCache')}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
+              {showReadButton && onReadChapter && (
+                <Button variant="outline" size="sm" onClick={onReadChapter}>
+                  <BookOpen className="h-3 w-3" />
+                </Button>
+              )}
+              {showViewContent && (
+                <ViewContentDialog
+                  title={title}
+                  content={content}
+                  chapterIndex={index}
+                />
+              )}
+              {showDownloadButton && onDownloadMindMap && (
+                <DownloadMindMapButton
+                  mindElixirRef={() => localMindElixirRef.current}
+                  title={title}
+                  downloadMindMap={onDownloadMindMap}
+                />
+              )}
+            </div>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="border rounded-lg">
-          <MindElixirReact
-            ref={localMindElixirRef}
-            data={mindMapData}
-            fitPage={false}
-            options={mindElixirOptions}
-            className={mindMapClassName}
-          />
-        </div>
+        {isLoading ? (
+          <div className="text-center text-gray-500 py-8">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
+            <p>{t('common.generatingMindMap')}</p>
+          </div>
+        ) : (
+          <div className="border rounded-lg overflow-hidden">
+            <MindElixirReact
+              ref={localMindElixirRef}
+              data={mindMapData}
+              fitPage={false}
+              options={mindElixirOptions}
+              className={mindMapClassName}
+            />
+          </div>
+        )}
       </CardContent>
     </Card>
   )
