@@ -140,7 +140,7 @@ const MindElixirReact = forwardRef<MindElixirReactRef, MindElixirReactProps>(
         ref={mindmapEl}
         className={className}
         onWheelCapture={
-          e => e.stopPropagation()
+          e => { if (!e.ctrlKey) e.stopPropagation() }
         }
       />
     )
