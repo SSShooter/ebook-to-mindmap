@@ -85,10 +85,7 @@ export const MindMapCard: React.FC<MindMapCardProps> = ({
             {title}
           </div>
           {isLoading ? (
-            <div className="flex items-center gap-2 mt-2 text-sm text-gray-500">
               <Loader2 className="h-4 w-4 animate-spin" />
-              <span>{t('common.processing')}</span>
-            </div>
           ) : (
             <div className="flex items-center gap-2 mt-2">
               {showOpenInMindElixir && onOpenInMindElixir && (
