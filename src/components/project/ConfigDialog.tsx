@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next'
 import { useConfigStore, useProcessingOptions } from '../../stores/configStore'
 import { useModelStore } from '../../stores/modelStore'
 import type { SupportedLanguage } from '../../services/prompts/utils'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useEffectEvent } from 'react'
 
 interface ConfigDialogProps {
   processing: boolean
@@ -36,28 +36,32 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
 
   const { processingMode, bookType, skipNonEssentialChapters, outputLanguage, forceUseSpine } = processingOptions
 
-  // Track selected model for this request
   const [selectedModelId, setSelectedModelId] = useState<string>('')
 
-  // Initialize with default model
-  useEffect(() => {
+  const selectedModel = models.find(m => m.id === selectedModelId)
+
+  const handleModelChange = (id: string) => {
+    setSelectedModelId(id)
+    const model = models.find(m => m.id === id)
+    if (model) {
+      setAiProvider(model.provider)
+      setApiKey(model.apiKey)
+      setApiUrl(model.apiUrl)
+      setModel(model.model)
+      setTemperature(model.temperature)
+    }
+  }
+
+  const onInit = useEffectEvent(() => {
     const defaultModel = getDefaultModel()
     if (defaultModel && !selectedModelId) {
-      setSelectedModelId(defaultModel.id)
+      handleModelChange(defaultModel.id)
     }
-  }, [getDefaultModel, selectedModelId])
+  });
 
-  // Update config when model selection changes
   useEffect(() => {
-    const selectedModel = models.find(m => m.id === selectedModelId)
-    if (selectedModel) {
-      setAiProvider(selectedModel.provider)
-      setApiKey(selectedModel.apiKey)
-      setApiUrl(selectedModel.apiUrl)
-      setModel(selectedModel.model)
-      setTemperature(selectedModel.temperature)
-    }
-  }, [selectedModelId, models, setAiProvider, setApiKey, setApiUrl, setModel, setTemperature])
+    onInit()
+  }, [])
 
   return (
     <Dialog>
@@ -103,7 +107,7 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
               ) : (
                 <Select
                   value={selectedModelId}
-                  onValueChange={setSelectedModelId}
+                  onValueChange={handleModelChange}
                   disabled={processing}
                 >
                   <SelectTrigger>
@@ -119,15 +123,15 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
                 </Select>
               )}
 
-              {selectedModelId && models.find(m => m.id === selectedModelId) && (
+              {selectedModel && (
                 <div className="text-xs text-gray-600 mt-2 space-y-1">
                   <div>
                     <span className="font-medium">{t('config.aiProvider')}:</span>{' '}
-                    {models.find(m => m.id === selectedModelId)?.provider}
+                    {selectedModel.provider}
                   </div>
                   <div>
                     <span className="font-medium">{t('config.modelName')}:</span>{' '}
-                    {models.find(m => m.id === selectedModelId)?.model}
+                    {selectedModel.model}
                   </div>
                 </div>
               )}

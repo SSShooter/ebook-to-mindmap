@@ -18,6 +18,8 @@ interface EpubReaderProps {
   className?: string
 }
 
+const epubProcessor = new EpubProcessor()
+
 export function EpubReader({ initialChapterId, chapterIds, chapters, bookData, onClose, className }: EpubReaderProps) {
   const { t } = useTranslation()
   const [currentIndex, setCurrentIndex] = useState(() =>
@@ -25,7 +27,6 @@ export function EpubReader({ initialChapterId, chapterIds, chapters, bookData, o
   )
   const [chapterHtmlContent, setChapterHtmlContent] = useState<string>('')
   const [isLoadingHtml, setIsLoadingHtml] = useState(false)
-  const [epubProcessor] = useState(() => new EpubProcessor())
   const shadowRef = useRef<HTMLDivElement>(null)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
 
@@ -103,7 +104,7 @@ export function EpubReader({ initialChapterId, chapterIds, chapters, bookData, o
     }
 
     loadChapterHtml()
-  }, [chapter, bookData, epubProcessor])
+  }, [chapter, bookData])
 
   return (
     <div className={cn("w-full h-full flex flex-col", className)}>

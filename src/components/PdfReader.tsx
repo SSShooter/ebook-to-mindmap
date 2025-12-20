@@ -22,6 +22,7 @@ interface PageContent {
   canvas?: HTMLCanvasElement
 }
 
+const pdfProcessor = new PdfProcessor()
 export function PdfReader({ initialChapterId, chapterIds, chapters, bookData, onClose, className }: PdfReaderProps) {
   const { t } = useTranslation()
   const [currentIndex, setCurrentIndex] = useState(() =>
@@ -30,7 +31,6 @@ export function PdfReader({ initialChapterId, chapterIds, chapters, bookData, on
   const [chapterPages, setChapterPages] = useState<PageContent[]>([])
   const [currentPageIndex, setCurrentPageIndex] = useState(0)
   const [isLoadingPages, setIsLoadingPages] = useState(false)
-  const [pdfProcessor] = useState(() => new PdfProcessor())
   const canvasContainerRef = useRef<HTMLDivElement>(null)
 
   const chapter = chapters.find(ch => ch.id === chapterIds[currentIndex])!
@@ -73,7 +73,7 @@ export function PdfReader({ initialChapterId, chapterIds, chapters, bookData, on
     }
 
     loadChapterPages()
-  }, [chapter, bookData, pdfProcessor])
+  }, [chapter, bookData])
 
   // 渲染当前页面的canvas
   useEffect(() => {
@@ -129,7 +129,7 @@ export function PdfReader({ initialChapterId, chapterIds, chapters, bookData, on
           </Button>
         </div>
 
-              </div>
+      </div>
       <Separator className="mb-3" />
 
       {/* Content */}
