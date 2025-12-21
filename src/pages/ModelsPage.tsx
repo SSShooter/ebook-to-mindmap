@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -30,23 +30,27 @@ export function ModelsPage() {
   const [isLoadingModels, setIsLoadingModels] = useState(false)
 
   // Fetch available models from OpenAI Compatible API
-  const fetchAvailableModels = async () => {
-    if (!formData.apiUrl || !formData.apiKey) {
+  const fetchAvailableModels = async (params?: { apiUrl?: string; apiKey?: string; provider?: string }) => {
+    const apiUrl = params?.apiUrl ?? formData.apiUrl
+    const apiKey = params?.apiKey ?? formData.apiKey
+    const provider = params?.provider ?? formData.provider
+
+    if (!apiUrl || !apiKey) {
       setAvailableModels([])
       return
     }
 
     // Only fetch for openai compatible providers
-    if (!['openai', 'ollama', '302.ai', 'gemini'].includes(formData.provider)) {
+    if (!['openai', 'ollama', '302.ai', 'gemini'].includes(provider)) {
       setAvailableModels([])
       return
     }
 
     setIsLoadingModels(true)
     try {
-      const response = await fetch(`${formData.apiUrl}/models`, {
+      const response = await fetch(`${apiUrl}/models`, {
         headers: {
-          'Authorization': `Bearer ${formData.apiKey}`,
+          'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
         },
       })
@@ -56,7 +60,7 @@ export function ModelsPage() {
       }
 
       const data = await response.json()
-      const models = data.data?.map((model: any) => model.id) || []
+      const models = data.data?.map((model: { id: string }) => model.id) || []
       setAvailableModels(models)
     } catch (error) {
       console.error('Failed to fetch models:', error)
@@ -66,15 +70,6 @@ export function ModelsPage() {
       setIsLoadingModels(false)
     }
   }
-
-  // Fetch models when API URL or API Key changes
-  useEffect(() => {
-    if (isDialogOpen && (formData.provider === 'openai' || formData.provider === 'ollama' || formData.provider === '302.ai' || formData.provider === 'gemini')) {
-      fetchAvailableModels()
-    } else {
-      setAvailableModels([])
-    }
-  }, [formData.apiUrl, formData.apiKey, formData.provider, isDialogOpen])
 
   const providerSettings: Record<AIModel['provider'], {
     apiKeyLabel: string
@@ -116,24 +111,28 @@ export function ModelsPage() {
   const handleOpenDialog = (model?: AIModel) => {
     if (model) {
       setEditingModel(model)
-      setFormData({
+      const newFormData = {
         name: model.name,
         provider: model.provider,
         apiKey: model.apiKey,
         apiUrl: model.apiUrl,
         model: model.model,
         temperature: model.temperature
-      })
+      }
+      setFormData(newFormData)
+      fetchAvailableModels(newFormData)
     } else {
       setEditingModel(null)
-      setFormData({
+      const newFormData: typeof formData = {
         name: '',
         provider: 'gemini',
         apiKey: '',
         apiUrl: 'https://generativelanguage.googleapis.com/v1beta/openai',
         model: 'gemini-1.5-flash',
         temperature: 0.7
-      })
+      }
+      setFormData(newFormData)
+      fetchAvailableModels(newFormData)
     }
     setIsDialogOpen(true)
   }
@@ -244,11 +243,13 @@ export function ModelsPage() {
                           'ollama': 'http://localhost:11434/v1',
                           '302.ai': 'https://api.302.ai/v1'
                         }
-                        setFormData({
+                        const newFormData = {
                           ...formData,
                           provider: value,
                           apiUrl: defaultApiUrls[value]
-                        })
+                        }
+                        setFormData(newFormData)
+                        fetchAvailableModels(newFormData)
                       }}
                     >
                       <SelectTrigger>
@@ -285,7 +286,11 @@ export function ModelsPage() {
                     type="password"
                     placeholder={providerSettings[formData.provider].apiKeyPlaceholder}
                     value={formData.apiKey}
-                    onChange={(e) => setFormData({ ...formData, apiKey: e.target.value })}
+                    onChange={(e) => {
+                      const newFormData = { ...formData, apiKey: e.target.value }
+                      setFormData(newFormData)
+                      fetchAvailableModels(newFormData)
+                    }}
                   />
                 </div>
 
@@ -297,7 +302,11 @@ export function ModelsPage() {
                       type="url"
                       placeholder={providerSettings[formData.provider].apiUrlPlaceholder || 'https://api.example.com/v1'}
                       value={formData.apiUrl}
-                      onChange={(e) => setFormData({ ...formData, apiUrl: e.target.value })}
+                      onChange={(e) => {
+                        const newFormData = { ...formData, apiUrl: e.target.value }
+                        setFormData(newFormData)
+                        fetchAvailableModels(newFormData)
+                      }}
                       disabled={formData.provider === 'gemini' || formData.provider === '302.ai'}
                     />
                   </div>
@@ -322,7 +331,7 @@ export function ModelsPage() {
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={fetchAvailableModels}
+                        onClick={() => fetchAvailableModels()}
                         disabled={isLoadingModels}
                         title={t('models.refreshModels', 'Refresh models')}
                         className="px-3"
