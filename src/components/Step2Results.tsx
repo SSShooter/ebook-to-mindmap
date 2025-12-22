@@ -195,16 +195,18 @@ ${bookSummary.overallSummary}
           {(processing || error) && (
             <div className="space-y-2">
               <div className="flex justify-between items-center text-sm">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
                   {error ? (
-                    <div className="flex items-center gap-2">
-                      <span className="text-red-500 font-medium">Error: {error}</span>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-red-500 font-medium truncate" title={error || ''}>
+                        Error: {error}
+                      </span>
                       {onRetry && (
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={onRetry}
-                          className="flex items-center gap-1 text-xs"
+                          className="flex items-center gap-1 text-xs shrink-0"
                         >
                           <RefreshCw className="h-3 w-3" />
                           {t('common.retry')}

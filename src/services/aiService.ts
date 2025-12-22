@@ -356,6 +356,12 @@ export class AIService {
     }
 
     const data = await response.json()
+
+    if (data.choices?.[0]?.error) {
+      const error = data.choices[0].error
+      throw new Error(`AI Provider Error: ${error.code} - ${error.message}`)
+    }
+
     return {
       content: data.choices[0]?.message?.content || '',
       reasoning: data.choices[0]?.message?.reasoning_content || ''
