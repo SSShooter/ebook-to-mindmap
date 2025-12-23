@@ -1,7 +1,5 @@
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button } from '@/components/ui/button'
-import { ChevronUp } from 'lucide-react'
 import { type ChapterData, type BookData as EpubBookData } from '@/services/epubProcessor'
 import { type BookData as PdfBookData } from '@/services/pdfProcessor'
 import { AIService } from '../services/aiService'
@@ -13,7 +11,6 @@ import { PdfReader } from '../components/PdfReader'
 import { Step1Config } from '../components/Step1Config'
 import { Step2Results } from '../components/Step2Results'
 import { toast } from 'sonner'
-import { scrollToTop } from '../utils'
 import { useConfigStore } from '../stores/configStore'
 
 const options = { direction: 1, alignment: 'nodes', editable: false, draggable:false } as Options
@@ -51,7 +48,6 @@ export function SummaryPage() {
   const [extractedChapters, setExtractedChapters] = useState<ChapterData[] | null>(null)
   const [bookData, setBookData] = useState<{ title: string; author: string } | null>(null)
   const [fullBookData, setFullBookData] = useState<EpubBookData | PdfBookData | null>(null)
-  const [showBackToTop, setShowBackToTop] = useState(false)
   const [readingChapterId, setReadingChapterId] = useState<string | null>(null)
   const [readingChapterIds, setReadingChapterIds] = useState<string[]>([])
   const [retryParams, setRetryParams] = useState<{
@@ -65,18 +61,6 @@ export function SummaryPage() {
   const configStore = useConfigStore()
   const { apiKey } = configStore.aiConfig
   const { processingMode, bookType } = configStore.processingOptions
-
-  useEffect(() => {
-    const scrollContainer = document.querySelector('.scroll-container')
-    if (!scrollContainer) return
-
-    const handleScroll = () => {
-      setShowBackToTop(scrollContainer.scrollTop > 300)
-    }
-
-    scrollContainer.addEventListener('scroll', handleScroll)
-    return () => scrollContainer.removeEventListener('scroll', handleScroll)
-  }, [])
 
   const handleFileChange = useCallback((selectedFile: File | null) => {
     setFile(selectedFile)
@@ -564,18 +548,6 @@ export function SummaryPage() {
           ) : null
         )}
       </div>
-
-      {/* Back to Top Button */}
-      {showBackToTop && (
-        <Button
-          onClick={scrollToTop}
-          className="fixed bottom-6 right-6 z-50 rounded-full w-12 h-12 shadow-lg hover:shadow-xl transition-all duration-300 bg-blue-600 hover:bg-blue-700"
-          size="icon"
-          aria-label={t('common.backToTop')}
-        >
-          <ChevronUp className="h-6 w-6" />
-        </Button>
-      )}
     </div>
   )
 }
