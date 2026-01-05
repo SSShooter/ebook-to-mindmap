@@ -77,34 +77,34 @@ export function SummaryPage() {
     if (!file) return
     const type = processingMode === 'summary' ? 'summary' : 'mindmap'
     if (await cacheService.clearChapterCache(file.name, chapterId, type)) {
-      toast.success('已清除缓存，下次处理将重新生成内容', {
+      toast.success(t('cache.cleared'), {
         duration: 3000,
         position: 'top-center',
       })
     }
-  }, [file, processingMode])
+  }, [file, processingMode, t])
 
   const clearSpecificCache = useCallback(async (cacheType: 'connections' | 'overall_summary' | 'character_relationship' | 'combined_mindmap' | 'merged_mindmap') => {
     if (!file) return
     const displayNames = {
-      connections: '章节关联',
-      overall_summary: '全书总结',
-      character_relationship: '人物关系图',
-      combined_mindmap: '整书思维导图',
-      merged_mindmap: '章节思维导图整合'
+      connections: t('cacheManagement.types.connections'),
+      overall_summary: t('cacheManagement.types.overallSummary'),
+      character_relationship: t('cacheManagement.types.characterRelationship'),
+      combined_mindmap: t('cacheManagement.types.combinedMindmap'),
+      merged_mindmap: t('cacheManagement.types.mergedMindmap')
     }
     if (await cacheService.clearSpecificCache(file.name, cacheType)) {
-      toast.success(`已清除${displayNames[cacheType]}缓存，下次处理将重新生成内容`, {
+      toast.success(t('cache.cleared'), {
         duration: 3000,
         position: 'top-center',
       })
     } else {
-      toast.info(`没有找到可清除的${displayNames[cacheType]}缓存`, {
+      toast.info(`${t('cache.noCacheFound', { mode: displayNames[cacheType] })}`, {
         duration: 3000,
         position: 'top-center',
       })
     }
-  }, [file])
+  }, [file, t])
 
   const handleReadChapter = useCallback((chapterId: string, chapterIds: string[]) => {
     setReadingChapterId(chapterId)
@@ -206,9 +206,9 @@ export function SummaryPage() {
         const groupChapters = group.chapters
 
         if (group.tag) {
-          setCurrentStep(`正在处理标签组 "${group.tag}" (${groupIndex + 1}/${totalGroups})，包含 ${groupChapters.length} 个章节`)
+          setCurrentStep(t('progress.processingTagGroup', { tag: group.tag, current: groupIndex + 1, total: totalGroups, count: groupChapters.length }))
         } else {
-          setCurrentStep(`正在处理第 ${groupIndex + 1}/${totalGroups} 个章节: ${groupChapters[0].title}`)
+          setCurrentStep(t('progress.processingChapter', { current: groupIndex + 1, total: totalGroups, title: groupChapters[0].title }))
         }
 
         const loadingGroup: ChapterGroup = {
@@ -308,7 +308,7 @@ export function SummaryPage() {
       }
 
       if (processingMode === 'summary') {
-        setCurrentStep('正在分析章节关联...')
+        setCurrentStep(t('progress.analyzingConnections'))
 
         // Mark connections as loading
         setBookSummary(prevSummary => ({
@@ -340,7 +340,7 @@ export function SummaryPage() {
         setProgress(80)
 
         if (bookType !== 'non-fiction') {
-          setCurrentStep('正在生成人物关系图...')
+          setCurrentStep(t('results.generatingCharacterRelationship'))
           const characterRelationship = await bookProcessingService.generateCharacterRelationship(
             file.name,
             processedChapters,
@@ -356,7 +356,7 @@ export function SummaryPage() {
         }
         setProgress(90)
 
-        setCurrentStep('正在生成全书总结...')
+        setCurrentStep(t('progress.generatingOverallSummary'))
 
         // Mark overallSummary as loading
         setBookSummary(prevSummary => ({
@@ -387,7 +387,7 @@ export function SummaryPage() {
           overallSummaryLoading: false
         }))
       } else if (processingMode === 'mindmap') {
-        setCurrentStep('正在合并章节思维导图...')
+        setCurrentStep(t('progress.mergingMindMaps'))
         const combinedMindMap = await bookProcessingService.mergeMindMaps(
           file.name,
           bookData.title,
@@ -400,7 +400,7 @@ export function SummaryPage() {
           combinedMindMap
         }))
       } else if (processingMode === 'combined-mindmap') {
-        setCurrentStep('正在生成整书思维导图...')
+        setCurrentStep(t('progress.generatingCombinedMindMap'))
         const combinedMindMap = await bookProcessingService.generateCombinedMindMap(
           file.name,
           bookData.title,
@@ -417,7 +417,7 @@ export function SummaryPage() {
       }
 
       setProgress(100)
-      setCurrentStep('处理完成！')
+      setCurrentStep(t('progress.completed'))
     } catch (err) {
       if (err instanceof Error && err.name === 'AbortError') {
         console.log(t('common.generationCancelled'))

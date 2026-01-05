@@ -52,6 +52,7 @@
     "extractingPdf": "Parsing PDF file...",
     "extractingChapters": "Extracting chapter content...",
     "processingChapter": "Processing chapter {{current}}/{{total}}: {{title}}",
+    "processingTagGroup": "Processing tag group \"{{tag}}\" ({{current}}/{{total}}), containing {{count}} chapters",
     "analyzingConnections": "Analyzing chapter connections...",
     "generatingOverallSummary": "Generating overall summary...",
     "mergingMindMaps": "Merging chapter mind maps...",

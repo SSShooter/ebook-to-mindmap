@@ -52,6 +52,7 @@
     "extractingPdf": "正在解析 PDF 文件...",
     "extractingChapters": "正在提取章节内容...",
     "processingChapter": "正在处理第 {{current}}/{{total}} 章: {{title}}",
+    "processingTagGroup": "正在处理标签组 \"{{tag}}\" ({{current}}/{{total}})，包含 {{count}} 个章节",
     "analyzingConnections": "正在分析章节关联...",
     "generatingOverallSummary": "正在生成全书总结...",
     "mergingMindMaps": "正在合并章节思维导图...",
