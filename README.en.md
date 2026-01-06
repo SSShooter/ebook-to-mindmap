@@ -5,7 +5,6 @@
   <h1 align="center">E-book to Mind Map</h1>
 </p>
 
-
 [中文](README.md) | English
 
 ![E-book to Mind Map Screenshot1](/img/screenshot1.jpg)
@@ -32,13 +31,6 @@ Try it now: https://ebook2me-next.mind-elixir.com/
   - 📝 **Text Summary Mode**: Generate chapter summaries, analyze chapter relationships, output complete book summary
   - 🧠 **Chapter Mind Map Mode**: Generate independent mind maps for each chapter
   - 🌐 **Whole Book Mind Map Mode**: Integrate entire book content into one comprehensive mind map
-
-### 🎯 Smart Chapter Processing
-
-- **Intelligent Chapter Detection**: Automatically identify and extract book chapter structure
-- **Chapter Filtering**: Support skipping prefaces, table of contents, acknowledgments and other non-core content
-- **Flexible Selection**: Users can freely choose chapters to process
-- **Sub-chapter Support**: Configurable sub-chapter extraction depth
 
 ### 💾 Efficient Caching Mechanism
 
@@ -113,6 +105,33 @@ Set processing parameters in the configuration dialog:
 3. After extraction, chapter list will be displayed
 4. You can select chapters to process
 
+#### Chapter Grouping (Optional)
+
+For books with comprehensive content, you can merge multiple small chapters into a group for processing, allowing for a more structured result. By grouping, AI will analyze the content of these chapters together.
+
+1. **Select Chapters**: Click on a chapter list item (not the checkbox area) to select it. Multiple selection is supported. Selected chapters will have a highlighted border.
+2. **Add Tag**:
+   - Click the "Add Tag" button at the top of the list
+   - Or use the shortcut `Ctrl + G`
+3. **Enter Group Name**: In the dialog that appears, enter a group name (e.g., "Part 1", "Chapter 1", etc.). After confirmation, the selected chapters will be marked as the same group.
+4. **Remove Group**: Click the "X" icon after the existing tag on the chapter list to remove the grouping for that chapter.
+
+### 4.5. Custom Prompts (Advanced)
+
+You can manage your dedicated prompts on the "Custom Prompts" page and use them when processing books to get results that better fit your needs.
+
+1. **Manage Prompts**:
+
+   - Click "Custom Prompts" in the navigation bar to enter the management page
+   - Click "Add Prompt" to create a new prompt template
+   - Fill in the name, description, and specific prompt content
+   - Support editing, copying, and deleting existing prompts
+
+2. **Use Prompts**:
+   - At the bottom of the configuration interface after extracting chapters, find the "Custom Prompts" option
+   - Select your pre-created prompt from the dropdown menu
+   - **Use Custom Prompt Only**: When checked, your prompt will completely replace the system default prompt (this option only applies to **Text Summary Mode**). If unchecked, your prompt will be sent to the AI as supplementary instructions.
+
 ### 5. Start Processing
 
 1. Confirm selected chapters
@@ -151,8 +170,6 @@ Depending on the selected processing mode, you can view different types of resul
 - **AI Services**:
   - Google Gemini: @google/generative-ai
   - OpenAI: Custom implementation
-
-
 
 ## 📄 License
 
