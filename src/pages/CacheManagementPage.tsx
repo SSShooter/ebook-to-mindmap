@@ -13,9 +13,10 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { Trash2, ArrowLeft, Loader2, FileText, Network, BookMarked } from 'lucide-react'
+import { Trash2, ArrowLeft, Loader2, FileText, Network, BookMarked, Download } from 'lucide-react'
 import { CacheService, type CacheKeyType, type CacheValue } from '@/services/cacheService'
 import { toast } from 'sonner'
+import JSZip from 'jszip'
 import { MarkdownCard } from '@/components/MarkdownCard'
 import { MindMapCard } from '@/components/MindMapCard'
 import type { MindElixirData } from 'mind-elixir'
@@ -137,6 +138,7 @@ export function CacheManagementPage() {
 
     useEffect(() => {
         loadCacheData()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     // 加载缓存值
@@ -165,6 +167,7 @@ export function CacheManagementPage() {
                 loadCacheValue(entry.key)
             }
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedGroup])
 
     // 确认删除
@@ -207,6 +210,85 @@ export function CacheManagementPage() {
         }
     }
 
+    // 下载内容
+    const handleDownload = async (group: BookModeGroup) => {
+        try {
+            toast.info(t('cacheManagement.preparingDownload'))
+
+            const zip = new JSZip()
+            const isSummary = group.mode === 'summary'
+
+            // 创建文件夹
+            const folder = zip.folder(group.displayName)
+            if (!folder) {
+                throw new Error('Failed to create folder')
+            }
+
+            // 分类章节内容
+            const chapters: CacheEntry[] = []
+            const otherEntries: CacheEntry[] = []
+
+            for (const entry of group.entries) {
+                if (entry.type === 'summary' || entry.type === 'mindmap') {
+                    chapters.push(entry)
+                } else {
+                    otherEntries.push(entry)
+                }
+            }
+
+            // 添加章节内容
+            for (const entry of chapters) {
+                // 直接从 cacheService 获取数据，而不是依赖 state
+                const value = await cacheService.getCacheValueByKey(entry.key)
+                if (!value) continue
+
+                const chapterName = entry.chapterId || 'unknown'
+
+                if (isSummary && typeof value === 'string') {
+                    // 文字总结模式：保存为 markdown
+                    folder.file(`${chapterName}.md`, value)
+                } else if (!isSummary && value && typeof value === 'object' && 'nodeData' in value) {
+                    // 思维导图模式：保存为 JSON
+                    folder.file(`${chapterName}.json`, JSON.stringify(value, null, 2))
+                }
+            }
+
+            // 添加其他内容（如章节关联、全书总结等）
+            for (const entry of otherEntries) {
+                // 直接从 cacheService 获取数据
+                const value = await cacheService.getCacheValueByKey(entry.key)
+                if (!value) continue
+
+                const fileName = getCacheTypeLabel(entry.type, t)
+
+                if (typeof value === 'string') {
+                    folder.file(`${fileName}.md`, value)
+                } else if (typeof value === 'object' && 'nodeData' in value) {
+                    folder.file(`${fileName}.json`, JSON.stringify(value, null, 2))
+                } else {
+                    // 其他类型保存为 JSON
+                    folder.file(`${fileName}.json`, JSON.stringify(value, null, 2))
+                }
+            }
+
+            // 生成并下载 zip 文件
+            const blob = await zip.generateAsync({ type: 'blob' })
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `${group.displayName}_${group.mode}.zip`
+            document.body.appendChild(a)
+            a.click()
+            document.body.removeChild(a)
+            URL.revokeObjectURL(url)
+
+            toast.success(t('cacheManagement.downloadSuccess'))
+        } catch (error) {
+            console.error('Failed to download content:', error)
+            toast.error(t('cacheManagement.downloadError'))
+        }
+    }
+
     // 渲染列表项
     const renderListItem = (group: BookModeGroup) => {
         const isSummary = group.mode === 'summary'
@@ -231,17 +313,30 @@ export function CacheManagementPage() {
                         </div>
                     </div>
                 </div>
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                        e.stopPropagation()
-                        confirmDelete({ group })
-                    }}
-                    className="text-red-500 hover:text-red-600 hover:bg-red-50 shrink-0"
-                >
-                    <Trash2 className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center gap-2 shrink-0">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            handleDownload(group)
+                        }}
+                        className="text-blue-500 hover:text-blue-600 hover:bg-blue-50"
+                    >
+                        <Download className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            confirmDelete({ group })
+                        }}
+                        className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                    >
+                        <Trash2 className="h-4 w-4" />
+                    </Button>
+                </div>
             </div>
         )
     }
@@ -490,15 +585,26 @@ export function CacheManagementPage() {
                                 {selectedGroup.entries.length} {t('cacheManagement.items')}
                             </Badge>
                         </div>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => confirmDelete({ group: selectedGroup })}
-                            className="text-red-500 hover:text-red-600 hover:bg-red-50 shrink-0"
-                        >
-                            <Trash2 className="h-4 w-4 mr-1" />
-                            <span className="hidden sm:inline">{t('cacheManagement.deleteBook')}</span>
-                        </Button>
+                        <div className="flex items-center gap-2 shrink-0">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleDownload(selectedGroup)}
+                                className="text-blue-500 hover:text-blue-600 hover:bg-blue-50"
+                            >
+                                <Download className="h-4 w-4 mr-1" />
+                                <span className="hidden sm:inline">{t('cacheManagement.downloadContent')}</span>
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => confirmDelete({ group: selectedGroup })}
+                                className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                            >
+                                <Trash2 className="h-4 w-4 mr-1" />
+                                <span className="hidden sm:inline">{t('cacheManagement.deleteBook')}</span>
+                            </Button>
+                        </div>
                     </div>
                 </div>
 
