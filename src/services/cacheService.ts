@@ -36,7 +36,7 @@ export class CacheService {
   // 统一的缓存键生成规则
   static generateKey(filename: string, type: CacheKeyType, chapterId?: string): string {
     // 清理文件名，移除扩展名和特殊字符
-    const cleanFilename = filename.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, '_')
+    const cleanFilename = filename.replace(/\.[^/.]+$/, '')
 
     if (chapterId) {
       // 章节级缓存：book_filename_chapter_chapterId_type
@@ -157,7 +157,7 @@ export class CacheService {
   // 清除整本书缓存
   async clearBookCache(fileName: string, processingMode: 'summary' | 'mindmap' | 'combined_mindmap'): Promise<number> {
     let deletedCount = 0
-    const cleanFilename = fileName.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, '_')
+    const cleanFilename = fileName.replace(/\.[^/.]+$/, '')
     const bookPrefix = `book_${cleanFilename}_`
 
     // 清除选中章节缓存

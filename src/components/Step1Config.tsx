@@ -240,9 +240,35 @@ export function Step1Config({
     }
   }, [])
 
-  const handleBoxSelect = useCallback((chapterId: string, checked: boolean) => {
+  const handleBoxSelect = useCallback((chapterId: string, checked: boolean, shiftKey: boolean = false) => {
     setBoxSelectedChapters((prev) => {
       const newSet = new Set(prev)
+      
+      // 如果按住 Shift 键，查找顺序上的上一个已选中章节
+      if (shiftKey && extractedChapters) {
+        const currentIndex = extractedChapters.findIndex(ch => ch.id === chapterId)
+        
+        if (currentIndex !== -1) {
+          // 从当前章节向前查找最近的一个已选中章节
+          let lastSelectedIndex = -1
+          for (let i = currentIndex - 1; i >= 0; i--) {
+            if (prev.has(extractedChapters[i].id)) {
+              lastSelectedIndex = i
+              break
+            }
+          }
+          
+          // 如果找到了上一个已选中的章节，选中范围内的所有章节
+          if (lastSelectedIndex !== -1) {
+            for (let i = lastSelectedIndex; i <= currentIndex; i++) {
+              newSet.add(extractedChapters[i].id)
+            }
+            return newSet
+          }
+        }
+      }
+      
+      // 正常的单个选择/取消选择
       if (checked) {
         newSet.add(chapterId)
       } else {
@@ -250,7 +276,7 @@ export function Step1Config({
       }
       return newSet
     })
-  }, [])
+  }, [extractedChapters])
 
   const handleAddTagsClick = useCallback(() => {
     if (boxSelectedChapters.size === 0) {
@@ -501,11 +527,11 @@ export function Step1Config({
                   return (
                     <div
                       key={chapter.id}
-                      className={`flex items-center gap-2 p-2 rounded-lg transition-all cursor-pointer ${isBoxSelected
+                      className={`flex items-center gap-2 p-2 rounded-lg transition-all cursor-pointer select-none ${isBoxSelected
                         ? 'bg-blue-100 border-2 border-blue-400'
                         : 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent'
                         }`}
-                      onClick={() => handleBoxSelect(chapter.id, !isBoxSelected)}
+                      onClick={(e) => handleBoxSelect(chapter.id, !isBoxSelected, e.shiftKey)}
                     >
                       <Checkbox
                         id={`chapter-${chapter.id}`}

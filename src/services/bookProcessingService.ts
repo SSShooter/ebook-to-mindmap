@@ -85,7 +85,7 @@ export class BookProcessingService {
         groups.push({
           tag,
           chapters: sameTagChapters,
-          groupId
+          groupId: `${tag}-${groupId}`
         })
       }
     }
