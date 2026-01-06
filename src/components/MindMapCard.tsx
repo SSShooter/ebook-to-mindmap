@@ -149,7 +149,7 @@ export const MindMapCard: React.FC<MindMapCardProps> = ({
             <MindElixirReact
               ref={localMindElixirRef}
               data={mindMapData}
-              fitPage={false}
+              fitPage={true}
               options={mindElixirOptions}
               className={mindMapClassName}
             />

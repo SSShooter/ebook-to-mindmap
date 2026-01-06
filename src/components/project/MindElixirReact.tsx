@@ -88,8 +88,8 @@ const MindElixirReact = forwardRef<MindElixirReactRef, MindElixirReactProps>(
       if (data && meInstance.current) {
         sanitizeNodeData(data.nodeData)
         meInstance.current.init(data)
-        meInstance.current.toCenter()
-        meInstance.current.scale(0.5)
+        // meInstance.current.toCenter()
+        // meInstance.current.scale(0.5)
         fitPage && meInstance.current.scaleFit()
         meInstance.current.map.style.opacity = "1"
       }
@@ -107,7 +107,7 @@ const MindElixirReact = forwardRef<MindElixirReactRef, MindElixirReactProps>(
 
       sanitizeNodeData(data.nodeData)
       meInstance.current.refresh(data)
-      meInstance.current.toCenter()
+      // meInstance.current.toCenter()
       fitPage && meInstance.current.scaleFit()
       meInstance.current.map.style.opacity = "1"
     }, [data, dataHash, fitPage])

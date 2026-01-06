@@ -45,7 +45,8 @@
     "extractAndApiKey": "请先提取章节并输入 API Key",
     "addTag": "添加标签",
     "selectChaptersForTag": "请先框选要添加标签的章节",
-    "tagAdded": "已为 {{count}} 个章节设置标签: {{tag}}"
+    "tagAdded": "已为 {{count}} 个章节设置标签: {{tag}}",
+    "groupingHint": "提示：点击章节列表项（非复选框区域）可多选章节进行分组"
   },
   "progress": {
     "extractingEpub": "正在解析 EPUB 文件...",

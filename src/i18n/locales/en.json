@@ -45,7 +45,8 @@
     "extractAndApiKey": "Please extract chapters and enter API Key first",
     "addTag": "Add Tag",
     "selectChaptersForTag": "Please select chapters to add tags first",
-    "tagAdded": "Tag set for {{count}} chapters: {{tag}}"
+    "tagAdded": "Tag set for {{count}} chapters: {{tag}}",
+    "groupingHint": "Tip: Click on chapter rows (not checkboxes) to multi-select chapters for grouping"
   },
   "progress": {
     "extractingEpub": "Parsing EPUB file...",

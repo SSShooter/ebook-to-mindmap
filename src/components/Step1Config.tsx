@@ -464,16 +464,26 @@ export function Step1Config({
                   {t('chapters.selectAll')}
                 </Label>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleAddTagsClick}
-                disabled={boxSelectedChapters.size === 0}
-                className="flex items-center gap-1"
-              >
-                <Tag className="h-3.5 w-3.5" />
-                {t('chapters.addTag')} {boxSelectedChapters.size > 0 && `(${boxSelectedChapters.size})`}
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAddTagsClick}
+                  disabled={boxSelectedChapters.size === 0}
+                  className="flex items-center gap-1"
+                >
+                  <Tag className="h-3.5 w-3.5" />
+                  {t('chapters.addTag')} {boxSelectedChapters.size > 0 && `(${boxSelectedChapters.size})`}
+                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="h-4 w-4 text-gray-400 cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent align="end">
+                    <p>{t('chapters.groupingHint')}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
             </div>
           </div>
         )}

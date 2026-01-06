@@ -64,7 +64,7 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
     <>
       {isMobile && isOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black opacity-50 z-40 lg:hidden"
           onClick={onClose}
         />
       )}
