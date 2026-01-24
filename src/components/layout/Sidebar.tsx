@@ -74,7 +74,7 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <img src="/icon.png" alt="icon" className="h-8 w-8" />
-              <span className="font-semibold text-base">eBook To Mindmap</span>
+              <span className="font-semibold text-base whitespace-nowrap">eBook To Mindmap</span>
             </div>
             {isMobile && (
               <button
@@ -113,7 +113,7 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
             })}
           </ul>
         </nav>
-        <div className="p-3 border-t border-sidebar-border">
+        <div className="p-3">
           <ThemeToggle />
         </div>
         <Footer />

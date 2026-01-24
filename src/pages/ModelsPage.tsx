@@ -376,7 +376,7 @@ export function ModelsPage() {
                 {t('models.noModels')}
               </div>
             ) : (
-              <div className="divide-y divide-gray-200">
+              <div className="divide-y divide-gray-200 dark:divide-gray-800">
                 {models.map((model) => (
                   <div key={model.id} className="p-4 hover:bg-muted/50 transition-colors">
                     {/* 标题行 - 模型名称和默认星标 */}

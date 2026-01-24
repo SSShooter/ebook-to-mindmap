@@ -458,7 +458,7 @@ export function SummaryPage() {
   const hasReader = readingChapterId && file && extractedChapters
 
   return (
-    <div className="flex-1 flex relative overflow-hidden">
+    <div className="flex-1 flex relative overflow-hidden bg-muted/50">
       {/* Left Module - Scrollable */}
       <div
         className={`

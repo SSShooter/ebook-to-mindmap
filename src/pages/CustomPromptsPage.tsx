@@ -187,7 +187,7 @@ export function CustomPromptsPage() {
                 {t('customPrompts.noPrompts')}
               </div>
             ) : (
-              <div className="divide-y divide-gray-200">
+              <div className="divide-y divide-gray-200 dark:divide-gray-800">
                 {prompts.map((prompt) => (
                   <div key={prompt.id} className="p-4 hover:bg-muted/50 transition-colors">
                     {/* 标题和操作按钮 */}

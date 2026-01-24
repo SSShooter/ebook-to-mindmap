@@ -621,37 +621,39 @@ export function CacheManagementPage() {
     }
 
     return (
-        <div className="h-full flex flex-col p-4 gap-4 overflow-hidden max-w-4xl mx-auto w-full">
-            {/* 标题 - 仅在列表视图显示 */}
-            {!selectedGroup && (
-                <div className="shrink-0">
-                    <h1 className="text-2xl font-bold flex items-center gap-2">
-                        <BookMarked className="h-6 w-6" />
-                        {t('cacheManagement.title')}
-                    </h1>
-                    <p className="text-muted-foreground text-sm mt-1">{t('cacheManagement.description')}</p>
-                </div>
-            )}
-
-            {/* 内容区域 */}
-            <div className="flex-1 min-h-0">
-                {loading ? (
-                    <div className="flex items-center justify-center py-16">
-                        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground/70" />
+        <div className="flex-1 overflow-hidden bg-muted/50">
+            <div className="max-w-4xl mx-auto h-full flex flex-col p-8">
+                {/* 标题 - 仅在列表视图显示 */}
+                {!selectedGroup && (
+                    <div className="mb-8 flex-shrink-0">
+                        <h1 className="text-2xl font-semibold text-foreground flex items-center gap-3">
+                            <BookMarked className="h-6 w-6 text-foreground/80" />
+                            {t('cacheManagement.title')}
+                        </h1>
+                        <p className="text-sm text-muted-foreground mt-1">{t('cacheManagement.description')}</p>
                     </div>
-                ) : selectedGroup ? (
-                    renderDetail()
-                ) : bookModeGroups.length === 0 ? (
-                    <div className="text-center text-muted-foreground py-16">
-                        {t('cacheManagement.noCache')}
-                    </div>
-                ) : (
-                    <ScrollArea className="h-full [&>div>div]:!block">
-                        <div className="pr-3">
-                            {renderBookList()}
-                        </div>
-                    </ScrollArea>
                 )}
+
+                {/* 内容区域 */}
+                <div className="flex-1 min-h-0">
+                    {loading ? (
+                        <div className="flex items-center justify-center py-16">
+                            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground/70" />
+                        </div>
+                    ) : selectedGroup ? (
+                        renderDetail()
+                    ) : bookModeGroups.length === 0 ? (
+                        <div className="text-center text-muted-foreground py-16">
+                            {t('cacheManagement.noCache')}
+                        </div>
+                    ) : (
+                        <ScrollArea className="h-full [&>div>div]:!block">
+                            <div className="pr-3">
+                                {renderBookList()}
+                            </div>
+                        </ScrollArea>
+                    )}
+                </div>
             </div>
 
             {/* 删除确认对话框 */}
