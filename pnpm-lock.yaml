@@ -104,6 +104,9 @@ importers:
       '@tailwindcss/vite':
         specifier: ^4.1.11
         version: 4.1.11(vite@7.0.5(@types/node@24.0.15)(jiti@2.4.2)(lightningcss@1.30.1)(tsx@4.21.0))
+      '@zumer/snapdom':
+        specifier: ^2.0.2
+        version: 2.0.2
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -144,8 +147,8 @@ importers:
         specifier: ^11.12.1
         version: 11.12.1
       mind-elixir:
-        specifier: ^5.5.0
-        version: 5.5.0
+        specifier: ^5.6.1
+        version: 5.6.1
       next-themes:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -2012,6 +2015,9 @@ packages:
     resolution: {integrity: sha512-x6BDiDTKeZWbeHgHlVzV1sqReGuz4b1R4cVStUDua8OSq4bRreZeiJKPFFlvJs67FvCnetq33aYb/XH73EQhdA==}
     engines: {bun: '>=0.7.0', deno: '>=1.0.0', node: '>=16.5.0'}
 
+  '@zumer/snapdom@2.0.2':
+    resolution: {integrity: sha512-W6quT4lMcPu8Q9O/Q6witSfc6/+xuY8C8yDoHug/+o7zYKCNE/e0I3//XsWDkyq9C0mDE0TAWF/8bwCR7x3gHQ==}
+
   acorn-jsx@5.3.2:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
     peerDependencies:
@@ -3109,8 +3115,8 @@ packages:
   mind-elixir@4.6.2:
     resolution: {integrity: sha512-KjIjInLbMtW7J68Hm+oJ/+g/fhG+h6kkJkU5HL1LgqLSIyKFQM4V5xogibbqm+9ycBmKu2TTOlE+5O2/3VZPtA==}
 
-  mind-elixir@5.5.0:
-    resolution: {integrity: sha512-a/bOTp3wJrK/vTm2/Vn5+9kYL0fNqxWvm8SsVojJO/tltLPPU8yMPzFCZHzGRz1Aoj6bpLxN+ExfIbc28nrNxQ==}
+  mind-elixir@5.6.1:
+    resolution: {integrity: sha512-FTpP5yfyjqXxtHbUAcJVrzBgbU9en0dQIbYx4lQc1C7aWOnjHGHr9iVccgMqU4gh9jVIBpunm4++2DpN753mGg==}
 
   minimatch@3.1.2:
     resolution: {integrity: sha512-J7p63hRiAjw1NDEww1W7i37+ByIrOWO5XQQAzZ3VOcL0PNybwpfmV/N05zFAzwQ9USyEcX6t3UO+K5aqBQOIHw==}
@@ -5493,6 +5499,8 @@ snapshots:
 
   '@zip.js/zip.js@2.7.64': {}
 
+  '@zumer/snapdom@2.0.2': {}
+
   acorn-jsx@5.3.2(acorn@8.15.0):
     dependencies:
       acorn: 8.15.0
@@ -6866,7 +6874,7 @@ snapshots:
 
   mind-elixir@4.6.2: {}
 
-  mind-elixir@5.5.0: {}
+  mind-elixir@5.6.1: {}
 
   minimatch@3.1.2:
     dependencies:
