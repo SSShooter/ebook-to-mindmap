@@ -140,7 +140,7 @@ ${bookSummary.overallSummary}
     <div className='h-full flex flex-col p-4 gap-3'>
       {/* 顶部固定区域 */}
       <div className="shrink-0">
-        <div className="p-4 bg-gray-50 rounded-lg space-y-3">
+        <div className="p-4 bg-muted rounded-lg space-y-3">
           {/* 头部导航和标题 */}
           <div className="flex items-center justify-between gap-3 overflow-hidden">
             <Tooltip>
@@ -161,14 +161,14 @@ ${bookSummary.overallSummary}
             <div className="flex items-center justify-between flex-1 min-w-0">
               <div className="flex items-center gap-2 min-w-0">
                 {processingMode === 'summary' ? (
-                  <><BookOpen className="h-5 w-5 text-gray-600 shrink-0" /><span className="font-medium text-sm text-gray-700 truncate">{t('results.summaryTitle', { title: bookSummary?.title })}</span></>
+                  <><BookOpen className="h-5 w-5 text-muted-foreground shrink-0" /><span className="font-medium text-sm truncate">{t('results.summaryTitle', { title: bookSummary?.title })}</span></>
                 ) : processingMode === 'mindmap' ? (
-                  <><Network className="h-5 w-5 text-gray-600 shrink-0" /><span className="font-medium text-sm text-gray-700 truncate">{t('results.chapterMindMapTitle', { title: bookMindMap?.title })}</span></>
+                  <><Network className="h-5 w-5 text-muted-foreground shrink-0" /><span className="font-medium text-sm truncate">{t('results.chapterMindMapTitle', { title: bookMindMap?.title })}</span></>
                 ) : (
-                  <><Network className="h-5 w-5 text-gray-600 shrink-0" /><span className="font-medium text-sm text-gray-700 truncate">{t('results.wholeMindMapTitle', { title: bookMindMap?.title })}</span></>
+                  <><Network className="h-5 w-5 text-muted-foreground shrink-0" /><span className="font-medium text-sm truncate">{t('results.wholeMindMapTitle', { title: bookMindMap?.title })}</span></>
                 )}
               </div>
-              <p className="text-xs text-gray-500 shrink-0">
+              <p className="text-xs text-muted-foreground/80 shrink-0">
                 {t('results.author', { author: bookSummary?.author || bookMindMap?.author })} • {bookSummary ? t('results.groupCount', { count: bookSummary.groups.length }) : bookMindMap ? t('results.groupCount', { count: bookMindMap.groups.length }) : ''}
               </p>
             </div>
@@ -295,7 +295,7 @@ ${bookSummary.overallSummary}
 
                   {showCharacterRelationship && (
                     <TabsContent value="characterRelationship">
-                      <div className="bg-white rounded-lg p-6 border border-gray-200">
+                      <div className="bg-card rounded-lg p-6 border border-border">
                         <div className="flex items-center justify-between mb-4">
                           <h3 className="text-lg font-semibold">{t('results.tabs.characterRelationship')}</h3>
                           <Button
@@ -312,7 +312,7 @@ ${bookSummary.overallSummary}
                             className="w-full min-h-[400px] flex items-center justify-center"
                           />
                         ) : (
-                          <div className="text-center text-gray-500 py-8">
+                          <div className="text-center text-muted-foreground py-8">
                             {t('results.generatingCharacterRelationship')}
                           </div>
                         )}
@@ -395,7 +395,7 @@ ${bookSummary.overallSummary}
                         mindElixirOptions={mindElixirOptions}
                       />
                     ) : (
-                      <div className="text-center text-gray-500 py-8 bg-gray-50 rounded-lg">
+                      <div className="text-center text-muted-foreground py-8 bg-muted rounded-lg">
                         {t('results.generatingMindMap')}
                       </div>
                     )}
@@ -419,7 +419,7 @@ ${bookSummary.overallSummary}
                     mindElixirOptions={mindElixirOptions}
                   />
                 ) : (
-                  <div className="text-center text-gray-500 py-8 bg-gray-50 rounded-lg">
+                  <div className="text-center text-muted-foreground py-8 bg-muted rounded-lg">
                     {t('results.generatingMindMap')}
                   </div>
                 )

@@ -108,15 +108,15 @@ export function CustomPromptsPage() {
   }
 
   return (
-    <div className="flex-1 overflow-auto bg-gray-50">
+    <div className="flex-1 overflow-auto bg-muted/50">
       <div className="max-w-4xl mx-auto p-8">
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900 flex items-center gap-3">
-              <MessageSquarePlus className="h-6 w-6 text-gray-700" />
+            <h1 className="text-2xl font-semibold text-foreground flex items-center gap-3">
+              <MessageSquarePlus className="h-6 w-6 text-foreground/80" />
               {t('customPrompts.title')}
             </h1>
-            <p className="text-sm text-gray-500 mt-1">{t('customPrompts.description')}</p>
+            <p className="text-sm text-muted-foreground mt-1">{t('customPrompts.description')}</p>
           </div>
 
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -162,7 +162,7 @@ export function CustomPromptsPage() {
                     rows={8}
                     className="min-h-[200px] resize-y"
                   />
-                  <p className="text-xs text-gray-600">
+                  <p className="text-xs text-muted-foreground">
                     {t('customPrompts.promptContentDescription')}
                   </p>
                 </div>
@@ -181,18 +181,18 @@ export function CustomPromptsPage() {
         </div>
 
         <ScrollArea className="h-[calc(100vh-240px)]">
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
             {prompts.length === 0 ? (
-              <div className="text-center text-gray-500 py-12">
+              <div className="text-center text-muted-foreground py-12">
                 {t('customPrompts.noPrompts')}
               </div>
             ) : (
               <div className="divide-y divide-gray-200">
                 {prompts.map((prompt) => (
-                  <div key={prompt.id} className="p-4 hover:bg-gray-50 transition-colors">
+                  <div key={prompt.id} className="p-4 hover:bg-muted/50 transition-colors">
                     {/* 标题和操作按钮 */}
                     <div className="flex items-start justify-between mb-3">
-                      <h3 className="font-medium text-gray-900 flex-1 pr-2 truncate" title={prompt.name}>
+                      <h3 className="font-medium text-foreground flex-1 pr-2 truncate" title={prompt.name}>
                         {prompt.name}
                       </h3>
                       <div className="flex gap-1 flex-shrink-0">
@@ -228,13 +228,13 @@ export function CustomPromptsPage() {
 
                     {/* 描述 */}
                     {prompt.description && (
-                      <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                      <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
                         {prompt.description}
                       </p>
                     )}
 
                     {/* 创建时间 */}
-                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
                       <Calendar className="h-3 w-3" />
                       {formatDate(prompt.createdAt)}
                     </div>

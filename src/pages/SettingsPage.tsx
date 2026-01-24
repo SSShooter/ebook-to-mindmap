@@ -68,22 +68,22 @@ export function SettingsPage() {
   }
 
   return (
-    <div className="flex-1 overflow-hidden bg-gray-50">
+    <div className="flex-1 overflow-hidden bg-muted/50">
       <div className="max-w-4xl mx-auto p-8 h-full flex flex-col">
         <div className="mb-8 flex-shrink-0">
-          <h1 className="text-2xl font-semibold text-gray-900 flex items-center gap-3">
-            <Settings className="h-6 w-6 text-gray-700" />
+          <h1 className="text-2xl font-semibold text-foreground flex items-center gap-3">
+            <Settings className="h-6 w-6 text-foreground/80" />
             {t('config.title')}
           </h1>
-          <p className="text-sm text-gray-500 mt-1">{t('config.description')}</p>
+          <p className="text-sm text-muted-foreground mt-1">{t('config.description')}</p>
         </div>
 
         <ScrollArea className="flex-1 h-1">
           <div className="space-y-6 pr-4">
             {/* Interface Language */}
-            <div className="p-5 bg-white rounded-xl border border-gray-200">
+            <div className="p-5 bg-card rounded-xl border border-border">
               <div className="space-y-3">
-                <Label htmlFor="interface-language" className="text-sm font-medium text-gray-900">
+                <Label htmlFor="interface-language" className="text-sm font-medium text-foreground">
                   {t('config.interfaceLanguage') || 'Interface Language'}
                 </Label>
                 <Select 
@@ -98,16 +98,16 @@ export function SettingsPage() {
                     <SelectItem value="zh">中文</SelectItem>
                   </SelectContent>
                 </Select>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted-foreground">
                   {t('config.interfaceLanguageDescription') || 'Select the language for the application interface'}
                 </p>
               </div>
             </div>
 
             {/* Output Language */}
-            <div className="p-5 bg-white rounded-xl border border-gray-200">
+            <div className="p-5 bg-card rounded-xl border border-border">
               <div className="space-y-3">
-                <Label htmlFor="output-language" className="text-sm font-medium text-gray-900">
+                <Label htmlFor="output-language" className="text-sm font-medium text-foreground">
                   {t('config.outputLanguage')}
                 </Label>
                 <Select value={outputLanguage} onValueChange={(value: SupportedLanguage) => setOutputLanguage(value)}>
@@ -125,15 +125,15 @@ export function SettingsPage() {
                     <SelectItem value="ru">Русский</SelectItem>
                   </SelectContent>
                 </Select>
-                <p className="text-xs text-gray-500">{t('config.outputLanguageDescription')}</p>
+                <p className="text-xs text-muted-foreground">{t('config.outputLanguageDescription')}</p>
               </div>
             </div>
 
             {/* Processing Options */}
-            <div className="p-5 bg-white rounded-xl border border-gray-200">
+            <div className="p-5 bg-card rounded-xl border border-border">
               <div className="space-y-4">
                 <div className="space-y-3">
-                  <Label htmlFor="processing-mode" className="text-sm font-medium text-gray-900">
+                  <Label htmlFor="processing-mode" className="text-sm font-medium text-foreground">
                     {t('config.processingMode')}
                   </Label>
                   <Select value={processingMode} onValueChange={(value: 'summary' | 'mindmap' | 'combined-mindmap') => setProcessingMode(value)}>
@@ -146,11 +146,11 @@ export function SettingsPage() {
                       <SelectItem value="combined-mindmap">{t('config.combinedMindmapMode')}</SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-gray-500">{t('config.processingModeDescription')}</p>
+                  <p className="text-xs text-muted-foreground">{t('config.processingModeDescription')}</p>
                 </div>
 
                 <div className="space-y-3">
-                  <Label htmlFor="book-type" className="text-sm font-medium text-gray-900">
+                  <Label htmlFor="book-type" className="text-sm font-medium text-foreground">
                     {t('config.bookType')}
                   </Label>
                   <Select value={bookType} onValueChange={(value: 'fiction' | 'non-fiction') => setBookType(value)}>
@@ -162,7 +162,7 @@ export function SettingsPage() {
                       <SelectItem value="fiction">{t('config.novelType')}</SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted-foreground">
                     {t('config.bookTypeDescription', { type: processingMode === 'summary' ? t('config.summary') : t('config.mindmap') })}
                   </p>
                 </div>
@@ -170,12 +170,12 @@ export function SettingsPage() {
             </div>
 
             {/* Additional Options */}
-            <div className="flex items-center justify-between p-5 bg-white rounded-xl border border-gray-200">
+            <div className="flex items-center justify-between p-5 bg-card rounded-xl border border-border">
               <div className="space-y-0.5">
-                <Label htmlFor="skip-non-essential" className="text-sm font-medium text-gray-900">
+                <Label htmlFor="skip-non-essential" className="text-sm font-medium text-foreground">
                   {t('config.skipIrrelevantChapters')}
                 </Label>
-                <p className="text-xs text-gray-500">{t('config.skipIrrelevantChaptersDescription')}</p>
+                <p className="text-xs text-muted-foreground">{t('config.skipIrrelevantChaptersDescription')}</p>
               </div>
               <Switch
                 id="skip-non-essential"
@@ -184,12 +184,12 @@ export function SettingsPage() {
               />
             </div>
 
-            <div className="flex items-center justify-between p-5 bg-white rounded-xl border border-gray-200">
+            <div className="flex items-center justify-between p-5 bg-card rounded-xl border border-border">
               <div className="space-y-0.5">
-                <Label htmlFor="force-use-spine" className="text-sm font-medium text-gray-900">
+                <Label htmlFor="force-use-spine" className="text-sm font-medium text-foreground">
                   {t('config.forceUseSpine')}
                 </Label>
-                <p className="text-xs text-gray-500">{t('config.forceUseSpineDescription')}</p>
+                <p className="text-xs text-muted-foreground">{t('config.forceUseSpineDescription')}</p>
               </div>
               <Switch
                 id="force-use-spine"
@@ -198,9 +198,9 @@ export function SettingsPage() {
               />
             </div>
 
-            <div className="p-5 bg-white rounded-xl border border-gray-200">
+            <div className="p-5 bg-card rounded-xl border border-border">
               <div className="space-y-3">
-                <Label htmlFor="max-sub-chapter-depth" className="text-sm font-medium text-gray-900">
+                <Label htmlFor="max-sub-chapter-depth" className="text-sm font-medium text-foreground">
                   {t('config.recursionDepth')}
                 </Label>
                 <Select
@@ -219,7 +219,7 @@ export function SettingsPage() {
                     <SelectItem value="5">{t('config.recursion5Layers')}</SelectItem>
                   </SelectContent>
                 </Select>
-                <p className="text-xs text-gray-500">{t('config.recursionDepthDescription')}</p>
+                <p className="text-xs text-muted-foreground">{t('config.recursionDepthDescription')}</p>
               </div>
             </div>
 

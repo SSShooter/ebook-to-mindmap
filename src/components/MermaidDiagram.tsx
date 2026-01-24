@@ -149,7 +149,7 @@ export function MermaidDiagram({
               <p class="text-sm mt-2">Mermaid图表渲染出错，请检查图表语法。</p>
               <details class="mt-2">
                 <summary class="cursor-pointer text-sm">查看原始代码</summary>
-                <pre class="mt-2 text-xs bg-gray-100 p-2 rounded overflow-auto">${chart}</pre>
+                <pre class="mt-2 text-xs bg-muted p-2 rounded overflow-auto">${chart}</pre>
               </details>
             </div>
           `
@@ -162,7 +162,7 @@ export function MermaidDiagram({
 
     return (
         <div
-            className={`relative overflow-hidden border rounded-lg bg-white transition-all duration-300 ${isFullscreen ? 'flex items-center justify-center bg-white' : ''
+            className={`relative overflow-hidden border rounded-lg bg-card transition-all duration-300 ${isFullscreen ? 'flex items-center justify-center bg-card' : ''
                 }`}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
@@ -171,7 +171,7 @@ export function MermaidDiagram({
             style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
         >
             {/* 缩放控制按钮 - 左上角 */}
-            <div className="absolute top-2 left-2 flex gap-1 z-10 bg-white/80 backdrop-blur-sm rounded-md p-1 shadow-sm" onMouseDown={e => e.stopPropagation()}>
+            <div className="absolute top-2 left-2 flex gap-1 z-10 bg-card/80 backdrop-blur-sm rounded-md p-1 shadow-sm" onMouseDown={e => e.stopPropagation()}>
                 <Button
                     variant="outline"
                     size="sm"

@@ -1,7 +1,7 @@
 export function Footer() {
   return (
     <div>
-      <p className="text-gray-400 text-center py-4 text-sm">
+      <p className="text-sidebar-foreground/60 text-center py-4 text-sm">
         Mindmap powered by{' '}
         <a
           href="https://mind-elixir.com/"

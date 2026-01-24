@@ -205,15 +205,15 @@ export function ModelsPage() {
   }
 
   return (
-    <div className="flex-1 overflow-auto bg-gray-50">
+    <div className="flex-1 overflow-auto bg-muted/50">
       <div className="max-w-4xl mx-auto p-8">
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900 flex items-center gap-3">
-              <Brain className="h-6 w-6 text-gray-700" />
+            <h1 className="text-2xl font-semibold text-foreground flex items-center gap-3">
+              <Brain className="h-6 w-6 text-foreground/80" />
               {t('models.title')}
             </h1>
-            <p className="text-sm text-gray-500 mt-1">{t('models.description')}</p>
+            <p className="text-sm text-muted-foreground mt-1">{t('models.description')}</p>
           </div>
 
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -353,7 +353,7 @@ export function ModelsPage() {
                     value={formData.temperature}
                     onChange={(e) => setFormData({ ...formData, temperature: parseFloat(e.target.value) || 0.7 })}
                   />
-                  <p className="text-xs text-gray-600">{t('config.temperatureDescription')}</p>
+                  <p className="text-xs text-muted-foreground">{t('config.temperatureDescription')}</p>
                 </div>
               </div>
 
@@ -370,15 +370,15 @@ export function ModelsPage() {
         </div>
 
         <ScrollArea className="h-[calc(100vh-240px)]">
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
             {models.length === 0 ? (
-              <div className="text-center text-gray-500 py-12">
+              <div className="text-center text-muted-foreground py-12">
                 {t('models.noModels')}
               </div>
             ) : (
               <div className="divide-y divide-gray-200">
                 {models.map((model) => (
-                  <div key={model.id} className="p-4 hover:bg-gray-50 transition-colors">
+                  <div key={model.id} className="p-4 hover:bg-muted/50 transition-colors">
                     {/* 标题行 - 模型名称和默认星标 */}
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -389,11 +389,11 @@ export function ModelsPage() {
                           className="p-1 h-6 w-6 flex-shrink-0"
                         >
                           <Star
-                            className={`h-4 w-4 ${model.isDefault ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400'
+                            className={`h-4 w-4 ${model.isDefault ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground/70'
                               }`}
                           />
                         </Button>
-                        <h3 className="font-medium text-gray-900 truncate" title={model.name}>
+                        <h3 className="font-medium text-foreground truncate" title={model.name}>
                           {model.name}
                         </h3>
 
@@ -439,9 +439,9 @@ export function ModelsPage() {
 
 
                     {/* 模型ID */}
-                    <div className="text-sm text-gray-600">
-                      <span className="text-gray-500">{t('models.modelId')}: </span>
-                      <span className="font-mono text-xs bg-gray-100 px-1 rounded truncate" title={model.model}>
+                    <div className="text-sm text-muted-foreground">
+                      <span className="text-muted-foreground">{t('models.modelId')}: </span>
+                      <span className="font-mono text-xs bg-muted px-1 rounded truncate" title={model.model}>
                         {model.model}
                       </span>
                     </div>

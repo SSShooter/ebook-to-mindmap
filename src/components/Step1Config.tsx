@@ -376,7 +376,7 @@ export function Step1Config({
     return <div
       className={`m-4 relative border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${isDragging
         ? 'border-blue-500 bg-blue-50'
-        : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+        : 'border-border hover:border-border/60 hover:bg-muted/50'
         }`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -391,10 +391,10 @@ export function Step1Config({
         onChange={handleFileChange}
         className="hidden"
       />
-      <Upload className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+      <Upload className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
       <h3 className="text-lg font-semibold mb-1">{t('upload.title')}</h3>
-      <p className="text-sm text-gray-600 mb-2">{t('upload.description')}</p>
-      <p className="text-xs text-gray-500">
+      <p className="text-sm text-muted-foreground mb-2">{t('upload.description')}</p>
+      <p className="text-xs text-muted-foreground/80">
         {t('upload.dragDropHint')}
       </p>
     </div>
@@ -411,13 +411,13 @@ export function Step1Config({
       />
 
       {/* 顶部固定区域 */}
-      <div className="shrink-0 p-3 bg-gray-50 rounded-lg">
+      <div className="shrink-0 p-3 bg-muted rounded-lg">
         <div className="flex items-center justify-between gap-3 ">
           <div className="flex items-center gap-2 flex-1 min-w-0">
-            <FileText className="h-4 w-4 text-gray-600 shrink-0" />
+            <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
             <div className="flex-1 flex min-w-0 items-center">
               <p className="font-medium truncate text-sm">{file.name}</p>
-              <p className="text-xs text-gray-500 shrink-0">
+              <p className="text-xs text-muted-foreground/80 shrink-0">
                 {(file.size / 1024 / 1024).toFixed(2)} MB
               </p>
             </div>
@@ -469,13 +469,13 @@ export function Step1Config({
           </div>
         </div>
         {extractedChapters && bookData && (
-          <div className="mt-3 bg-gray-50 rounded-lg">
+          <div className="mt-3 bg-muted rounded-lg">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <List className="h-4 w-4" />
                 <h3 className="font-semibold text-sm">{t('chapters.title')}</h3>
               </div>
-              <p className="text-xs text-gray-600">
+              <p className="text-xs text-muted-foreground">
                 {t('chapters.totalChapters', { count: extractedChapters.length })} • {t('chapters.selectedChapters', { count: selectedChapters.size })}
               </p>
             </div>
@@ -503,7 +503,7 @@ export function Step1Config({
                 </Button>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Info className="h-4 w-4 text-gray-400 cursor-help" />
+                    <Info className="h-4 w-4 text-muted-foreground cursor-help" />
                   </TooltipTrigger>
                   <TooltipContent align="end">
                     <p>{t('chapters.groupingHint')}</p>
@@ -529,7 +529,7 @@ export function Step1Config({
                       key={chapter.id}
                       className={`flex items-center gap-2 p-2 rounded-lg transition-all cursor-pointer select-none ${isBoxSelected
                         ? 'bg-blue-100 border-2 border-blue-400'
-                        : 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent'
+                        : 'bg-muted hover:bg-muted/80 border-2 border-transparent'
                         }`}
                       onClick={(e) => handleBoxSelect(chapter.id, !isBoxSelected, e.shiftKey)}
                     >
@@ -547,7 +547,7 @@ export function Step1Config({
                           {chapter.title}
                         </div>
                         <div className="flex items-center gap-1">
-                          <span className="text-xs text-gray-500 shrink-0 py-0.5">
+                          <span className="text-xs text-muted-foreground/80 shrink-0 py-0.5">
                             {getStringSizeInKB(chapter.content)} KB
                           </span>
                           {tag && (
@@ -601,7 +601,7 @@ export function Step1Config({
 
       {/* 底部固定区域 */}
       {extractedChapters && bookData && (
-        <div className="shrink-0 space-y-3 p-3 bg-gray-50 rounded-lg">
+        <div className="shrink-0 space-y-3 p-3 bg-muted rounded-lg">
           <div className='flex items-center gap-2'>
             <div className="flex items-center gap-2">
               <Label htmlFor="custom-prompt" className="text-sm font-medium">
@@ -609,7 +609,7 @@ export function Step1Config({
               </Label>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Info className="h-3.5 w-3.5 text-gray-400 cursor-help" />
+                  <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>{t('chapters.customPromptDescription')}</p>
@@ -664,7 +664,7 @@ export function Step1Config({
                 </Label>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Info className="h-3.5 w-3.5 text-gray-400 cursor-help" />
+                    <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>{t('chapters.useCustomPromptOnlyDescription')}</p>

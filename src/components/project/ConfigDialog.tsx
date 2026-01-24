@@ -94,14 +94,14 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
         <ScrollArea className="max-h-[60vh] pr-4">
           <div className="space-y-4">
             {/* Model Selection */}
-            <div className="space-y-3 p-4 bg-gray-50 rounded-lg border">
+            <div className="space-y-3 p-4 bg-muted rounded-lg border">
               <div className="flex items-center gap-2 mb-2">
                 <Brain className="h-4 w-4" />
                 <Label className="text-sm font-medium">{t('models.selectModel')}</Label>
               </div>
 
               {models.length === 0 ? (
-                <div className="text-sm text-gray-600 py-2">
+                <div className="text-sm text-muted-foreground py-2">
                   {t('models.noModelsConfigured')}
                 </div>
               ) : (
@@ -124,7 +124,7 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
               )}
 
               {selectedModel && (
-                <div className="text-xs text-gray-600 mt-2 space-y-1">
+                <div className="text-xs text-muted-foreground mt-2 space-y-1">
                   <div>
                     <span className="font-medium">{t('config.aiProvider')}:</span>{' '}
                     {selectedModel.provider}
@@ -157,7 +157,7 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
                     <SelectItem value="ru">Русский</SelectItem>
                   </SelectContent>
                 </Select>
-                <p className="text-xs text-gray-600">
+                <p className="text-xs text-muted-foreground">
                   {t('config.outputLanguageDescription')}
                 </p>
               </div>
@@ -179,7 +179,7 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
                       <SelectItem value="combined-mindmap">{t('config.combinedMindmapMode')}</SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-gray-600">
+                  <p className="text-xs text-muted-foreground">
                     {t('config.processingModeDescription')}
                   </p>
                 </div>
@@ -197,7 +197,7 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
                       <SelectItem value="fiction">{t('config.novelType')}</SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-gray-600">
+                  <p className="text-xs text-muted-foreground">
                     {t('config.bookTypeDescription', { type: processingMode === 'summary' ? t('config.summary') : t('config.mindmap') })}
                   </p>
                 </div>
@@ -210,7 +210,7 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
                 <Label htmlFor="skip-non-essential" className="text-sm font-medium">
                   {t('config.skipIrrelevantChapters')}
                 </Label>
-                <p className="text-xs text-gray-600">
+                <p className="text-xs text-muted-foreground">
                   {t('config.skipIrrelevantChaptersDescription')}
                 </p>
               </div>
@@ -227,7 +227,7 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
                 <Label htmlFor="force-use-spine" className="text-sm font-medium">
                   {t('config.forceUseSpine')}
                 </Label>
-                <p className="text-xs text-gray-600">
+                <p className="text-xs text-muted-foreground">
                   {t('config.forceUseSpineDescription')}
                 </p>
               </div>
@@ -261,7 +261,7 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
                     <SelectItem value="5">{t('config.recursion5Layers')}</SelectItem>
                   </SelectContent>
                 </Select>
-                <p className="text-xs text-gray-600">
+                <p className="text-xs text-muted-foreground">
                   {t('config.recursionDepthDescription')}
                 </p>
               </div>

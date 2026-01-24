@@ -3,6 +3,7 @@ import { Link, useLocation } from 'wouter'
 import { BookOpen, Settings, Brain, MessageSquarePlus, X, Database } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Footer } from '../Footer'
+import { ThemeToggle } from '../ThemeToggle'
 
 interface SidebarProps {
   isOpen?: boolean
@@ -43,7 +44,7 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
   ]
 
   const sidebarClasses = cn(
-    'bg-gray-900 text-white flex flex-col h-screen shrink-0 z-50 transition-transform duration-300 ease-in-out',
+    'bg-sidebar text-sidebar-foreground flex flex-col h-screen shrink-0 z-50 transition-transform duration-300 ease-in-out',
     isMobile
       ? 'fixed top-0 left-0 w-64 transform'
       : 'w-56',
@@ -69,7 +70,7 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
         />
       )}
       <div className={sidebarClasses}>
-        <div className="p-4 border-b border-gray-800">
+        <div className="p-4 border-b border-sidebar-border">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <img src="/icon.png" alt="icon" className="h-8 w-8" />
@@ -78,7 +79,7 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
             {isMobile && (
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-white transition-colors"
+                className="text-sidebar-foreground/60 hover:text-sidebar-foreground transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -100,8 +101,8 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
                     className={cn(
                       'flex items-center gap-3 px-3 py-2 rounded-lg transition-colors',
                       isActive
-                        ? 'bg-gray-800 text-white'
-                        : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                        ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                        : 'text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
                     )}
                   >
                     <Icon className="h-5 w-5" />
@@ -112,6 +113,9 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
             })}
           </ul>
         </nav>
+        <div className="p-3 border-t border-sidebar-border">
+          <ThemeToggle />
+        </div>
         <Footer />
       </div>
     </>

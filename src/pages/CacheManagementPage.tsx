@@ -299,13 +299,13 @@ export function CacheManagementPage() {
             <div
                 key={`${group.bookName}-${group.mode}`}
                 onClick={() => setSelectedGroup(group)}
-                className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm cursor-pointer transition-all"
+                className="flex items-center justify-between p-4 bg-card rounded-lg border border-border hover:border-border hover:shadow-sm cursor-pointer transition-all"
             >
                 <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <Icon className="h-5 w-5 text-gray-500 shrink-0" />
+                    <Icon className="h-5 w-5 text-muted-foreground shrink-0" />
                     <div className="min-w-0">
                         <div className="font-medium truncate">{group.displayName}</div>
-                        <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
+                        <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
                             <Badge variant={isSummary ? "default" : "secondary"}>
                                 {modeLabel}
                             </Badge>
@@ -565,7 +565,7 @@ export function CacheManagementPage() {
         return (
             <div className="h-full flex flex-col">
                 {/* 头部 */}
-                <div className="shrink-0 p-4 bg-gray-50 rounded-lg mb-3">
+                <div className="shrink-0 p-4 bg-muted/50 rounded-lg mb-3">
                     <div className="flex items-center justify-between gap-3">
                         <Button
                             variant="outline"
@@ -576,8 +576,8 @@ export function CacheManagementPage() {
                             <ArrowLeft className="h-4 w-4" />
                         </Button>
                         <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <Icon className="h-5 w-5 text-gray-600 shrink-0" />
-                            <span className="font-medium text-sm text-gray-700 truncate">{selectedGroup.displayName}</span>
+                            <Icon className="h-5 w-5 text-muted-foreground shrink-0" />
+                            <span className="font-medium text-sm text-foreground/80 truncate">{selectedGroup.displayName}</span>
                             <Badge variant={isSummary ? "default" : "secondary"}>
                                 {modeLabel}
                             </Badge>
@@ -629,7 +629,7 @@ export function CacheManagementPage() {
                         <BookMarked className="h-6 w-6" />
                         {t('cacheManagement.title')}
                     </h1>
-                    <p className="text-gray-500 text-sm mt-1">{t('cacheManagement.description')}</p>
+                    <p className="text-muted-foreground text-sm mt-1">{t('cacheManagement.description')}</p>
                 </div>
             )}
 
@@ -637,12 +637,12 @@ export function CacheManagementPage() {
             <div className="flex-1 min-h-0">
                 {loading ? (
                     <div className="flex items-center justify-center py-16">
-                        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+                        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground/70" />
                     </div>
                 ) : selectedGroup ? (
                     renderDetail()
                 ) : bookModeGroups.length === 0 ? (
-                    <div className="text-center text-gray-500 py-16">
+                    <div className="text-center text-muted-foreground py-16">
                         {t('cacheManagement.noCache')}
                     </div>
                 ) : (

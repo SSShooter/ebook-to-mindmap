@@ -123,16 +123,16 @@ export const MarkdownCard: React.FC<MarkdownCardProps> = ({
       {!isCollapsed && (
         <CardContent>
           {isLoading && !markdownContent && !reasoning ? (
-            <div className="text-center text-gray-500 py-8">
+            <div className="text-center text-muted-foreground py-8">
               <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
               <p>{t('common.generatingContent')}</p>
             </div>
           ) : (
-            <div className="text-gray-700 leading-relaxed prose prose-sm max-w-none">
+            <div className="leading-relaxed prose prose-sm max-w-none dark:prose-invert">
               {reasoning && !markdownContent && (
-                <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200 text-sm text-gray-600">
+                <div className="mb-4 p-4 bg-muted rounded-lg border border-border text-sm text-muted-foreground">
                   <div className="font-medium mb-2 flex items-center gap-2">
-                    <span className="text-xs uppercase tracking-wider text-gray-400">{t('common.reasoning')}</span>
+                    <span className="text-xs uppercase tracking-wider text-muted-foreground/60">{t('common.reasoning')}</span>
                   </div>
                   <div className="whitespace-pre-wrap font-mono text-xs">{reasoning}</div>
                 </div>
@@ -142,7 +142,7 @@ export const MarkdownCard: React.FC<MarkdownCardProps> = ({
               </ReactMarkdown>
               {isLoading && (
                 <div className="flex justify-center py-4">
-                  <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                 </div>
               )}
             </div>

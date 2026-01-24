@@ -140,7 +140,7 @@ export const MindMapCard: React.FC<MindMapCardProps> = ({
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className="text-center text-gray-500 py-8">
+          <div className="text-center text-muted-foreground py-8">
             <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
             <p>{t("common.generatingMindMap")}</p>
           </div>
