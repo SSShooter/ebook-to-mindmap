@@ -7,9 +7,8 @@ import { ViewContentDialog } from "./ViewContentDialog";
 import { DownloadMindMapButton } from "./DownloadMindMapButton";
 // import MindElixirReact from "./project/MindElixirReact";
 import type { MindElixirData, MindElixirInstance, Options } from "mind-elixir";
-import type { MindElixirReactRef } from "./project/MindElixirReact";
 import { useTranslation } from "react-i18next";
-import { MindMap, MindMapControls } from "./ui/mindmap";
+import { MindMap, MindMapControls, type MindMapRef } from "./ui/mindmap";
 
 interface MindMapCardProps {
   /** 章节ID */
@@ -55,6 +54,8 @@ interface MindMapCardProps {
   mindElixirOptions?: Partial<Options>;
   /** 是否为加载状态 */
   isLoading?: boolean;
+  /** 思维导图方向 (0: side, 1: right, 2: left) */
+  direction?: 0 | 1 | 2;
 }
 
 export const MindMapCard: React.FC<MindMapCardProps> = ({
@@ -77,9 +78,10 @@ export const MindMapCard: React.FC<MindMapCardProps> = ({
   className = "",
   mindMapClassName = "aspect-square w-full max-w-[500px] mx-auto",
   isLoading = false,
+  direction = 1,
 }) => {
   const { t } = useTranslation();
-  const localMindElixirRef = React.useRef<MindElixirReactRef | null>(null);
+  const localMindElixirRef = React.useRef<MindMapRef | null>(null);
 
   return (
     <Card className={`gap-2 ${className}`}>
@@ -146,7 +148,13 @@ export const MindMapCard: React.FC<MindMapCardProps> = ({
           </div>
         ) : (
           <div className="border rounded-lg overflow-hidden">
-            <MindMap direction={1} className={mindMapClassName} data={mindMapData} readonly>
+            <MindMap
+              ref={localMindElixirRef}
+              direction={direction}
+              className={mindMapClassName}
+              data={mindMapData}
+              readonly
+            >
               <MindMapControls position="top-right" showExport={false} />
             </MindMap>
           </div>

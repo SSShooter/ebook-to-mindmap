@@ -310,9 +310,10 @@ export const MindMap = forwardRef<MindMapRef, MindMapProps>(function MindMap({
   const id = useId();
   
   // Expose mind instance to parent component via ref
+  // We need mindInstance as a dependency to ensure the ref is updated after async initialization
   useImperativeHandle(ref, () => ({
     instance: mindRef.current,
-  }), []);
+  }));
   
   // Store resolvedTheme in a ref for use in effects without triggering re-runs
   const resolvedThemeRef = useRef(resolvedTheme);

@@ -417,6 +417,7 @@ ${bookSummary.overallSummary}
                     showCopyButton={false}
                     mindMapClassName="w-full h-[600px] mx-auto"
                     mindElixirOptions={mindElixirOptions}
+                    direction={2}
                   />
                 ) : (
                   <div className="text-center text-muted-foreground py-8 bg-muted rounded-lg">
