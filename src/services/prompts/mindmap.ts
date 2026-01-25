@@ -40,7 +40,7 @@ export interface Summary {
 - 适当添加 Summary，不要添加多余的 Summary
 - 最后添加一个金句节点记录几句本章金句
 - 适当添加表达该节点内涵的 emoji
-- 确保JSON格式正确，不要返回任何JSON以外的内容
+- 输出应直接以 { 开始，以 } 结束
 `
 
   return userPrompt
@@ -101,6 +101,7 @@ export interface Arrow {
 - **直接的父子关系不需要使用 Arrow 链接**
 - 只能添加 6 条以下 Arrow，请对最关键的节点关系进行链接
 - 确保JSON格式正确，不要返回任何JSON以外的内容
+- 输出应直接以 { 开始，以 } 结束
 `
 
   return userPrompt
