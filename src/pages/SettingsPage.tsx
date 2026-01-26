@@ -8,9 +8,11 @@ import { Settings, Download, Upload } from 'lucide-react'
 import { toast } from 'sonner'
 import { useConfigStore, useProcessingOptions } from '../stores/configStore'
 import type { SupportedLanguage } from '../services/prompts/utils'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export function SettingsPage() {
   const { t, i18n } = useTranslation()
+  const { theme, setTheme } = useTheme()
   const processingOptions = useProcessingOptions()
   const {
     setProcessingMode,
@@ -100,6 +102,31 @@ export function SettingsPage() {
                 </Select>
                 <p className="text-xs text-muted-foreground">
                   {t('config.interfaceLanguageDescription') || 'Select the language for the application interface'}
+                </p>
+              </div>
+            </div>
+
+            {/* Theme Selection */}
+            <div className="p-5 bg-card rounded-xl border border-border">
+              <div className="space-y-3">
+                <Label htmlFor="theme" className="text-sm font-medium text-foreground">
+                  {t('theme.title', { defaultValue: '主题' })}
+                </Label>
+                <Select 
+                  value={theme} 
+                  onValueChange={(value: 'light' | 'dark' | 'system') => setTheme(value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('theme.select', { defaultValue: '选择主题' })} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="light">{t('theme.light', { defaultValue: '浅色主题' })}</SelectItem>
+                    <SelectItem value="dark">{t('theme.dark', { defaultValue: '深色主题' })}</SelectItem>
+                    <SelectItem value="system">{t('theme.system', { defaultValue: '跟随系统' })}</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  {t('theme.description', { defaultValue: '选择应用的主题外观' })}
                 </p>
               </div>
             </div>

@@ -193,6 +193,15 @@
     "exportSuccess": "配置导出成功",
     "importError": "导入配置文件失败,请检查文件格式"
   },
+  "theme": {
+    "title": "主题",
+    "select": "选择主题",
+    "light": "浅色主题",
+    "dark": "深色主题",
+    "system": "跟随系统",
+    "description": "选择应用的主题外观",
+    "clickToChange": "点击切换主题"
+  },
   "download": {
     "title": "下载思维导图",
     "downloadAs": "下载",

@@ -3,7 +3,6 @@ import { Link, useLocation } from 'wouter'
 import { BookOpen, Settings, Brain, MessageSquarePlus, X, Database } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Footer } from '../Footer'
-import { ThemeToggle } from '../ThemeToggle'
 
 interface SidebarProps {
   isOpen?: boolean
@@ -113,9 +112,6 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
             })}
           </ul>
         </nav>
-        <div className="p-3">
-          <ThemeToggle />
-        </div>
         <Footer />
       </div>
     </>

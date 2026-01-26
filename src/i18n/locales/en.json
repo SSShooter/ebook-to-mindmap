@@ -228,6 +228,15 @@
     "exportSuccess": "Configuration exported successfully",
     "importError": "Failed to import configuration file, please check the file format"
   },
+  "theme": {
+    "title": "Theme",
+    "select": "Select Theme",
+    "light": "Light Theme",
+    "dark": "Dark Theme",
+    "system": "Follow System",
+    "description": "Select the theme appearance for the application",
+    "clickToChange": "Click to change theme"
+  },
   "download": {
     "title": "Download Mind Map",
     "downloadAllMarkdown": "Download Complete Markdown",
