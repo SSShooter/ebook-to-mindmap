@@ -126,47 +126,49 @@ export function CustomPromptsPage() {
                 {t('customPrompts.addPrompt')}
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-2xl max-h-[90vh]">
               <DialogHeader>
                 <DialogTitle>
                   {editingPrompt ? t('customPrompts.editPrompt') : t('customPrompts.addPrompt')}
                 </DialogTitle>
               </DialogHeader>
 
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="prompt-name">{t('customPrompts.promptName')}</Label>
-                  <Input
-                    id="prompt-name"
-                    placeholder={t('customPrompts.promptNamePlaceholder')}
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  />
+              <ScrollArea className="max-h-[calc(90vh-180px)] pr-4">
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="prompt-name">{t('customPrompts.promptName')}</Label>
+                    <Input
+                      id="prompt-name"
+                      placeholder={t('customPrompts.promptNamePlaceholder')}
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="prompt-description">{t('customPrompts.promptDescription')}</Label>
+                    <Input
+                      id="prompt-description"
+                      placeholder={t('customPrompts.promptDescriptionPlaceholder')}
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="prompt-content">{t('customPrompts.promptContent')}</Label>
+                    <Textarea
+                      id="prompt-content"
+                      placeholder={t('customPrompts.promptContentPlaceholder')}
+                      value={formData.content}
+                      onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                      rows={8}
+                      className="min-h-[200px] resize-y"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      {t('customPrompts.promptContentDescription')}
+                    </p>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="prompt-description">{t('customPrompts.promptDescription')}</Label>
-                  <Input
-                    id="prompt-description"
-                    placeholder={t('customPrompts.promptDescriptionPlaceholder')}
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="prompt-content">{t('customPrompts.promptContent')}</Label>
-                  <Textarea
-                    id="prompt-content"
-                    placeholder={t('customPrompts.promptContentPlaceholder')}
-                    value={formData.content}
-                    onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                    rows={8}
-                    className="min-h-[200px] resize-y"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    {t('customPrompts.promptContentDescription')}
-                  </p>
-                </div>
-              </div>
+              </ScrollArea>
 
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsDialogOpen(false)}>

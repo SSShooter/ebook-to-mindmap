@@ -415,7 +415,7 @@ export function Step1Config({
         <div className="flex items-center justify-between gap-3 ">
           <div className="flex items-center gap-2 flex-1 min-w-0">
             <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
-            <div className="flex-1 flex min-w-0 items-center">
+            <div className="flex-1 flex min-w-0 items-center gap-1">
               <p className="font-medium truncate text-sm">{file.name}</p>
               <p className="text-xs text-muted-foreground/80 shrink-0">
                 {(file.size / 1024 / 1024).toFixed(2)} MB
