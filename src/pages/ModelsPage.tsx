@@ -10,6 +10,7 @@ import { Combobox } from '@/components/ui/combobox'
 import { Brain, Plus, Pencil, Trash2, Star, ExternalLink, Copy, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
 import { useModelStore, type AIModel } from '../stores/modelStore'
+import { PROVIDER_CONFIGS } from '../types/ai'
 
 export function ModelsPage() {
   const { t } = useTranslation()
@@ -41,7 +42,7 @@ export function ModelsPage() {
     }
 
     // Only fetch for openai compatible providers
-    if (!['openai', 'ollama', '302.ai', 'gemini'].includes(provider)) {
+    if (!['openai', 'ollama', '302.ai', 'gemini', 'openrouter'].includes(provider)) {
       setAvailableModels([])
       return
     }
@@ -81,30 +82,37 @@ export function ModelsPage() {
     gemini: {
       apiKeyLabel: 'Gemini API Key',
       apiKeyPlaceholder: t('config.enterGeminiApiKey'),
-      modelPlaceholder: t('config.geminiModelPlaceholder'),
-      apiUrlPlaceholder: 'https://generativelanguage.googleapis.com/v1beta/openai',
-      url: 'https://aistudio.google.com/',
+      modelPlaceholder: t('config.modelPlaceholder'),
+      apiUrlPlaceholder: PROVIDER_CONFIGS.gemini.defaultApiUrl,
+      url: PROVIDER_CONFIGS.gemini.websiteUrl,
     },
     openai: {
       apiKeyLabel: 'API Token',
       apiKeyPlaceholder: t('config.enterApiToken'),
-      apiUrlPlaceholder: 'https://api.openai.com/v1',
+      apiUrlPlaceholder: PROVIDER_CONFIGS.openai.defaultApiUrl,
       modelPlaceholder: t('config.modelPlaceholder'),
-      url: 'https://platform.openai.com/',
+      url: PROVIDER_CONFIGS.openai.websiteUrl,
     },
     ollama: {
       apiKeyLabel: 'API Token',
       apiKeyPlaceholder: 'API Token',
-      apiUrlPlaceholder: 'http://localhost:11434/v1',
-      modelPlaceholder: 'llama2, mistral, codellama...',
-      url: 'https://ollama.com/',
+      apiUrlPlaceholder: PROVIDER_CONFIGS.ollama.defaultApiUrl,
+      modelPlaceholder: t('config.modelPlaceholder'),
+      url: PROVIDER_CONFIGS.ollama.websiteUrl,
     },
     '302.ai': {
       apiKeyLabel: 'API Token',
       apiKeyPlaceholder: t('config.enterApiToken'),
-      apiUrlPlaceholder: 'https://api.302.ai/v1',
+      apiUrlPlaceholder: PROVIDER_CONFIGS['302.ai'].defaultApiUrl,
       modelPlaceholder: t('config.modelPlaceholder'),
-      url: 'https://share.302.ai/BJ7iSL',
+      url: PROVIDER_CONFIGS['302.ai'].websiteUrl,
+    },
+    openrouter: {
+      apiKeyLabel: 'OpenRouter API Key',
+      apiKeyPlaceholder: t('config.enterOpenRouterApiKey'),
+      apiUrlPlaceholder: PROVIDER_CONFIGS.openrouter.defaultApiUrl,
+      modelPlaceholder: t('config.modelPlaceholder'),
+      url: PROVIDER_CONFIGS.openrouter.websiteUrl,
     },
   }
 
@@ -127,8 +135,8 @@ export function ModelsPage() {
         name: '',
         provider: 'gemini',
         apiKey: '',
-        apiUrl: 'https://generativelanguage.googleapis.com/v1beta/openai',
-        model: 'gemini-1.5-flash',
+        apiUrl: PROVIDER_CONFIGS.gemini.defaultApiUrl,
+        model: PROVIDER_CONFIGS.gemini.defaultModel,
         temperature: 0.7
       }
       setFormData(newFormData)
@@ -237,16 +245,10 @@ export function ModelsPage() {
                     <Select
                       value={formData.provider}
                       onValueChange={(value: AIModel['provider']) => {
-                        const defaultApiUrls: Record<AIModel['provider'], string> = {
-                          'gemini': 'https://generativelanguage.googleapis.com/v1beta/openai',
-                          'openai': 'https://api.openai.com/v1',
-                          'ollama': 'http://localhost:11434/v1',
-                          '302.ai': 'https://api.302.ai/v1'
-                        }
                         const newFormData = {
                           ...formData,
                           provider: value,
-                          apiUrl: defaultApiUrls[value]
+                          apiUrl: PROVIDER_CONFIGS[value].defaultApiUrl
                         }
                         setFormData(newFormData)
                         fetchAvailableModels(newFormData)
@@ -260,6 +262,7 @@ export function ModelsPage() {
                         <SelectItem value="openai">{t('config.openaiCompatible')}</SelectItem>
                         <SelectItem value="ollama">Ollama</SelectItem>
                         <SelectItem value="302.ai">302.AI</SelectItem>
+                        <SelectItem value="openrouter">OpenRouter</SelectItem>
                       </SelectContent>
                     </Select>
                     <Button variant="link" className="p-0 h-auto text-xs" asChild>
@@ -294,7 +297,7 @@ export function ModelsPage() {
                   />
                 </div>
 
-                {(formData.provider === 'openai' || formData.provider === 'ollama' || formData.provider === '302.ai' || formData.provider === 'gemini') && (
+                {(formData.provider === 'openai' || formData.provider === 'ollama' || formData.provider === '302.ai' || formData.provider === 'gemini' || formData.provider === 'openrouter') && (
                   <div className="space-y-2">
                     <Label htmlFor="api-url">{t('config.apiUrl')}</Label>
                     <Input
@@ -307,7 +310,7 @@ export function ModelsPage() {
                         setFormData(newFormData)
                         fetchAvailableModels(newFormData)
                       }}
-                      disabled={formData.provider === 'gemini' || formData.provider === '302.ai'}
+                      disabled={formData.provider === 'gemini' || formData.provider === '302.ai' || formData.provider === 'openrouter'}
                     />
                   </div>
                 )}
@@ -403,6 +406,7 @@ export function ModelsPage() {
                           {model.provider === 'openai' && t('config.openaiCompatible')}
                           {model.provider === 'ollama' && 'Ollama'}
                           {model.provider === '302.ai' && '302.AI'}
+                          {model.provider === 'openrouter' && 'OpenRouter'}
                         </span>
                       </div>
                       <div className="flex gap-1 flex-shrink-0">

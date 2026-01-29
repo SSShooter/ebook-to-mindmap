@@ -13,6 +13,8 @@ import {
 } from './prompts'
 import type { MindElixirData } from 'mind-elixir'
 import { getLanguageInstruction, type SupportedLanguage } from './prompts/utils'
+import type { AIConfig } from '../types/ai'
+import { PROVIDER_CONFIGS } from '../types/ai'
 
 interface Chapter {
   id: string
@@ -20,14 +22,6 @@ interface Chapter {
   content: string
   summary?: string
   reasoning?: string
-}
-
-interface AIConfig {
-  provider: 'gemini' | 'openai' | 'ollama' | '302.ai'
-  apiKey: string
-  apiUrl?: string // 用于OpenAI兼容的API地址
-  model?: string
-  temperature?: number
 }
 
 interface ModelConfig {
@@ -47,28 +41,12 @@ export class AIService {
   }
 
   private getModelConfig(config: AIConfig): ModelConfig {
-    switch (config.provider) {
-      case 'gemini':
-        return {
-          apiUrl: config.apiUrl || 'https://generativelanguage.googleapis.com/v1beta/openai',
-          apiKey: config.apiKey,
-          model: config.model || 'gemini-1.5-flash'
-        }
-      case 'openai':
-      case '302.ai':
-        return {
-          apiUrl: config.apiUrl || 'https://api.openai.com/v1',
-          apiKey: config.apiKey,
-          model: config.model || 'gpt-3.5-turbo'
-        }
-      case 'ollama':
-        return {
-          apiUrl: config.apiUrl || 'http://localhost:11434/v1',
-          apiKey: config.apiKey || '',
-          model: config.model || 'llama2'
-        }
-      default:
-        throw new Error(`Unsupported provider: ${config.provider}`)
+    const providerConfig = PROVIDER_CONFIGS[config.provider]
+    
+    return {
+      apiUrl: config.apiUrl || providerConfig.defaultApiUrl,
+      apiKey: config.apiKey || '',
+      model: config.model || providerConfig.defaultModel
     }
   }
 

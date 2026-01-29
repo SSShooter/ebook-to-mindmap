@@ -1,10 +1,11 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import type { AIProvider } from '../types/ai'
 
 export interface AIModel {
   id: string
   name: string
-  provider: 'gemini' | 'openai' | 'ollama' | '302.ai'
+  provider: AIProvider
   apiKey: string
   apiUrl: string
   model: string

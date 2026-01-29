@@ -1,15 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { SupportedLanguage } from '../services/prompts/utils'
-
-// AI配置接口
-interface AIConfig {
-  provider: 'gemini' | 'openai' | 'ollama' | '302.ai'
-  apiKey: string
-  apiUrl: string
-  model: string
-  temperature: number
-}
+import type { AIProvider, AIConfig } from '../types/ai'
 
 // 处理选项接口
 interface ProcessingOptions {
@@ -26,7 +18,7 @@ interface ProcessingOptions {
 interface ConfigState {
   // AI配置
   aiConfig: AIConfig
-  setAiProvider: (provider: 'gemini' | 'openai' | 'ollama' | '302.ai') => void
+  setAiProvider: (provider: AIProvider) => void
   setApiKey: (apiKey: string) => void
   setApiUrl: (apiUrl: string) => void
   setModel: (model: string) => void

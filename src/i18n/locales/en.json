@@ -181,10 +181,10 @@
     "openaiCompatible": "OpenAI Compatible",
     "enterGeminiApiKey": "Enter your Gemini API Key",
     "enterApiToken": "Enter your API Token",
+    "enterOpenRouterApiKey": "Enter your OpenRouter API Key",
     "apiUrl": "API URL",
     "modelName": "Model Name (Optional)",
     "modelPlaceholder": "gpt-3.5-turbo, gpt-4, etc.",
-    "geminiModelPlaceholder": "gemini-1.5-flash, gemini-1.5-pro, etc.",
     "temperature": "Temperature (Optional)",
     "temperatureDescription": "Controls AI response randomness, range 0-2, higher values are more random, recommended 0.7",
     "processingMode": "Processing Mode",
@@ -292,7 +292,10 @@
     "cannotDeleteLast": "Cannot delete the last model",
     "selectModel": "Select Model for This Request",
     "noModelsConfigured": "No models configured. Please go to Model Management to add models first.",
-    "selectModelPlaceholder": "Select a model"
+    "selectModelPlaceholder": "Select a model",
+    "fetchModelsFailed": "Failed to fetch models",
+    "searchModels": "Search models...",
+    "refreshModels": "Refresh models"
   },
   "customPrompts": {
     "title": "Custom Prompts",
