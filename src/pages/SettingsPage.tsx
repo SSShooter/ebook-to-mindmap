@@ -24,6 +24,12 @@ export function SettingsPage() {
 
   const { processingMode, bookType, skipNonEssentialChapters, outputLanguage, forceUseSpine } = processingOptions
 
+  // Normalize language to 'en' or 'zh' for the select component
+  const getCurrentLanguage = () => {
+    const lang = i18n.language || 'zh'
+    return lang.startsWith('zh') ? 'zh' : 'en'
+  }
+
   const handleExportConfig = () => {
     const config = {
       processingOptions
@@ -89,7 +95,7 @@ export function SettingsPage() {
                   {t('config.interfaceLanguage') || 'Interface Language'}
                 </Label>
                 <Select 
-                  value={i18n.language} 
+                  value={getCurrentLanguage()} 
                   onValueChange={(value) => i18n.changeLanguage(value)}
                 >
                   <SelectTrigger>
