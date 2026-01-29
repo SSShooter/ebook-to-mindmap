@@ -380,6 +380,7 @@ ${bookSummary.overallSummary}
                   <TabsContent value="combined" className='grid grid-cols-1'>
                     {bookMindMap.combinedMindMap ? (
                       <MindMapCard
+                        direction={2}
                         id="combined"
                         title={t('results.tabs.combinedMindMap')}
                         content=""

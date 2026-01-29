@@ -54,7 +54,6 @@ interface MindMapCardProps {
   mindElixirOptions?: Partial<Options>;
   /** 是否为加载状态 */
   isLoading?: boolean;
-  /** 思维导图方向 (0: side, 1: right, 2: left) */
   direction?: 0 | 1 | 2;
 }
 
