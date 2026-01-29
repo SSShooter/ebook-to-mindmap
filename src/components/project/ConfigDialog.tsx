@@ -94,10 +94,10 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
         <ScrollArea className="max-h-[60vh] pr-4">
           <div className="space-y-4">
             {/* Model Selection */}
-            <div className="space-y-3 p-4 bg-muted rounded-lg border">
+            <div className="space-y-3 p-5 bg-card rounded-xl border border-border">
               <div className="flex items-center gap-2 mb-2">
                 <Brain className="h-4 w-4" />
-                <Label className="text-sm font-medium">{t('models.selectModel')}</Label>
+                <Label className="text-sm font-medium text-foreground">{t('models.selectModel')}</Label>
               </div>
 
               {models.length === 0 ? (
@@ -137,9 +137,9 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
               )}
             </div>
 
-            <div className="p-3 bg-indigo-50 rounded-lg border">
-              <div className="space-y-2">
-                <Label htmlFor="output-language" className="text-sm font-medium">
+            <div className="p-5 bg-card rounded-xl border border-border">
+              <div className="space-y-3">
+                <Label htmlFor="output-language" className="text-sm font-medium text-foreground">
                   {t('config.outputLanguage')}
                 </Label>
                 <Select value={outputLanguage} onValueChange={(value: SupportedLanguage) => setOutputLanguage(value)} disabled={processing}>
@@ -163,10 +163,10 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
               </div>
             </div>
 
-            <div className="p-3 bg-purple-50 rounded-lg border">
-              <div className="space-y-3">
-                <div className="space-y-2">
-                  <Label htmlFor="processing-mode" className="text-sm font-medium">
+            <div className="p-5 bg-card rounded-xl border border-border">
+              <div className="space-y-4">
+                <div className="space-y-3">
+                  <Label htmlFor="processing-mode" className="text-sm font-medium text-foreground">
                     {t('config.processingMode')}
                   </Label>
                   <Select value={processingMode} onValueChange={(value: 'summary' | 'mindmap' | 'combined-mindmap') => setProcessingMode(value)} disabled={processing}>
@@ -184,8 +184,8 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
                   </p>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="book-type" className="text-sm font-medium">
+                <div className="space-y-3">
+                  <Label htmlFor="book-type" className="text-sm font-medium text-foreground">
                     {t('config.bookType')}
                   </Label>
                   <Select value={bookType} onValueChange={(value: 'fiction' | 'non-fiction') => setBookType(value)} disabled={processing}>
@@ -205,9 +205,9 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
             </div>
 
 
-            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border">
-              <div className="space-y-1">
-                <Label htmlFor="skip-non-essential" className="text-sm font-medium">
+            <div className="flex items-center justify-between p-5 bg-card rounded-xl border border-border">
+              <div className="space-y-0.5">
+                <Label htmlFor="skip-non-essential" className="text-sm font-medium text-foreground">
                   {t('config.skipIrrelevantChapters')}
                 </Label>
                 <p className="text-xs text-muted-foreground">
@@ -222,9 +222,9 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
               />
             </div>
 
-            <div className="flex items-center justify-between p-3 bg-cyan-50 rounded-lg border">
-              <div className="space-y-1">
-                <Label htmlFor="force-use-spine" className="text-sm font-medium">
+            <div className="flex items-center justify-between p-5 bg-card rounded-xl border border-border">
+              <div className="space-y-0.5">
+                <Label htmlFor="force-use-spine" className="text-sm font-medium text-foreground">
                   {t('config.forceUseSpine')}
                 </Label>
                 <p className="text-xs text-muted-foreground">
@@ -239,9 +239,9 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
               />
             </div>
 
-            <div className="p-3 bg-amber-50 rounded-lg border mb-4">
-              <div className="space-y-2">
-                <Label htmlFor="max-sub-chapter-depth" className="text-sm font-medium">
+            <div className="p-5 bg-card rounded-xl border border-border">
+              <div className="space-y-3">
+                <Label htmlFor="max-sub-chapter-depth" className="text-sm font-medium text-foreground">
                   {t('config.recursionDepth')}
                 </Label>
                 <Select
