@@ -40,7 +40,8 @@ interface BookMindMap {
   title: string
   author: string
   groups: ChapterGroup[]
-  combinedMindMap: MindElixirData | null
+  mergedMindMap?: MindElixirData | null
+  wholeMindMap?: MindElixirData | null
 }
 
 interface Step2ResultsProps {
@@ -51,7 +52,7 @@ interface Step2ResultsProps {
   error: string | null
   bookSummary: BookSummary | null
   bookMindMap: BookMindMap | null
-  processingMode: 'summary' | 'mindmap' | 'combined-mindmap'
+  processingMode: 'summary' | 'mindmap' | 'whole-mindmap'
   extractedChapters: ChapterData[] | null
   onBackToConfig: () => void
   onClearChapterCache: (chapterId: string) => void
@@ -378,13 +379,13 @@ ${bookSummary.overallSummary}
                   </TabsContent>
 
                   <TabsContent value="combined" className='grid grid-cols-1'>
-                    {bookMindMap.combinedMindMap ? (
+                    {bookMindMap.mergedMindMap ? (
                       <MindMapCard
                         direction={2}
                         id="combined"
                         title={t('results.tabs.combinedMindMap')}
                         content=""
-                        mindMapData={bookMindMap.combinedMindMap}
+                        mindMapData={bookMindMap.mergedMindMap}
                         index={0}
                         onOpenInMindElixir={(mindmapData) => openInMindElixir(mindmapData, t('results.combinedMindMapTitle', { title: bookMindMap.title }))}
                         onDownloadMindMap={downloadMindMap}
@@ -402,15 +403,15 @@ ${bookSummary.overallSummary}
                     )}
                   </TabsContent>
                 </Tabs>
-              ) : processingMode === 'combined-mindmap' && bookMindMap ? (
-                bookMindMap.combinedMindMap ? (
+              ) : processingMode === 'whole-mindmap' && bookMindMap ? (
+                bookMindMap.wholeMindMap ? (
                   <MindMapCard
                     id="whole-book"
-                    title={t('results.tabs.combinedMindMap')}
+                    title={t('results.wholeMindMapTitle', { title: bookMindMap.title })}
                     content=""
-                    mindMapData={bookMindMap.combinedMindMap}
+                    mindMapData={bookMindMap.wholeMindMap}
                     index={0}
-                    onOpenInMindElixir={(mindmapData) => openInMindElixir(mindmapData, t('results.combinedMindMapTitle', { title: bookMindMap.title }))}
+                    onOpenInMindElixir={(mindmapData) => openInMindElixir(mindmapData, t('results.wholeMindMapTitle', { title: bookMindMap.title }))}
                     onDownloadMindMap={downloadMindMap}
                     onClearCache={() => onClearSpecificCache('combined_mindmap')}
                     showClearCache={true}

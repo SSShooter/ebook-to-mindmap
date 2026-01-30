@@ -5,7 +5,7 @@ import type { AIProvider, AIConfig } from '../types/ai'
 
 // 处理选项接口
 interface ProcessingOptions {
-  processingMode: 'summary' | 'mindmap' | 'combined-mindmap'
+  processingMode: 'summary' | 'mindmap' | 'whole-mindmap'
   bookType: 'fiction' | 'non-fiction'
 
   skipNonEssentialChapters: boolean
@@ -26,7 +26,7 @@ interface ConfigState {
 
   // 处理选项
   processingOptions: ProcessingOptions
-  setProcessingMode: (mode: 'summary' | 'mindmap' | 'combined-mindmap') => void
+  setProcessingMode: (mode: 'summary' | 'mindmap' | 'whole-mindmap') => void
   setBookType: (type: 'fiction' | 'non-fiction') => void
 
   setSkipNonEssentialChapters: (enabled: boolean) => void

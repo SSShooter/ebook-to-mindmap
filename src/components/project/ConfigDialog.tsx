@@ -169,14 +169,14 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
                   <Label htmlFor="processing-mode" className="text-sm font-medium text-foreground">
                     {t('config.processingMode')}
                   </Label>
-                  <Select value={processingMode} onValueChange={(value: 'summary' | 'mindmap' | 'combined-mindmap') => setProcessingMode(value)} disabled={processing}>
+                  <Select value={processingMode} onValueChange={(value: 'summary' | 'mindmap' | 'whole-mindmap') => setProcessingMode(value)} disabled={processing}>
                     <SelectTrigger>
                       <SelectValue placeholder={t('config.selectProcessingMode')} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="summary">{t('config.summaryMode')}</SelectItem>
                       <SelectItem value="mindmap">{t('config.mindmapMode')}</SelectItem>
-                      <SelectItem value="combined-mindmap">{t('config.combinedMindmapMode')}</SelectItem>
+                      <SelectItem value="whole-mindmap">{t('config.combinedMindmapMode')}</SelectItem>
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground">

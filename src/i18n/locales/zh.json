@@ -101,7 +101,7 @@
     "modes": {
       "summary": "文字总结",
       "mindmap": "章节思维导图",
-      "combined-mindmap": "整书思维导图"
+      "whole-mindmap": "整书思维导图"
     }
   },
   "common": {

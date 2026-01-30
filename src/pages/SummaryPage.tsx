@@ -30,7 +30,8 @@ interface BookMindMap {
   title: string
   author: string
   groups: ChapterGroup[]
-  combinedMindMap: MindElixirData | null
+  mergedMindMap?: MindElixirData | null
+  wholeMindMap?: MindElixirData | null
 }
 
 const cacheService = new CacheService()
@@ -192,12 +193,13 @@ export function SummaryPage() {
           characterRelationship: '',
           overallSummary: ''
         })
-      } else if (processingMode === 'mindmap' || processingMode === 'combined-mindmap') {
+      } else if (processingMode === 'mindmap' || processingMode === 'whole-mindmap') {
         setBookMindMap({
           title: bookData.title,
           author: bookData.author,
           groups: [],
-          combinedMindMap: null
+          mergedMindMap: null,
+          wholeMindMap: null
         })
       }
 
@@ -281,7 +283,7 @@ export function SummaryPage() {
             ...prevMindMap!,
             groups: [...processedGroups]
           }))
-        } else if (processingMode === 'combined-mindmap') {
+        } else if (processingMode === 'whole-mindmap') {
           const processedGroup: ChapterGroup = {
             groupId: group.groupId,
             tag: group.tag,
@@ -388,7 +390,7 @@ export function SummaryPage() {
         }))
       } else if (processingMode === 'mindmap') {
         setCurrentStep(t('progress.mergingMindMaps'))
-        const combinedMindMap = await bookProcessingService.mergeMindMaps(
+        const mergedMindMap = await bookProcessingService.mergeMindMaps(
           file.name,
           bookData.title,
           processedChapters
@@ -397,11 +399,11 @@ export function SummaryPage() {
         setProgress(85)
         setBookMindMap(prevMindMap => ({
           ...prevMindMap!,
-          combinedMindMap
+          mergedMindMap
         }))
-      } else if (processingMode === 'combined-mindmap') {
+      } else if (processingMode === 'whole-mindmap') {
         setCurrentStep(t('progress.generatingCombinedMindMap'))
-        const combinedMindMap = await bookProcessingService.generateCombinedMindMap(
+        const wholeMindMap = await bookProcessingService.generateCombinedMindMap(
           file.name,
           bookData.title,
           processedChapters,
@@ -411,7 +413,7 @@ export function SummaryPage() {
 
         setBookMindMap(prevMindMap => ({
           ...prevMindMap!,
-          combinedMindMap
+          wholeMindMap
         }))
         setProgress(85)
       }

@@ -101,7 +101,7 @@
     "modes": {
       "summary": "text summary",
       "mindmap": "chapter mind map",
-      "combined-mindmap": "complete mind map"
+      "whole-mindmap": "whole book mind map"
     }
   },
   "mindElixir": {

@@ -121,7 +121,7 @@ export function Step1Config({
   // 清除整本书缓存的函数
   const clearBookCache = useCallback(async () => {
     if (!file) return
-    const mode = processingMode === 'combined-mindmap' ? 'combined_mindmap' : processingMode as 'summary' | 'mindmap'
+    const mode = processingMode === 'whole-mindmap' ? 'combined_mindmap' : processingMode as 'summary' | 'mindmap'
     const deletedCount = await cacheService.clearBookCache(file.name, mode)
     const modeKey = t(`cache.modes.${processingMode}`)
     if (deletedCount > 0) {
@@ -654,7 +654,7 @@ export function Step1Config({
                       cacheService.setUseCustomOnly(file.name, newValue).catch(console.error)
                     }
                   }}
-                  disabled={processing || extractingChapters || processingMode === 'mindmap' || processingMode === 'combined-mindmap'}
+                  disabled={processing || extractingChapters || processingMode === 'mindmap' || processingMode === 'whole-mindmap'}
                 />
                 <Label
                   htmlFor="use-custom-only"
