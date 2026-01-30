@@ -2,7 +2,7 @@ import type { ChapterData } from './epubProcessor'
 import type { AIService } from './aiService'
 import type { CacheService } from './cacheService'
 import type { SupportedLanguage } from './prompts/utils'
-import type { MindElixirData } from 'mind-elixir'
+import type { MindElixirData, NodeObj } from 'mind-elixir'
 import type { Summary } from 'node_modules/mind-elixir/dist/types/summary'
 
 /**
@@ -383,24 +383,50 @@ export class BookProcessingService {
     if (!combinedMindMap) {
       console.log('🔄 [DEBUG] 缓存未命中，开始合并章节思维导图')
 
+      const processedChaptersNodes: NodeObj[] = []
+      let processedSummaries: Summary[] = []
+
+      chapters.forEach((chapter) => {
+        if (!chapter.mindMap?.nodeData) return
+
+        // Generate prefix using hashString of chapter id
+        // 使用chapter.id作为prefix的基础
+        const prefix = hashString(chapter.id) + '-'
+
+        // 递归处理节点ID
+        const processNode = (node: NodeObj): NodeObj => {
+          const newNode = { ...node, id: prefix + node.id }
+          if (newNode.children && newNode.children.length > 0) {
+            newNode.children = newNode.children.map(processNode)
+          }
+          return newNode
+        }
+
+        const newRoot = processNode(chapter.mindMap.nodeData)
+        processedChaptersNodes.push(newRoot)
+
+        // 处理summaries
+        if (chapter.mindMap.summaries) {
+          const newSummaries = chapter.mindMap.summaries.map(s => ({
+            ...s,
+            id: prefix + s.id,
+            parent: prefix + s.parent
+          }))
+          processedSummaries = processedSummaries.concat(newSummaries)
+        }
+      })
+
       const rootNode = {
         topic: bookTitle,
         id: '0',
         tags: ['全书'],
-        children: chapters.map((chapter, index) => ({
-          topic: chapter.title,
-          id: `chapter_${index + 1}`,
-          children: chapter.mindMap?.nodeData?.children || []
-        }))
+        children: processedChaptersNodes
       }
 
       combinedMindMap = {
         nodeData: rootNode,
         arrows: [],
-        summaries: chapters.reduce(
-          (acc, chapter) => acc.concat(chapter.mindMap?.summaries || []),
-          [] as Summary[]
-        )
+        summaries: processedSummaries
       }
 
       await this.cacheService.setCache(fileName, 'merged_mindmap', combinedMindMap)
