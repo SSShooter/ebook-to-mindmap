@@ -9,11 +9,12 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu'
 import type { MindMapRef } from './ui/mindmap'
+import type { MindElixirInstance } from 'mind-elixir'
 
 interface DownloadMindMapButtonProps {
   mindElixirRef: React.RefObject<MindMapRef | null> | (() => MindMapRef | null | undefined)
   title: string
-  downloadMindMap: (instance: any, title: string, format: string) => void
+  downloadMindMap: (instance: MindElixirInstance, title: string, format: string) => void
 }
 
 
