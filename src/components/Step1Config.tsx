@@ -528,7 +528,7 @@ export function Step1Config({
                     <div
                       key={chapter.id}
                       className={`flex items-center gap-2 p-2 rounded-lg transition-all cursor-pointer select-none ${isBoxSelected
-                        ? 'bg-blue-100 border-2 border-blue-400'
+                        ? 'bg-blue-100 dark:bg-blue-900/30 border-2 border-blue-400 dark:border-blue-600'
                         : 'bg-muted hover:bg-muted/80 border-2 border-transparent'
                         }`}
                       onClick={(e) => handleBoxSelect(chapter.id, !isBoxSelected, e.shiftKey)}
@@ -552,7 +552,7 @@ export function Step1Config({
                           </span>
                           {tag && (
                             <span
-                              className="flex items-center gap-0.5 px-1.5 py-0.5 bg-blue-100 text-blue-700 text-xs rounded overflow-hidden"
+                              className="flex items-center gap-0.5 px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-xs rounded overflow-hidden"
                               onClick={(e) => {
                                 e.preventDefault()
                                 e.stopPropagation()
@@ -562,7 +562,7 @@ export function Step1Config({
                                 {tag}
                               </span>
                               <X
-                                className="h-2.5 w-2.5 shrink-0 cursor-pointer hover:text-blue-900"
+                                className="h-2.5 w-2.5 shrink-0 cursor-pointer hover:text-blue-900 dark:hover:text-blue-100"
                                 onClick={(e) => {
                                   e.preventDefault()
                                   e.stopPropagation()
