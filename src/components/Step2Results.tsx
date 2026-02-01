@@ -362,7 +362,6 @@ ${bookSummary.overallSummary}
                           content={groupContent}
                           mindMapData={group.mindMap || { nodeData: { topic: '', id: '', children: [] } }}
                           index={index}
-                          showCopyButton={false}
                           onClearCache={onClearChapterCache}
                           onOpenInMindElixir={openInMindElixir}
                           onDownloadMindMap={downloadMindMap}
@@ -392,7 +391,6 @@ ${bookSummary.overallSummary}
                         onClearCache={() => onClearSpecificCache('merged_mindmap')}
                         showClearCache={true}
                         showViewContent={false}
-                        showCopyButton={false}
                         mindMapClassName="w-full h-[600px] mx-auto"
                         mindElixirOptions={mindElixirOptions}
                       />
@@ -416,7 +414,6 @@ ${bookSummary.overallSummary}
                     onClearCache={() => onClearSpecificCache('combined_mindmap')}
                     showClearCache={true}
                     showViewContent={false}
-                    showCopyButton={false}
                     mindMapClassName="w-full h-[600px] mx-auto"
                     mindElixirOptions={mindElixirOptions}
                     direction={2}

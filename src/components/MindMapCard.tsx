@@ -2,7 +2,6 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trash2, ExternalLink, BookOpen, Loader2 } from "lucide-react";
-import { CopyButton } from "@/components/ui/copy-button";
 import { ViewContentDialog } from "./ViewContentDialog";
 import { DownloadMindMapButton } from "./DownloadMindMapButton";
 // import MindElixirReact from "./project/MindElixirReact";
@@ -70,7 +69,6 @@ export const MindMapCard: React.FC<MindMapCardProps> = ({
   onDownloadMindMap,
   showClearCache = true,
   showViewContent = true,
-  showCopyButton = true,
   showOpenInMindElixir = true,
   showDownloadButton = true,
   showReadButton = true,
@@ -98,13 +96,6 @@ export const MindMapCard: React.FC<MindMapCardProps> = ({
                 >
                   <ExternalLink className="h-4 w-4 mr-1" />
                 </Button>
-              )}
-              {showCopyButton && (
-                <CopyButton
-                  content={content}
-                  successMessage={t("common.copiedToClipboard")}
-                  title={t("common.copyChapterContent")}
-                />
               )}
               {showClearCache && onClearCache && (
                 <Button
