@@ -5,7 +5,12 @@ import { Trash2, ExternalLink, BookOpen, Loader2 } from 'lucide-react'
 import { ViewContentDialog } from './ViewContentDialog'
 import { DownloadMindMapButton } from './DownloadMindMapButton'
 // import MindElixirReact from "./project/MindElixirReact";
-import type { MindElixirData, MindElixirInstance, Options } from 'mind-elixir'
+import type {
+  MindElixirData,
+  MindElixirInstance,
+  NodeObj,
+  Options,
+} from 'mind-elixir'
 import { useTranslation } from 'react-i18next'
 import { MindMap, MindMapControls, type MindMapRef } from './ui/mindmap'
 
@@ -52,6 +57,22 @@ interface MindMapCardProps {
   /** 是否为加载状态 */
   isLoading?: boolean
   direction?: 0 | 1 | 2
+  /** 是否自动滚动到最后添加的节点（用于流式更新） */
+  autoScrollToLast?: boolean
+}
+
+// Helper function to find the last (deepest, rightmost) node in the tree
+function findLastNode(node: NodeObj): NodeObj | null {
+  if (!node) return null
+
+  // If node has children, traverse to the rightmost child recursively
+  if (node.children && node.children.length > 0) {
+    const lastChild = node.children[node.children.length - 1]
+    return findLastNode(lastChild)
+  }
+
+  // This is a leaf node
+  return node
 }
 
 export const MindMapCard: React.FC<MindMapCardProps> = ({
@@ -74,9 +95,34 @@ export const MindMapCard: React.FC<MindMapCardProps> = ({
   mindMapClassName = 'aspect-square w-full max-w-[500px] mx-auto',
   isLoading = false,
   direction = 1,
+  autoScrollToLast = true,
 }) => {
   const { t } = useTranslation()
   const localMindElixirRef = React.useRef<MindMapRef | null>(null)
+
+  // Auto-scroll to last node when mindMapData changes (for streaming updates)
+  React.useEffect(() => {
+    if (
+      autoScrollToLast &&
+      mindMapData?.nodeData &&
+      localMindElixirRef.current?.instance
+    ) {
+      // Use setTimeout to ensure DOM has updated after MindMap refresh
+      const timer = setTimeout(() => {
+        const lastNode = findLastNode(mindMapData.nodeData)
+        if (lastNode?.id && localMindElixirRef.current?.instance) {
+          const nodeEle = localMindElixirRef.current.instance.findEle(
+            lastNode.id
+          )
+          if (nodeEle) {
+            localMindElixirRef.current.instance.scrollIntoView(nodeEle)
+          }
+        }
+      }, 100)
+
+      return () => clearTimeout(timer)
+    }
+  }, [mindMapData, autoScrollToLast])
 
   return (
     <Card className={`gap-2 ${className}`}>

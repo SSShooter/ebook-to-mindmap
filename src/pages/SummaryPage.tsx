@@ -345,7 +345,27 @@ export function SummaryPage() {
               file.name,
               configStore.processingOptions.outputLanguage,
               customPrompt,
-              abortSignal
+              abortSignal,
+              (data) => {
+                setBookMindMap((prevMindMap) => {
+                  if (!prevMindMap) return null
+                  const newGroups = [...prevMindMap.groups]
+                  const targetGroupIndex = newGroups.findIndex(
+                    (g) => g.groupId === group.groupId
+                  )
+                  if (targetGroupIndex !== -1 && data.mindMap) {
+                    newGroups[targetGroupIndex] = {
+                      ...newGroups[targetGroupIndex],
+                      mindMap: data.mindMap,
+                      isLoading: false,
+                    }
+                  }
+                  return {
+                    ...prevMindMap,
+                    groups: newGroups,
+                  }
+                })
+              }
             )
 
             processedGroups.push(result.group)
@@ -483,7 +503,15 @@ export function SummaryPage() {
               bookData.title,
               processedChapters,
               customPrompt,
-              abortSignal
+              abortSignal,
+              (data) => {
+                if (data.mindMap) {
+                  setBookMindMap((prevMindMap) => ({
+                    ...prevMindMap!,
+                    wholeMindMap: data.mindMap,
+                  }))
+                }
+              }
             )
 
           setBookMindMap((prevMindMap) => ({

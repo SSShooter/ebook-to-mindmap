@@ -18,7 +18,11 @@ export {
 // 测试连接的prompt
 export const getTestConnectionPrompt = () => '请回复"连接成功"'
 
-export { getChapterMindMapPrompt, getMindMapArrowPrompt } from './mindmap'
+export {
+  getChapterMindMapPrompt,
+  getMindMapArrowPrompt,
+  getChapterMindMapStreamPrompt,
+} from './mindmap'
 
 export {
   getCharacterRelationshipPrompt,

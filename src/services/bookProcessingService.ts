@@ -218,7 +218,8 @@ export class BookProcessingService {
     fileName: string,
     outputLanguage: SupportedLanguage,
     customPrompt: string,
-    abortSignal: AbortSignal
+    abortSignal: AbortSignal,
+    onStreamUpdate?: (data: { mindMap: MindElixirData | null }) => void
   ): Promise<{ group: ChapterGroup; chapters: Chapter[] }> {
     let mindMap = await this.cacheService.getMindMap(
       fileName,
@@ -230,18 +231,46 @@ export class BookProcessingService {
       const combinedContent = group.chapters
         .map((ch) => `## ${ch.title}\n\n${ch.content}`)
         .join('\n\n')
-      mindMap = await this.aiService.generateChapterMindMap(
+
+      let lastUpdateTime = 0
+
+      const handleStreamUpdate = onStreamUpdate
+        ? (data: { plaintext: string; mindMap: MindElixirData | null }) => {
+            const now = Date.now()
+            // 节流更新：每500ms更新一次
+            if (now - lastUpdateTime >= 500 || lastUpdateTime === 0) {
+              if (data.mindMap) {
+                onStreamUpdate({ mindMap: data.mindMap })
+              }
+              lastUpdateTime = now
+            }
+          }
+        : undefined
+
+      mindMap = await this.aiService.generateChapterMindMapStream(
         combinedContent,
         outputLanguage,
         customPrompt,
-        abortSignal
+        abortSignal,
+        handleStreamUpdate
       )
+
+      // 确保最后一次更新包含完整数据
+      if (onStreamUpdate) {
+        onStreamUpdate({ mindMap })
+      }
+
       await this.cacheService.setCache(
         fileName,
         'mindmap',
         mindMap,
         group.groupId
       )
+    } else {
+      // 如果命中缓存，也通知一下
+      if (onStreamUpdate) {
+        onStreamUpdate({ mindMap })
+      }
     }
 
     if (!mindMap.nodeData) {
@@ -509,7 +538,8 @@ export class BookProcessingService {
     bookTitle: string,
     chapters: Chapter[],
     customPrompt: string,
-    abortSignal: AbortSignal
+    abortSignal: AbortSignal,
+    onStreamUpdate?: (data: { mindMap: MindElixirData | null }) => void
   ): Promise<MindElixirData> {
     let combinedMindMap = await this.cacheService.getMindMap(
       fileName,
@@ -518,12 +548,35 @@ export class BookProcessingService {
 
     if (!combinedMindMap) {
       console.log('🔄 [DEBUG] 缓存未命中，开始生成整书思维导图')
-      combinedMindMap = await this.aiService.generateCombinedMindMap(
+
+      let lastUpdateTime = 0
+
+      const handleStreamUpdate = onStreamUpdate
+        ? (data: { plaintext: string; mindMap: MindElixirData | null }) => {
+            const now = Date.now()
+            // 节流更新：每500ms更新一次
+            if (now - lastUpdateTime >= 500 || lastUpdateTime === 0) {
+              if (data.mindMap) {
+                onStreamUpdate({ mindMap: data.mindMap })
+              }
+              lastUpdateTime = now
+            }
+          }
+        : undefined
+
+      combinedMindMap = await this.aiService.generateCombinedMindMapStream(
         bookTitle,
         chapters,
         customPrompt,
-        abortSignal
+        abortSignal,
+        handleStreamUpdate
       )
+
+      // 确保最后一次更新包含完整数据
+      if (onStreamUpdate) {
+        onStreamUpdate({ mindMap: combinedMindMap })
+      }
+
       await this.cacheService.setCache(
         fileName,
         'combined_mindmap',
@@ -532,6 +585,10 @@ export class BookProcessingService {
       console.log('💾 [DEBUG] 整书思维导图已缓存')
     } else {
       console.log('✅ [DEBUG] 使用缓存的整书思维导图')
+      // 如果命中缓存，也通知一下
+      if (onStreamUpdate) {
+        onStreamUpdate({ mindMap: combinedMindMap })
+      }
     }
 
     return combinedMindMap
