@@ -459,6 +459,7 @@ ${bookSummary.overallSummary}
                           title={groupTitle}
                           isLoading={group.isLoading}
                           content={groupContent}
+                          reasoning={group.reasoning}
                           mindMapData={
                             group.mindMap || {
                               nodeData: { topic: '', id: '', children: [] },

@@ -8,6 +8,7 @@ import remarkGfm from 'remark-gfm'
 import remarkCjkFriendly from 'remark-cjk-friendly'
 import { CopyButton } from '@/components/ui/copy-button'
 import { ViewContentDialog } from './ViewContentDialog'
+import { ReasoningDisplay } from './ReasoningDisplay'
 import { useTranslation } from 'react-i18next'
 
 interface MarkdownCardProps {
@@ -127,18 +128,7 @@ export const MarkdownCard: React.FC<MarkdownCardProps> = ({
             </div>
           ) : (
             <div className="leading-relaxed prose prose-sm max-w-none dark:prose-invert">
-              {reasoning && !markdownContent && (
-                <div className="mb-4 p-4 bg-muted rounded-lg border border-border text-sm text-muted-foreground">
-                  <div className="font-medium mb-2 flex items-center gap-2">
-                    <span className="text-xs uppercase tracking-wider text-muted-foreground/60">
-                      {t('common.reasoning')}
-                    </span>
-                  </div>
-                  <div className="whitespace-pre-wrap font-mono text-xs">
-                    {reasoning}
-                  </div>
-                </div>
-              )}
+              {!markdownContent && <ReasoningDisplay reasoning={reasoning} />}
               <ReactMarkdown remarkPlugins={[remarkGfm, remarkCjkFriendly]}>
                 {markdownContent || ''}
               </ReactMarkdown>

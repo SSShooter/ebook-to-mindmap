@@ -13,6 +13,7 @@ import type {
 } from 'mind-elixir'
 import { useTranslation } from 'react-i18next'
 import { MindMap, MindMapControls, type MindMapRef } from './ui/mindmap'
+import { ReasoningDisplay } from './ReasoningDisplay'
 
 interface MindMapCardProps {
   /** 章节ID */
@@ -23,6 +24,8 @@ interface MindMapCardProps {
   content: string
   /** 思维导图数据 */
   mindMapData: MindElixirData
+  /** 思考过程内容 */
+  reasoning?: string
   /** 章节索引 */
   index: number
 
@@ -80,6 +83,7 @@ export const MindMapCard: React.FC<MindMapCardProps> = ({
   title,
   content,
   mindMapData,
+  reasoning,
   index,
 
   onClearCache,
@@ -180,6 +184,10 @@ export const MindMapCard: React.FC<MindMapCardProps> = ({
           </div>
         ) : (
           <div className="border rounded-lg overflow-hidden">
+            <ReasoningDisplay
+              reasoning={reasoning}
+              className="rounded-none border-x-0 border-t-0"
+            />
             <MindMap
               ref={localMindElixirRef}
               direction={direction}
