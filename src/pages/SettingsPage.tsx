@@ -2,7 +2,13 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Settings, Download, Upload } from 'lucide-react'
 import { toast } from 'sonner'
@@ -19,10 +25,16 @@ export function SettingsPage() {
     setBookType,
     setSkipNonEssentialChapters,
     setOutputLanguage,
-    setForceUseSpine
+    setForceUseSpine,
   } = useConfigStore()
 
-  const { processingMode, bookType, skipNonEssentialChapters, outputLanguage, forceUseSpine } = processingOptions
+  const {
+    processingMode,
+    bookType,
+    skipNonEssentialChapters,
+    outputLanguage,
+    forceUseSpine,
+  } = processingOptions
 
   // Normalize language to 'en' or 'zh' for the select component
   const getCurrentLanguage = () => {
@@ -32,7 +44,7 @@ export function SettingsPage() {
 
   const handleExportConfig = () => {
     const config = {
-      processingOptions
+      processingOptions,
     }
     const dataStr = JSON.stringify(config, null, 2)
     const dataBlob = new Blob([dataStr], { type: 'application/json' })
@@ -57,7 +69,7 @@ export function SettingsPage() {
       reader.onload = (event) => {
         try {
           const config = JSON.parse(event.target?.result as string)
-          
+
           if (!config.processingOptions) {
             toast.error(t('config.importError'))
             return
@@ -83,7 +95,9 @@ export function SettingsPage() {
             <Settings className="h-6 w-6 text-foreground/80" />
             {t('config.title')}
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">{t('config.description')}</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            {t('config.description')}
+          </p>
         </div>
 
         <ScrollArea className="flex-1 h-1">
@@ -91,15 +105,21 @@ export function SettingsPage() {
             {/* Interface Language */}
             <div className="p-5 bg-card rounded-xl border border-border">
               <div className="space-y-3">
-                <Label htmlFor="interface-language" className="text-sm font-medium text-foreground">
+                <Label
+                  htmlFor="interface-language"
+                  className="text-sm font-medium text-foreground">
                   {t('config.interfaceLanguage') || 'Interface Language'}
                 </Label>
-                <Select 
-                  value={getCurrentLanguage()} 
-                  onValueChange={(value) => i18n.changeLanguage(value)}
-                >
+                <Select
+                  value={getCurrentLanguage()}
+                  onValueChange={(value) => i18n.changeLanguage(value)}>
                   <SelectTrigger>
-                    <SelectValue placeholder={t('config.selectInterfaceLanguage') || 'Select interface language'} />
+                    <SelectValue
+                      placeholder={
+                        t('config.selectInterfaceLanguage') ||
+                        'Select interface language'
+                      }
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="en">English</SelectItem>
@@ -107,7 +127,8 @@ export function SettingsPage() {
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground">
-                  {t('config.interfaceLanguageDescription') || 'Select the language for the application interface'}
+                  {t('config.interfaceLanguageDescription') ||
+                    'Select the language for the application interface'}
                 </p>
               </div>
             </div>
@@ -115,24 +136,39 @@ export function SettingsPage() {
             {/* Theme Selection */}
             <div className="p-5 bg-card rounded-xl border border-border">
               <div className="space-y-3">
-                <Label htmlFor="theme" className="text-sm font-medium text-foreground">
+                <Label
+                  htmlFor="theme"
+                  className="text-sm font-medium text-foreground">
                   {t('theme.title', { defaultValue: '主题' })}
                 </Label>
-                <Select 
-                  value={theme} 
-                  onValueChange={(value: 'light' | 'dark' | 'system') => setTheme(value)}
-                >
+                <Select
+                  value={theme}
+                  onValueChange={(value: 'light' | 'dark' | 'system') =>
+                    setTheme(value)
+                  }>
                   <SelectTrigger>
-                    <SelectValue placeholder={t('theme.select', { defaultValue: '选择主题' })} />
+                    <SelectValue
+                      placeholder={t('theme.select', {
+                        defaultValue: '选择主题',
+                      })}
+                    />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="light">{t('theme.light', { defaultValue: '浅色主题' })}</SelectItem>
-                    <SelectItem value="dark">{t('theme.dark', { defaultValue: '深色主题' })}</SelectItem>
-                    <SelectItem value="system">{t('theme.system', { defaultValue: '跟随系统' })}</SelectItem>
+                    <SelectItem value="light">
+                      {t('theme.light', { defaultValue: '浅色主题' })}
+                    </SelectItem>
+                    <SelectItem value="dark">
+                      {t('theme.dark', { defaultValue: '深色主题' })}
+                    </SelectItem>
+                    <SelectItem value="system">
+                      {t('theme.system', { defaultValue: '跟随系统' })}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground">
-                  {t('theme.description', { defaultValue: '选择应用的主题外观' })}
+                  {t('theme.description', {
+                    defaultValue: '选择应用的主题外观',
+                  })}
                 </p>
               </div>
             </div>
@@ -140,15 +176,25 @@ export function SettingsPage() {
             {/* Output Language */}
             <div className="p-5 bg-card rounded-xl border border-border">
               <div className="space-y-3">
-                <Label htmlFor="output-language" className="text-sm font-medium text-foreground">
+                <Label
+                  htmlFor="output-language"
+                  className="text-sm font-medium text-foreground">
                   {t('config.outputLanguage')}
                 </Label>
-                <Select value={outputLanguage} onValueChange={(value: SupportedLanguage) => setOutputLanguage(value)}>
+                <Select
+                  value={outputLanguage}
+                  onValueChange={(value: SupportedLanguage) =>
+                    setOutputLanguage(value)
+                  }>
                   <SelectTrigger>
-                    <SelectValue placeholder={t('config.selectOutputLanguage')} />
+                    <SelectValue
+                      placeholder={t('config.selectOutputLanguage')}
+                    />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="auto">{t('config.outputLanguageAuto')}</SelectItem>
+                    <SelectItem value="auto">
+                      {t('config.outputLanguageAuto')}
+                    </SelectItem>
                     <SelectItem value="en">English</SelectItem>
                     <SelectItem value="zh">中文</SelectItem>
                     <SelectItem value="ja">日本語</SelectItem>
@@ -158,7 +204,9 @@ export function SettingsPage() {
                     <SelectItem value="ru">Русский</SelectItem>
                   </SelectContent>
                 </Select>
-                <p className="text-xs text-muted-foreground">{t('config.outputLanguageDescription')}</p>
+                <p className="text-xs text-muted-foreground">
+                  {t('config.outputLanguageDescription')}
+                </p>
               </div>
             </div>
 
@@ -166,37 +214,68 @@ export function SettingsPage() {
             <div className="p-5 bg-card rounded-xl border border-border">
               <div className="space-y-4">
                 <div className="space-y-3">
-                  <Label htmlFor="processing-mode" className="text-sm font-medium text-foreground">
+                  <Label
+                    htmlFor="processing-mode"
+                    className="text-sm font-medium text-foreground">
                     {t('config.processingMode')}
                   </Label>
-                  <Select value={processingMode} onValueChange={(value: 'summary' | 'mindmap' | 'whole-mindmap') => setProcessingMode(value)}>
+                  <Select
+                    value={processingMode}
+                    onValueChange={(
+                      value: 'summary' | 'mindmap' | 'whole-mindmap'
+                    ) => setProcessingMode(value)}>
                     <SelectTrigger>
-                      <SelectValue placeholder={t('config.selectProcessingMode')} />
+                      <SelectValue
+                        placeholder={t('config.selectProcessingMode')}
+                      />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="summary">{t('config.summaryMode')}</SelectItem>
-                      <SelectItem value="mindmap">{t('config.mindmapMode')}</SelectItem>
-                      <SelectItem value="whole-mindmap">{t('config.combinedMindmapMode')}</SelectItem>
+                      <SelectItem value="summary">
+                        {t('config.summaryMode')}
+                      </SelectItem>
+                      <SelectItem value="mindmap">
+                        {t('config.mindmapMode')}
+                      </SelectItem>
+                      <SelectItem value="whole-mindmap">
+                        {t('config.combinedMindmapMode')}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-muted-foreground">{t('config.processingModeDescription')}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t('config.processingModeDescription')}
+                  </p>
                 </div>
 
                 <div className="space-y-3">
-                  <Label htmlFor="book-type" className="text-sm font-medium text-foreground">
+                  <Label
+                    htmlFor="book-type"
+                    className="text-sm font-medium text-foreground">
                     {t('config.bookType')}
                   </Label>
-                  <Select value={bookType} onValueChange={(value: 'fiction' | 'non-fiction') => setBookType(value)}>
+                  <Select
+                    value={bookType}
+                    onValueChange={(value: 'fiction' | 'non-fiction') =>
+                      setBookType(value)
+                    }>
                     <SelectTrigger>
                       <SelectValue placeholder={t('config.selectBookType')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="non-fiction">{t('config.socialType')}</SelectItem>
-                      <SelectItem value="fiction">{t('config.novelType')}</SelectItem>
+                      <SelectItem value="non-fiction">
+                        {t('config.socialType')}
+                      </SelectItem>
+                      <SelectItem value="fiction">
+                        {t('config.novelType')}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground">
-                    {t('config.bookTypeDescription', { type: processingMode === 'summary' ? t('config.summary') : t('config.mindmap') })}
+                    {t('config.bookTypeDescription', {
+                      type:
+                        processingMode === 'summary'
+                          ? t('config.summary')
+                          : t('config.mindmap'),
+                    })}
                   </p>
                 </div>
               </div>
@@ -205,10 +284,14 @@ export function SettingsPage() {
             {/* Additional Options */}
             <div className="flex items-center justify-between p-5 bg-card rounded-xl border border-border">
               <div className="space-y-0.5">
-                <Label htmlFor="skip-non-essential" className="text-sm font-medium text-foreground">
+                <Label
+                  htmlFor="skip-non-essential"
+                  className="text-sm font-medium text-foreground">
                   {t('config.skipIrrelevantChapters')}
                 </Label>
-                <p className="text-xs text-muted-foreground">{t('config.skipIrrelevantChaptersDescription')}</p>
+                <p className="text-xs text-muted-foreground">
+                  {t('config.skipIrrelevantChaptersDescription')}
+                </p>
               </div>
               <Switch
                 id="skip-non-essential"
@@ -219,10 +302,14 @@ export function SettingsPage() {
 
             <div className="flex items-center justify-between p-5 bg-card rounded-xl border border-border">
               <div className="space-y-0.5">
-                <Label htmlFor="force-use-spine" className="text-sm font-medium text-foreground">
+                <Label
+                  htmlFor="force-use-spine"
+                  className="text-sm font-medium text-foreground">
                   {t('config.forceUseSpine')}
                 </Label>
-                <p className="text-xs text-muted-foreground">{t('config.forceUseSpineDescription')}</p>
+                <p className="text-xs text-muted-foreground">
+                  {t('config.forceUseSpineDescription')}
+                </p>
               </div>
               <Switch
                 id="force-use-spine"
@@ -233,26 +320,45 @@ export function SettingsPage() {
 
             <div className="p-5 bg-card rounded-xl border border-border">
               <div className="space-y-3">
-                <Label htmlFor="max-sub-chapter-depth" className="text-sm font-medium text-foreground">
+                <Label
+                  htmlFor="max-sub-chapter-depth"
+                  className="text-sm font-medium text-foreground">
                   {t('config.recursionDepth')}
                 </Label>
                 <Select
                   value={processingOptions.maxSubChapterDepth?.toString()}
-                  onValueChange={(value) => useConfigStore.getState().setMaxSubChapterDepth(parseInt(value))}
-                >
+                  onValueChange={(value) =>
+                    useConfigStore
+                      .getState()
+                      .setMaxSubChapterDepth(parseInt(value))
+                  }>
                   <SelectTrigger>
-                    <SelectValue placeholder={t('config.selectRecursionDepth')} />
+                    <SelectValue
+                      placeholder={t('config.selectRecursionDepth')}
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="0">{t('config.noRecursion')}</SelectItem>
-                    <SelectItem value="1">{t('config.recursion1Layer')}</SelectItem>
-                    <SelectItem value="2">{t('config.recursion2Layers')}</SelectItem>
-                    <SelectItem value="3">{t('config.recursion3Layers')}</SelectItem>
-                    <SelectItem value="4">{t('config.recursion4Layers')}</SelectItem>
-                    <SelectItem value="5">{t('config.recursion5Layers')}</SelectItem>
+                    <SelectItem value="1">
+                      {t('config.recursion1Layer')}
+                    </SelectItem>
+                    <SelectItem value="2">
+                      {t('config.recursion2Layers')}
+                    </SelectItem>
+                    <SelectItem value="3">
+                      {t('config.recursion3Layers')}
+                    </SelectItem>
+                    <SelectItem value="4">
+                      {t('config.recursion4Layers')}
+                    </SelectItem>
+                    <SelectItem value="5">
+                      {t('config.recursion5Layers')}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
-                <p className="text-xs text-muted-foreground">{t('config.recursionDepthDescription')}</p>
+                <p className="text-xs text-muted-foreground">
+                  {t('config.recursionDepthDescription')}
+                </p>
               </div>
             </div>
 
@@ -261,16 +367,14 @@ export function SettingsPage() {
               <Button
                 variant="outline"
                 onClick={handleImportConfig}
-                className="flex items-center gap-2"
-              >
+                className="flex items-center gap-2">
                 <Upload className="h-4 w-4" />
                 {t('config.importConfig')}
               </Button>
               <Button
                 variant="outline"
                 onClick={handleExportConfig}
-                className="flex items-center gap-2"
-              >
+                className="flex items-center gap-2">
                 <Download className="h-4 w-4" />
                 {t('config.exportConfig')}
               </Button>

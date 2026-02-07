@@ -35,7 +35,10 @@ interface ConfigState {
   setForceUseSpine: (enabled: boolean) => void
 
   // 统一导入配置
-  importConfig: (config: { aiConfig?: Partial<AIConfig>, processingOptions?: Partial<ProcessingOptions> }) => void
+  importConfig: (config: {
+    aiConfig?: Partial<AIConfig>
+    processingOptions?: Partial<ProcessingOptions>
+  }) => void
 }
 
 // 默认配置
@@ -44,7 +47,7 @@ const defaultAIConfig: AIConfig = {
   apiKey: '',
   apiUrl: 'https://api.openai.com/v1',
   model: 'gemini-1.5-flash',
-  temperature: 0.7
+  temperature: 0.7,
 }
 
 const defaultProcessingOptions: ProcessingOptions = {
@@ -54,7 +57,7 @@ const defaultProcessingOptions: ProcessingOptions = {
   skipNonEssentialChapters: true,
   maxSubChapterDepth: 0,
   outputLanguage: 'en',
-  forceUseSpine: false
+  forceUseSpine: false,
 }
 
 // 创建配置store
@@ -63,56 +66,75 @@ export const useConfigStore = create<ConfigState>()(
     (set) => ({
       // AI配置
       aiConfig: defaultAIConfig,
-      setAiProvider: (provider) => set((state) => ({
-        aiConfig: { ...state.aiConfig, provider }
-      })),
-      setApiKey: (apiKey) => set((state) => ({
-        aiConfig: { ...state.aiConfig, apiKey }
-      })),
-      setApiUrl: (apiUrl) => set((state) => ({
-        aiConfig: { ...state.aiConfig, apiUrl }
-      })),
-      setModel: (model) => set((state) => ({
-        aiConfig: { ...state.aiConfig, model }
-      })),
-      setTemperature: (temperature) => set((state) => ({
-        aiConfig: { ...state.aiConfig, temperature }
-      })),
+      setAiProvider: (provider) =>
+        set((state) => ({
+          aiConfig: { ...state.aiConfig, provider },
+        })),
+      setApiKey: (apiKey) =>
+        set((state) => ({
+          aiConfig: { ...state.aiConfig, apiKey },
+        })),
+      setApiUrl: (apiUrl) =>
+        set((state) => ({
+          aiConfig: { ...state.aiConfig, apiUrl },
+        })),
+      setModel: (model) =>
+        set((state) => ({
+          aiConfig: { ...state.aiConfig, model },
+        })),
+      setTemperature: (temperature) =>
+        set((state) => ({
+          aiConfig: { ...state.aiConfig, temperature },
+        })),
 
       // 处理选项
       processingOptions: defaultProcessingOptions,
-      setProcessingMode: (processingMode) => set((state) => ({
-        processingOptions: { ...state.processingOptions, processingMode }
-      })),
-      setBookType: (bookType) => set((state) => ({
-        processingOptions: { ...state.processingOptions, bookType }
-      })),
+      setProcessingMode: (processingMode) =>
+        set((state) => ({
+          processingOptions: { ...state.processingOptions, processingMode },
+        })),
+      setBookType: (bookType) =>
+        set((state) => ({
+          processingOptions: { ...state.processingOptions, bookType },
+        })),
 
-      setSkipNonEssentialChapters: (skipNonEssentialChapters) => set((state) => ({
-        processingOptions: { ...state.processingOptions, skipNonEssentialChapters }
-      })),
-      setMaxSubChapterDepth: (maxSubChapterDepth) => set((state) => ({
-        processingOptions: { ...state.processingOptions, maxSubChapterDepth }
-      })),
-      setOutputLanguage: (outputLanguage) => set((state) => ({
-        processingOptions: { ...state.processingOptions, outputLanguage }
-      })),
-      setForceUseSpine: (forceUseSpine) => set((state) => ({
-        processingOptions: { ...state.processingOptions, forceUseSpine }
-      })),
+      setSkipNonEssentialChapters: (skipNonEssentialChapters) =>
+        set((state) => ({
+          processingOptions: {
+            ...state.processingOptions,
+            skipNonEssentialChapters,
+          },
+        })),
+      setMaxSubChapterDepth: (maxSubChapterDepth) =>
+        set((state) => ({
+          processingOptions: { ...state.processingOptions, maxSubChapterDepth },
+        })),
+      setOutputLanguage: (outputLanguage) =>
+        set((state) => ({
+          processingOptions: { ...state.processingOptions, outputLanguage },
+        })),
+      setForceUseSpine: (forceUseSpine) =>
+        set((state) => ({
+          processingOptions: { ...state.processingOptions, forceUseSpine },
+        })),
 
       // 统一导入配置
-      importConfig: (config) => set((state) => ({
-        aiConfig: config.aiConfig ? { ...state.aiConfig, ...config.aiConfig } : state.aiConfig,
-        processingOptions: config.processingOptions ? { ...state.processingOptions, ...config.processingOptions } : state.processingOptions
-      }))
+      importConfig: (config) =>
+        set((state) => ({
+          aiConfig: config.aiConfig
+            ? { ...state.aiConfig, ...config.aiConfig }
+            : state.aiConfig,
+          processingOptions: config.processingOptions
+            ? { ...state.processingOptions, ...config.processingOptions }
+            : state.processingOptions,
+        })),
     }),
     {
       name: 'ebook-mindmap-config', // localStorage中的键名
       partialize: (state) => ({
         aiConfig: state.aiConfig,
-        processingOptions: state.processingOptions
-      })
+        processingOptions: state.processingOptions,
+      }),
     }
   )
 )
@@ -122,8 +144,19 @@ const getDefaultModelFromStorage = (): AIConfig | null => {
   if (typeof window === 'undefined') return null
 
   try {
-    const modelStore = JSON.parse(localStorage.getItem('ebook-models') || '{"state":{"models":[]}}')
-    const defaultModel = modelStore.state.models.find((m: { isDefault: boolean; provider: string; apiKey: string; apiUrl: string; model: string; temperature: number }) => m.isDefault)
+    const modelStore = JSON.parse(
+      localStorage.getItem('ebook-models') || '{"state":{"models":[]}}'
+    )
+    const defaultModel = modelStore.state.models.find(
+      (m: {
+        isDefault: boolean
+        provider: string
+        apiKey: string
+        apiUrl: string
+        model: string
+        temperature: number
+      }) => m.isDefault
+    )
 
     if (defaultModel) {
       return {
@@ -131,7 +164,7 @@ const getDefaultModelFromStorage = (): AIConfig | null => {
         apiKey: defaultModel.apiKey,
         apiUrl: defaultModel.apiUrl,
         model: defaultModel.model,
-        temperature: defaultModel.temperature
+        temperature: defaultModel.temperature,
       }
     }
   } catch (error) {
@@ -151,4 +184,5 @@ export const useAIConfig = () => {
   return defaultModel || configStoreAIConfig
 }
 
-export const useProcessingOptions = () => useConfigStore((state) => state.processingOptions)
+export const useProcessingOptions = () =>
+  useConfigStore((state) => state.processingOptions)

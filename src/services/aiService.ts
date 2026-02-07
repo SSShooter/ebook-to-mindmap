@@ -42,11 +42,11 @@ export class AIService {
 
   private getModelConfig(config: AIConfig): ModelConfig {
     const providerConfig = PROVIDER_CONFIGS[config.provider]
-    
+
     return {
       apiUrl: config.apiUrl || providerConfig.defaultApiUrl,
       apiKey: config.apiKey || '',
-      model: config.model || providerConfig.defaultModel
+      model: config.model || providerConfig.defaultModel,
     }
   }
 
@@ -65,15 +65,36 @@ export class AIService {
     onStreamUpdate?: (data: { content: string; reasoning?: string }) => void
   ): Promise<{ content: string; reasoning: string }> {
     try {
-      const prompt = bookType === 'fiction'
-        ? getFictionChapterSummaryPrompt(title, content, customPrompt, useCustomOnly)
-        : getNonFictionChapterSummaryPrompt(title, content, customPrompt, useCustomOnly)
+      const prompt =
+        bookType === 'fiction'
+          ? getFictionChapterSummaryPrompt(
+              title,
+              content,
+              customPrompt,
+              useCustomOnly
+            )
+          : getNonFictionChapterSummaryPrompt(
+              title,
+              content,
+              customPrompt,
+              useCustomOnly
+            )
 
       let result: { content: string; reasoning: string }
       if (onStreamUpdate) {
-        result = await this.generateContentStream(prompt, onStreamUpdate, outputLanguage, abortSignal)
+        result = await this.generateContentStream(
+          prompt,
+          onStreamUpdate,
+          outputLanguage,
+          abortSignal
+        )
       } else {
-        result = await this.generateContent(prompt, outputLanguage, abortSignal, false)
+        result = await this.generateContent(
+          prompt,
+          outputLanguage,
+          abortSignal,
+          false
+        )
       }
 
       if (!result.content || result.content.trim().length === 0) {
@@ -82,10 +103,12 @@ export class AIService {
 
       return {
         content: result.content.trim(),
-        reasoning: result.reasoning.trim()
+        reasoning: result.reasoning.trim(),
       }
     } catch (error) {
-      throw new Error(`${error instanceof Error ? error.message : 'Unknown error'}`)
+      throw new Error(
+        `${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 
@@ -98,17 +121,23 @@ export class AIService {
   ): Promise<string> {
     try {
       // 构建章节摘要信息
-      const chapterSummaries = chapters.map((chapter) =>
-        `${chapter.title}:\n${chapter.summary || '无总结'}`
-      ).join('\n\n')
+      const chapterSummaries = chapters
+        .map((chapter) => `${chapter.title}:\n${chapter.summary || '无总结'}`)
+        .join('\n\n')
 
-      const prompt = bookType === 'fiction'
-        ? getFictionChapterConnectionsAnalysisPrompt(chapterSummaries)
-        : getChapterConnectionsAnalysisPrompt(chapterSummaries)
+      const prompt =
+        bookType === 'fiction'
+          ? getFictionChapterConnectionsAnalysisPrompt(chapterSummaries)
+          : getChapterConnectionsAnalysisPrompt(chapterSummaries)
 
       let result: { content: string; reasoning: string }
       if (onStreamUpdate) {
-        result = await this.generateContentStream(prompt, onStreamUpdate, outputLanguage, abortSignal)
+        result = await this.generateContentStream(
+          prompt,
+          onStreamUpdate,
+          outputLanguage,
+          abortSignal
+        )
       } else {
         result = await this.generateContent(prompt, outputLanguage, abortSignal)
       }
@@ -120,7 +149,9 @@ export class AIService {
 
       return connections.trim()
     } catch (error) {
-      throw new Error(`章节关联分析失败: ${error instanceof Error ? error.message : '未知错误'}`)
+      throw new Error(
+        `章节关联分析失败: ${error instanceof Error ? error.message : '未知错误'}`
+      )
     }
   }
 
@@ -134,17 +165,26 @@ export class AIService {
   ): Promise<string> {
     try {
       // 构建简化的章节信息
-      const chapterInfo = chapters.map((chapter, index) =>
-        `第${index + 1}章：${chapter.title}，内容：${chapter.summary || '无总结'}`
-      ).join('\n')
+      const chapterInfo = chapters
+        .map(
+          (chapter, index) =>
+            `第${index + 1}章：${chapter.title}，内容：${chapter.summary || '无总结'}`
+        )
+        .join('\n')
 
-      const prompt = bookType === 'fiction'
-        ? getFictionOverallSummaryPrompt(bookTitle, chapterInfo)
-        : getOverallSummaryPrompt(bookTitle, chapterInfo)
+      const prompt =
+        bookType === 'fiction'
+          ? getFictionOverallSummaryPrompt(bookTitle, chapterInfo)
+          : getOverallSummaryPrompt(bookTitle, chapterInfo)
 
       let result: { content: string; reasoning: string }
       if (onStreamUpdate) {
-        result = await this.generateContentStream(prompt, onStreamUpdate, outputLanguage, abortSignal)
+        result = await this.generateContentStream(
+          prompt,
+          onStreamUpdate,
+          outputLanguage,
+          abortSignal
+        )
       } else {
         result = await this.generateContent(prompt, outputLanguage, abortSignal)
       }
@@ -156,7 +196,9 @@ export class AIService {
 
       return summary.trim()
     } catch (error) {
-      throw new Error(`全书总结生成失败: ${error instanceof Error ? error.message : '未知错误'}`)
+      throw new Error(
+        `全书总结生成失败: ${error instanceof Error ? error.message : '未知错误'}`
+      )
     }
   }
 
@@ -168,15 +210,21 @@ export class AIService {
   ): Promise<string> {
     try {
       // 构建章节摘要信息
-      const chapterSummaries = chapters.map((chapter) =>
-        `${chapter.title}:\n${chapter.summary || '无总结'}`
-      ).join('\n\n')
+      const chapterSummaries = chapters
+        .map((chapter) => `${chapter.title}:\n${chapter.summary || '无总结'}`)
+        .join('\n\n')
 
-      const prompt = bookType === 'fiction'
-        ? getFictionCharacterRelationshipPrompt(chapterSummaries)
-        : getCharacterRelationshipPrompt(chapterSummaries)
+      const prompt =
+        bookType === 'fiction'
+          ? getFictionCharacterRelationshipPrompt(chapterSummaries)
+          : getCharacterRelationshipPrompt(chapterSummaries)
 
-      const result = await this.generateContent(prompt, outputLanguage, abortSignal, false)
+      const result = await this.generateContent(
+        prompt,
+        outputLanguage,
+        abortSignal,
+        false
+      )
       const relationship = result.content
 
       if (!relationship || relationship.trim().length === 0) {
@@ -192,12 +240,18 @@ export class AIService {
       // 如果没有代码块，返回原始内容
       return relationship.trim()
     } catch (error) {
-      throw new Error(`人物关系图生成失败: ${error instanceof Error ? error.message : '未知错误'}`)
+      throw new Error(
+        `人物关系图生成失败: ${error instanceof Error ? error.message : '未知错误'}`
+      )
     }
   }
 
-
-  async generateChapterMindMap(content: string, outputLanguage: SupportedLanguage = 'en', customPrompt?: string, abortSignal?: AbortSignal) {
+  async generateChapterMindMap(
+    content: string,
+    outputLanguage: SupportedLanguage = 'en',
+    customPrompt?: string,
+    abortSignal?: AbortSignal
+  ) {
     try {
       const basePrompt = getChapterMindMapPrompt()
       let prompt = basePrompt + `章节内容：\n${content}`
@@ -207,33 +261,63 @@ export class AIService {
         prompt += `\n\n补充要求：${customPrompt.trim()}`
       }
 
-      const result = await this.generateContent(prompt, outputLanguage, abortSignal, true)
+      const result = await this.generateContent(
+        prompt,
+        outputLanguage,
+        abortSignal,
+        true
+      )
       const mindMapJson = result.content
 
-      return this.parseJsonResponse(mindMapJson, "思维导图") as MindElixirData
+      return this.parseJsonResponse(mindMapJson, '思维导图') as MindElixirData
     } catch (error) {
-      throw new Error(`章节思维导图生成失败: ${error instanceof Error ? error.message : '未知错误'}`)
+      throw new Error(
+        `章节思维导图生成失败: ${error instanceof Error ? error.message : '未知错误'}`
+      )
     }
   }
 
-  async generateMindMapArrows(combinedMindMapData: MindElixirData, outputLanguage: SupportedLanguage = 'en', abortSignal?: AbortSignal) {
+  async generateMindMapArrows(
+    combinedMindMapData: MindElixirData,
+    outputLanguage: SupportedLanguage = 'en',
+    abortSignal?: AbortSignal
+  ) {
     try {
       const basePrompt = getMindMapArrowPrompt()
-      const prompt = basePrompt + `\n\n当前思维导图数据：\n${JSON.stringify(combinedMindMapData, null, 2)}`
+      const prompt =
+        basePrompt +
+        `\n\n当前思维导图数据：\n${JSON.stringify(combinedMindMapData, null, 2)}`
 
-      const result = await this.generateContent(prompt, outputLanguage, abortSignal, true)
+      const result = await this.generateContent(
+        prompt,
+        outputLanguage,
+        abortSignal,
+        true
+      )
       const arrowsJson = result.content
 
-      return this.parseJsonResponse(arrowsJson, "箭头") as MindElixirData['arrows']
+      return this.parseJsonResponse(
+        arrowsJson,
+        '箭头'
+      ) as MindElixirData['arrows']
     } catch (error) {
-      throw new Error(`思维导图箭头生成失败: ${error instanceof Error ? error.message : '未知错误'}`)
+      throw new Error(
+        `思维导图箭头生成失败: ${error instanceof Error ? error.message : '未知错误'}`
+      )
     }
   }
 
-  async generateCombinedMindMap(bookTitle: string, chapters: Chapter[], customPrompt?: string, abortSignal?: AbortSignal) {
+  async generateCombinedMindMap(
+    bookTitle: string,
+    chapters: Chapter[],
+    customPrompt?: string,
+    abortSignal?: AbortSignal
+  ) {
     try {
       const basePrompt = getChapterMindMapPrompt()
-      const chaptersContent = chapters.map(item => item.content).join('\n\n ------------- \n\n')
+      const chaptersContent = chapters
+        .map((item) => item.content)
+        .join('\n\n ------------- \n\n')
       let prompt = `${basePrompt}
         请为整本书《${bookTitle}》生成一个完整的思维导图，将所有章节的内容整合在一起。
         章节内容：\n${chaptersContent}`
@@ -246,9 +330,11 @@ export class AIService {
       const result = await this.generateContent(prompt, 'en', abortSignal, true)
       const mindMapJson = result.content
 
-      return this.parseJsonResponse(mindMapJson, "思维导图") as MindElixirData
+      return this.parseJsonResponse(mindMapJson, '思维导图') as MindElixirData
     } catch (error) {
-      throw new Error(`整书思维导图生成失败: ${error instanceof Error ? error.message : '未知错误'}`)
+      throw new Error(
+        `整书思维导图生成失败: ${error instanceof Error ? error.message : '未知错误'}`
+      )
     }
   }
 
@@ -287,11 +373,11 @@ export class AIService {
     const systemPrompt = getLanguageInstruction(language)
 
     // 合并系统提示和用户提示
-    const messages: Array<{ role: 'system' | 'user', content: string }> = [
+    const messages: Array<{ role: 'system' | 'user'; content: string }> = [
       {
         role: 'user',
-        content: prompt + '\n\n' + systemPrompt
-      }
+        content: prompt + '\n\n' + systemPrompt,
+      },
     ]
 
     // 检查是否已取消
@@ -302,19 +388,19 @@ export class AIService {
     // 构建请求体，只在需要JSON格式时添加response_format
     const requestBody: {
       model: string
-      messages: Array<{ role: 'system' | 'user', content: string }>
+      messages: Array<{ role: 'system' | 'user'; content: string }>
       temperature: number
       response_format?: { type: string }
     } = {
       model: this.model.model,
       messages,
-      temperature: config.temperature || 0.7
+      temperature: config.temperature || 0.7,
     }
 
     // 只有在生成思维导图时才要求JSON格式
     if (requireJsonFormat) {
       requestBody.response_format = {
-        "type": "json_object"
+        type: 'json_object',
       }
     }
 
@@ -322,15 +408,17 @@ export class AIService {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.model.apiKey}`
+        Authorization: `Bearer ${this.model.apiKey}`,
       },
       body: JSON.stringify(requestBody),
-      signal: abortSignal
+      signal: abortSignal,
     })
 
     if (!response.ok) {
       const errorBody = await response.text()
-      throw new Error(`Error: ${response.status} ${response.statusText} - ${errorBody}`)
+      throw new Error(
+        `Error: ${response.status} ${response.statusText} - ${errorBody}`
+      )
     }
 
     const data = await response.json()
@@ -342,7 +430,7 @@ export class AIService {
 
     return {
       content: data.choices[0]?.message?.content || '',
-      reasoning: data.choices[0]?.message?.reasoning_content || ''
+      reasoning: data.choices[0]?.message?.reasoning_content || '',
     }
   }
 
@@ -357,11 +445,11 @@ export class AIService {
     const language = outputLanguage || 'en'
     const systemPrompt = getLanguageInstruction(language)
 
-    const messages: Array<{ role: 'system' | 'user', content: string }> = [
+    const messages: Array<{ role: 'system' | 'user'; content: string }> = [
       {
         role: 'user',
-        content: prompt + '\n\n' + systemPrompt
-      }
+        content: prompt + '\n\n' + systemPrompt,
+      },
     ]
 
     if (abortSignal?.aborted) {
@@ -373,20 +461,22 @@ export class AIService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.model.apiKey}`
+          Authorization: `Bearer ${this.model.apiKey}`,
         },
         body: JSON.stringify({
           model: this.model.model,
           messages,
           temperature: config.temperature || 0.7,
-          stream: true // 开启流式传输
+          stream: true, // 开启流式传输
         }),
-        signal: abortSignal
+        signal: abortSignal,
       })
 
       if (!response.ok) {
         const errorBody = await response.text()
-        throw new Error(`Error: ${response.status} ${response.statusText} - ${errorBody}`)
+        throw new Error(
+          `Error: ${response.status} ${response.statusText} - ${errorBody}`
+        )
       }
 
       if (!response.body) {
@@ -419,7 +509,8 @@ export class AIService {
               const json = JSON.parse(jsonStr)
               const delta = json.choices?.[0]?.delta
               const contentChunk = delta?.content || ''
-              const reasoningChunk = delta?.reasoning_content || delta?.reasoning || ''
+              const reasoningChunk =
+                delta?.reasoning_content || delta?.reasoning || ''
 
               if (contentChunk || reasoningChunk) {
                 fullContent += contentChunk
@@ -438,15 +529,24 @@ export class AIService {
       if (error instanceof Error && error.name === 'AbortError') {
         throw error
       }
-      throw new Error(`Stream generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      throw new Error(
+        `Stream generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 
   // 辅助方法：检查API连接
   async testConnection(): Promise<boolean> {
     try {
-      const result = await this.generateContent(getTestConnectionPrompt(), undefined, undefined, false)
-      return result.content.includes('连接成功') || result.content.includes('成功')
+      const result = await this.generateContent(
+        getTestConnectionPrompt(),
+        undefined,
+        undefined,
+        false
+      )
+      return (
+        result.content.includes('连接成功') || result.content.includes('成功')
+      )
     } catch {
       return false
     }

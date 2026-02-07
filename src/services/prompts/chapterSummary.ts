@@ -1,6 +1,11 @@
 // 章节总结相关的prompt模板
 
-export const getFictionChapterSummaryPrompt = (title: string, content: string, customPrompt?: string, useCustomOnly: boolean = false) => {
+export const getFictionChapterSummaryPrompt = (
+  title: string,
+  content: string,
+  customPrompt?: string,
+  useCustomOnly: boolean = false
+) => {
   // 固定章节内容部分
   const chapterContent = `章节标题：${title}
 
@@ -45,7 +50,12 @@ ${defaultPrompt}
 ${defaultPrompt}`
 }
 
-export const getNonFictionChapterSummaryPrompt = (title: string, content: string, customPrompt?: string, useCustomOnly: boolean = false) => {
+export const getNonFictionChapterSummaryPrompt = (
+  title: string,
+  content: string,
+  customPrompt?: string,
+  useCustomOnly: boolean = false
+) => {
   // 固定章节内容部分
   const chapterContent = `章节标题：${title}
 

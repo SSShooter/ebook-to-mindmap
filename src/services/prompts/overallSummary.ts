@@ -1,16 +1,22 @@
 // 全书总结相关的prompt模板
 
-export const getOverallSummaryPrompt = (bookTitle: string, chapterInfo: string) => {
+export const getOverallSummaryPrompt = (
+  bookTitle: string,
+  chapterInfo: string
+) => {
   const userPrompt = `书籍章节结构：
 ${chapterInfo}
 
 以上是《${bookTitle}》这本书的重点内容，请生成一个全面的总结报告，帮助读者快速掌握全书精髓。`
-  
+
   return userPrompt
 }
 
 // 专门针对小说的全书总结prompt
-export const getFictionOverallSummaryPrompt = (bookTitle: string, chapterInfo: string) => {
+export const getFictionOverallSummaryPrompt = (
+  bookTitle: string,
+  chapterInfo: string
+) => {
   const userPrompt = `小说章节结构：
 ${chapterInfo}
 
@@ -39,6 +45,6 @@ ${chapterInfo}
 - 阅读这本小说可能带来的思考和感悟
 
 请用生动的语言来总结，让读者能够感受到小说的魅力和深度。`
-  
+
   return userPrompt
 }

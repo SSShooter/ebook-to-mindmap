@@ -23,7 +23,14 @@ interface PageContent {
 }
 
 const pdfProcessor = new PdfProcessor()
-export function PdfReader({ initialChapterId, chapterIds, chapters, bookData, onClose, className }: PdfReaderProps) {
+export function PdfReader({
+  initialChapterId,
+  chapterIds,
+  chapters,
+  bookData,
+  onClose,
+  className,
+}: PdfReaderProps) {
   const { t } = useTranslation()
   const [currentIndex, setCurrentIndex] = useState(() =>
     chapterIds.indexOf(initialChapterId)
@@ -33,7 +40,7 @@ export function PdfReader({ initialChapterId, chapterIds, chapters, bookData, on
   const [isLoadingPages, setIsLoadingPages] = useState(false)
   const canvasContainerRef = useRef<HTMLDivElement>(null)
 
-  const chapter = chapters.find(ch => ch.id === chapterIds[currentIndex])!
+  const chapter = chapters.find((ch) => ch.id === chapterIds[currentIndex])!
   const hasMultipleChapters = chapterIds.length > 1
   const canGoPrevious = hasMultipleChapters && currentIndex > 0
   const canGoNext = hasMultipleChapters && currentIndex < chapterIds.length - 1
@@ -60,7 +67,10 @@ export function PdfReader({ initialChapterId, chapterIds, chapters, bookData, on
 
       setIsLoadingPages(true)
       try {
-        const pages = await pdfProcessor.getChapterPages(bookData.pdfDocument, chapter)
+        const pages = await pdfProcessor.getChapterPages(
+          bookData.pdfDocument,
+          chapter
+        )
         setChapterPages(pages)
         setCurrentPageIndex(0)
       } catch (error) {
@@ -107,7 +117,7 @@ export function PdfReader({ initialChapterId, chapterIds, chapters, bookData, on
   }
 
   return (
-    <div className={cn("w-full h-full flex flex-col", className)}>
+    <div className={cn('w-full h-full flex flex-col', className)}>
       {/* Header */}
       <div className="flex-shrink-0 p-2">
         <div className="flex items-center justify-between gap-4 mb-3">
@@ -123,12 +133,10 @@ export function PdfReader({ initialChapterId, chapterIds, chapters, bookData, on
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="h-8 w-8"
-          >
+            className="h-8 w-8">
             <X className="h-4 w-4" />
           </Button>
         </div>
-
       </div>
       <Separator className="mb-3" />
 
@@ -158,12 +166,13 @@ export function PdfReader({ initialChapterId, chapterIds, chapters, bookData, on
                       }
                     }}
                     disabled={currentPageIndex === 0 && !canGoPrevious}
-                    className="h-8 w-8"
-                  >
+                    className="h-8 w-8">
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
                   <span className="text-sm text-muted-foreground min-w-[120px] text-center">
-                    {hasMultipleChapters ? `${currentIndex + 1} / ${chapterIds.length} - ` : ''}
+                    {hasMultipleChapters
+                      ? `${currentIndex + 1} / ${chapterIds.length} - `
+                      : ''}
                     {currentPageIndex + 1} / {totalPages}
                   </span>
                   <Button
@@ -179,16 +188,12 @@ export function PdfReader({ initialChapterId, chapterIds, chapters, bookData, on
                       }
                     }}
                     disabled={currentPageIndex === totalPages - 1 && !canGoNext}
-                    className="h-8 w-8"
-                  >
+                    className="h-8 w-8">
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
 
-                <div
-                  ref={canvasContainerRef}
-                  className="w-full"
-                />
+                <div ref={canvasContainerRef} className="w-full" />
               </div>
             )}
           </div>

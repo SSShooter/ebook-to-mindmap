@@ -12,7 +12,7 @@ function hashString(str: string): string {
   let hash = 0
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i)
-    hash = ((hash << 5) - hash) + char
+    hash = (hash << 5) - hash + char
     hash = hash & hash // Convert to 32bit integer
   }
   return Math.abs(hash).toString(36)
@@ -75,17 +75,24 @@ export class BookProcessingService {
         groups.push({
           tag: null,
           chapters: [chapter],
-          groupId: chapter.title
+          groupId: chapter.title,
         })
       } else if (!processedTags.has(tag)) {
         // 第一次遇到这个tag，收集所有同tag的章节
         processedTags.add(tag)
-        const sameTagChapters = chapters.filter(ch => chapterTags.get(ch.id) === tag)
-        const groupId = hashString(sameTagChapters.map(ch => ch.id).sort().join('_'))
+        const sameTagChapters = chapters.filter(
+          (ch) => chapterTags.get(ch.id) === tag
+        )
+        const groupId = hashString(
+          sameTagChapters
+            .map((ch) => ch.id)
+            .sort()
+            .join('_')
+        )
         groups.push({
           tag,
           chapters: sameTagChapters,
-          groupId: `${tag}-${groupId}`
+          groupId: `${tag}-${groupId}`,
         })
       }
     }
@@ -106,7 +113,11 @@ export class BookProcessingService {
     abortSignal: AbortSignal,
     onStreamUpdate?: (data: { summary: string; reasoning?: string }) => void
   ): Promise<{ group: ChapterGroup; chapters: Chapter[] }> {
-    let summary = await this.cacheService.getString(fileName, 'summary', group.groupId)
+    let summary = await this.cacheService.getString(
+      fileName,
+      'summary',
+      group.groupId
+    )
     // TODO: Cache reasoning too if needed, for now we might lose reasoning on cache hit unless we cache it separately.
     // Let's assume we don't cache reasoning for now or we need to update cache service.
     // For this task, let's focus on streaming display.
@@ -115,23 +126,34 @@ export class BookProcessingService {
 
     if (!summary) {
       const combinedTitle = group.tag
-        ? `${group.tag} (${group.chapters.map(ch => ch.title).join(', ')})`
+        ? `${group.tag} (${group.chapters.map((ch) => ch.title).join(', ')})`
         : group.chapters[0].title
-      const combinedContent = group.chapters.map(ch => `## ${ch.title}\n\n${ch.content}`).join('\n\n')
+      const combinedContent = group.chapters
+        .map((ch) => `## ${ch.title}\n\n${ch.content}`)
+        .join('\n\n')
 
       let currentSummary = ''
       let currentReasoning = ''
       let lastUpdateTime = 0
 
-      const handleStreamUpdate = (data: { content: string; reasoning?: string }) => {
+      const handleStreamUpdate = (data: {
+        content: string
+        reasoning?: string
+      }) => {
         currentSummary += data.content
         if (data.reasoning) {
           currentReasoning += data.reasoning
         }
         const now = Date.now()
         // 每5秒更新一次，或者如果是第一批数据也更新
-        if (onStreamUpdate && (now - lastUpdateTime >= 1000 || lastUpdateTime === 0)) {
-          onStreamUpdate({ summary: currentSummary, reasoning: currentReasoning })
+        if (
+          onStreamUpdate &&
+          (now - lastUpdateTime >= 1000 || lastUpdateTime === 0)
+        ) {
+          onStreamUpdate({
+            summary: currentSummary,
+            reasoning: currentReasoning,
+          })
           lastUpdateTime = now
         }
       }
@@ -155,7 +177,12 @@ export class BookProcessingService {
         onStreamUpdate({ summary, reasoning })
       }
 
-      await this.cacheService.setCache(fileName, 'summary', summary, group.groupId)
+      await this.cacheService.setCache(
+        fileName,
+        'summary',
+        summary,
+        group.groupId
+      )
     } else {
       // 如果命中缓存，也通知一下（可选，视UI需求而定，这里为了统一行为可以调用一次）
       if (onStreamUpdate) {
@@ -166,18 +193,18 @@ export class BookProcessingService {
     const processedGroup: ChapterGroup = {
       groupId: group.groupId,
       tag: group.tag,
-      chapterIds: group.chapters.map(ch => ch.id),
-      chapterTitles: group.chapters.map(ch => ch.title),
+      chapterIds: group.chapters.map((ch) => ch.id),
+      chapterTitles: group.chapters.map((ch) => ch.title),
       summary,
       reasoning: reasoning || undefined,
-      isLoading: false
+      isLoading: false,
     }
 
-    const processedChapters: Chapter[] = group.chapters.map(chapter => ({
+    const processedChapters: Chapter[] = group.chapters.map((chapter) => ({
       ...chapter,
       summary,
       reasoning: reasoning || undefined,
-      isLoading: false
+      isLoading: false,
     }))
 
     return { group: processedGroup, chapters: processedChapters }
@@ -193,17 +220,28 @@ export class BookProcessingService {
     customPrompt: string,
     abortSignal: AbortSignal
   ): Promise<{ group: ChapterGroup; chapters: Chapter[] }> {
-    let mindMap = await this.cacheService.getMindMap(fileName, 'mindmap', group.groupId)
+    let mindMap = await this.cacheService.getMindMap(
+      fileName,
+      'mindmap',
+      group.groupId
+    )
 
     if (!mindMap) {
-      const combinedContent = group.chapters.map(ch => `## ${ch.title}\n\n${ch.content}`).join('\n\n')
+      const combinedContent = group.chapters
+        .map((ch) => `## ${ch.title}\n\n${ch.content}`)
+        .join('\n\n')
       mindMap = await this.aiService.generateChapterMindMap(
         combinedContent,
         outputLanguage,
         customPrompt,
         abortSignal
       )
-      await this.cacheService.setCache(fileName, 'mindmap', mindMap, group.groupId)
+      await this.cacheService.setCache(
+        fileName,
+        'mindmap',
+        mindMap,
+        group.groupId
+      )
     }
 
     if (!mindMap.nodeData) {
@@ -213,16 +251,16 @@ export class BookProcessingService {
     const processedGroup: ChapterGroup = {
       groupId: group.groupId,
       tag: group.tag,
-      chapterIds: group.chapters.map(ch => ch.id),
-      chapterTitles: group.chapters.map(ch => ch.title),
+      chapterIds: group.chapters.map((ch) => ch.id),
+      chapterTitles: group.chapters.map((ch) => ch.title),
       mindMap,
-      isLoading: false
+      isLoading: false,
     }
 
-    const processedChapters: Chapter[] = group.chapters.map(chapter => ({
+    const processedChapters: Chapter[] = group.chapters.map((chapter) => ({
       ...chapter,
       mindMap,
-      isLoading: false
+      isLoading: false,
     }))
 
     return { group: processedGroup, chapters: processedChapters }
@@ -247,15 +285,17 @@ export class BookProcessingService {
       let currentContent = ''
       let lastUpdateTime = 0
 
-      const handleStreamUpdate = onStreamUpdate ? (data: { content: string; reasoning?: string }) => {
-        currentContent += data.content
-        const now = Date.now()
-        // 每1秒更新一次，或者如果是第一批数据也更新
-        if (now - lastUpdateTime >= 1000 || lastUpdateTime === 0) {
-          onStreamUpdate({ content: currentContent })
-          lastUpdateTime = now
-        }
-      } : undefined
+      const handleStreamUpdate = onStreamUpdate
+        ? (data: { content: string; reasoning?: string }) => {
+            currentContent += data.content
+            const now = Date.now()
+            // 每1秒更新一次，或者如果是第一批数据也更新
+            if (now - lastUpdateTime >= 1000 || lastUpdateTime === 0) {
+              onStreamUpdate({ content: currentContent })
+              lastUpdateTime = now
+            }
+          }
+        : undefined
 
       connections = await this.aiService.analyzeConnections(
         chapters,
@@ -295,7 +335,10 @@ export class BookProcessingService {
     abortSignal: AbortSignal,
     onStreamUpdate?: (data: { content: string }) => void
   ): Promise<string> {
-    let overallSummary = await this.cacheService.getString(fileName, 'overall_summary')
+    let overallSummary = await this.cacheService.getString(
+      fileName,
+      'overall_summary'
+    )
 
     if (!overallSummary) {
       console.log('🔄 [DEBUG] 缓存未命中，开始生成全书总结')
@@ -303,15 +346,17 @@ export class BookProcessingService {
       let currentContent = ''
       let lastUpdateTime = 0
 
-      const handleStreamUpdate = onStreamUpdate ? (data: { content: string; reasoning?: string }) => {
-        currentContent += data.content
-        const now = Date.now()
-        // 每1秒更新一次，或者如果是第一批数据也更新
-        if (now - lastUpdateTime >= 1000 || lastUpdateTime === 0) {
-          onStreamUpdate({ content: currentContent })
-          lastUpdateTime = now
-        }
-      } : undefined
+      const handleStreamUpdate = onStreamUpdate
+        ? (data: { content: string; reasoning?: string }) => {
+            currentContent += data.content
+            const now = Date.now()
+            // 每1秒更新一次，或者如果是第一批数据也更新
+            if (now - lastUpdateTime >= 1000 || lastUpdateTime === 0) {
+              onStreamUpdate({ content: currentContent })
+              lastUpdateTime = now
+            }
+          }
+        : undefined
 
       overallSummary = await this.aiService.generateOverallSummary(
         bookTitle,
@@ -327,7 +372,11 @@ export class BookProcessingService {
         onStreamUpdate({ content: overallSummary })
       }
 
-      await this.cacheService.setCache(fileName, 'overall_summary', overallSummary)
+      await this.cacheService.setCache(
+        fileName,
+        'overall_summary',
+        overallSummary
+      )
       console.log('💾 [DEBUG] 全书总结已缓存')
     } else {
       console.log('✅ [DEBUG] 使用缓存的全书总结')
@@ -350,17 +399,25 @@ export class BookProcessingService {
     bookType: BookType,
     abortSignal: AbortSignal
   ): Promise<string> {
-    let characterRelationship = await this.cacheService.getString(fileName, 'character_relationship')
+    let characterRelationship = await this.cacheService.getString(
+      fileName,
+      'character_relationship'
+    )
 
     if (!characterRelationship) {
       console.log('🔄 [DEBUG] 缓存未命中，开始生成人物关系图')
-      characterRelationship = await this.aiService.generateCharacterRelationship(
-        chapters,
-        outputLanguage,
-        bookType,
-        abortSignal
+      characterRelationship =
+        await this.aiService.generateCharacterRelationship(
+          chapters,
+          outputLanguage,
+          bookType,
+          abortSignal
+        )
+      await this.cacheService.setCache(
+        fileName,
+        'character_relationship',
+        characterRelationship
       )
-      await this.cacheService.setCache(fileName, 'character_relationship', characterRelationship)
       console.log('💾 [DEBUG] 人物关系图已缓存')
     } else {
       console.log('✅ [DEBUG] 使用缓存的人物关系图')
@@ -368,7 +425,6 @@ export class BookProcessingService {
 
     return characterRelationship
   }
-
 
   /**
    * 合并章节思维导图
@@ -378,7 +434,10 @@ export class BookProcessingService {
     bookTitle: string,
     chapters: Chapter[]
   ): Promise<MindElixirData> {
-    let combinedMindMap = await this.cacheService.getMindMap(fileName, 'merged_mindmap')
+    let combinedMindMap = await this.cacheService.getMindMap(
+      fileName,
+      'merged_mindmap'
+    )
 
     if (!combinedMindMap) {
       console.log('🔄 [DEBUG] 缓存未命中，开始合并章节思维导图')
@@ -407,10 +466,10 @@ export class BookProcessingService {
 
         // 处理summaries
         if (chapter.mindMap.summaries) {
-          const newSummaries = chapter.mindMap.summaries.map(s => ({
+          const newSummaries = chapter.mindMap.summaries.map((s) => ({
             ...s,
             id: prefix + s.id,
-            parent: prefix + s.parent
+            parent: prefix + s.parent,
           }))
           processedSummaries = processedSummaries.concat(newSummaries)
         }
@@ -420,16 +479,20 @@ export class BookProcessingService {
         topic: bookTitle,
         id: '0',
         tags: ['全书'],
-        children: processedChaptersNodes
+        children: processedChaptersNodes,
       }
 
       combinedMindMap = {
         nodeData: rootNode,
         arrows: [],
-        summaries: processedSummaries
+        summaries: processedSummaries,
       }
 
-      await this.cacheService.setCache(fileName, 'merged_mindmap', combinedMindMap)
+      await this.cacheService.setCache(
+        fileName,
+        'merged_mindmap',
+        combinedMindMap
+      )
       console.log('💾 [DEBUG] 合并思维导图已缓存')
     } else {
       console.log('✅ [DEBUG] 使用缓存的合并思维导图')
@@ -448,7 +511,10 @@ export class BookProcessingService {
     customPrompt: string,
     abortSignal: AbortSignal
   ): Promise<MindElixirData> {
-    let combinedMindMap = await this.cacheService.getMindMap(fileName, 'combined_mindmap')
+    let combinedMindMap = await this.cacheService.getMindMap(
+      fileName,
+      'combined_mindmap'
+    )
 
     if (!combinedMindMap) {
       console.log('🔄 [DEBUG] 缓存未命中，开始生成整书思维导图')
@@ -458,7 +524,11 @@ export class BookProcessingService {
         customPrompt,
         abortSignal
       )
-      await this.cacheService.setCache(fileName, 'combined_mindmap', combinedMindMap)
+      await this.cacheService.setCache(
+        fileName,
+        'combined_mindmap',
+        combinedMindMap
+      )
       console.log('💾 [DEBUG] 整书思维导图已缓存')
     } else {
       console.log('✅ [DEBUG] 使用缓存的整书思维导图')

@@ -12,12 +12,16 @@ import type { MindMapRef } from './ui/mindmap'
 import type { MindElixirInstance } from 'mind-elixir'
 
 interface DownloadMindMapButtonProps {
-  mindElixirRef: React.RefObject<MindMapRef | null> | (() => MindMapRef | null | undefined)
+  mindElixirRef:
+    | React.RefObject<MindMapRef | null>
+    | (() => MindMapRef | null | undefined)
   title: string
-  downloadMindMap: (instance: MindElixirInstance, title: string, format: string) => void
+  downloadMindMap: (
+    instance: MindElixirInstance,
+    title: string,
+    format: string
+  ) => void
 }
-
-
 
 export const DownloadMindMapButton: React.FC<DownloadMindMapButtonProps> = ({
   mindElixirRef,
@@ -25,7 +29,7 @@ export const DownloadMindMapButton: React.FC<DownloadMindMapButtonProps> = ({
   downloadMindMap,
 }) => {
   const { t } = useTranslation()
-  
+
   const EXPORT_FORMATS = [
     { key: 'PNG', label: `${t('download.downloadAs')} PNG` },
     { key: 'JPEG', label: `${t('download.downloadAs')} JPEG` },
@@ -41,7 +45,7 @@ export const DownloadMindMapButton: React.FC<DownloadMindMapButtonProps> = ({
     } else {
       instance = mindElixirRef.current?.instance
     }
-    
+
     if (instance) {
       downloadMindMap(instance, title, format)
     }
@@ -50,11 +54,7 @@ export const DownloadMindMapButton: React.FC<DownloadMindMapButtonProps> = ({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          title={t('download.title')}
-        >
+        <Button variant="outline" size="sm" title={t('download.title')}>
           <Download className="h-4 w-4 mr-1" />
           <ChevronDown className="h-3 w-3" />
         </Button>
@@ -63,8 +63,7 @@ export const DownloadMindMapButton: React.FC<DownloadMindMapButtonProps> = ({
         {EXPORT_FORMATS.map((format) => (
           <DropdownMenuItem
             key={format.key}
-            onClick={() => handleDownload(format.key)}
-          >
+            onClick={() => handleDownload(format.key)}>
             {format.label}
           </DropdownMenuItem>
         ))}

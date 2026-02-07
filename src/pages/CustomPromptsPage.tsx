@@ -5,21 +5,39 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
-import { MessageSquarePlus, Plus, Pencil, Trash2, Copy, Calendar } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import {
+  MessageSquarePlus,
+  Plus,
+  Pencil,
+  Trash2,
+  Copy,
+  Calendar,
+} from 'lucide-react'
 import { toast } from 'sonner'
-import { useCustomPromptStore, type CustomPrompt } from '../stores/customPromptStore'
+import {
+  useCustomPromptStore,
+  type CustomPrompt,
+} from '../stores/customPromptStore'
 
 export function CustomPromptsPage() {
   const { t } = useTranslation()
-  const { prompts, addPrompt, updatePrompt, deletePrompt } = useCustomPromptStore()
+  const { prompts, addPrompt, updatePrompt, deletePrompt } =
+    useCustomPromptStore()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingPrompt, setEditingPrompt] = useState<CustomPrompt | null>(null)
 
   const [formData, setFormData] = useState({
     name: '',
     content: '',
-    description: ''
+    description: '',
   })
 
   const handleOpenDialog = (prompt?: CustomPrompt) => {
@@ -28,14 +46,14 @@ export function CustomPromptsPage() {
       setFormData({
         name: prompt.name,
         content: prompt.content,
-        description: prompt.description || ''
+        description: prompt.description || '',
       })
     } else {
       setEditingPrompt(null)
       setFormData({
         name: '',
         content: '',
-        description: ''
+        description: '',
       })
     }
     setIsDialogOpen(true)
@@ -54,7 +72,9 @@ export function CustomPromptsPage() {
 
     // Check for duplicate names (excluding the current editing prompt)
     const isDuplicate = prompts.some(
-      prompt => prompt.name.trim() === formData.name.trim() && prompt.id !== editingPrompt?.id
+      (prompt) =>
+        prompt.name.trim() === formData.name.trim() &&
+        prompt.id !== editingPrompt?.id
     )
 
     if (isDuplicate) {
@@ -83,7 +103,7 @@ export function CustomPromptsPage() {
     // Generate a unique name by appending a number
     let copyName = `${prompt.name} (Copy)`
     let counter = 1
-    while (prompts.some(p => p.name === copyName)) {
+    while (prompts.some((p) => p.name === copyName)) {
       counter++
       copyName = `${prompt.name} (Copy ${counter})`
     }
@@ -92,7 +112,7 @@ export function CustomPromptsPage() {
     setFormData({
       name: copyName,
       content: prompt.content,
-      description: prompt.description || ''
+      description: prompt.description || '',
     })
     setIsDialogOpen(true)
   }
@@ -103,7 +123,7 @@ export function CustomPromptsPage() {
       month: '2-digit',
       day: '2-digit',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     })
   }
 
@@ -116,12 +136,16 @@ export function CustomPromptsPage() {
               <MessageSquarePlus className="h-6 w-6 text-foreground/80" />
               {t('customPrompts.title')}
             </h1>
-            <p className="text-sm text-muted-foreground mt-1">{t('customPrompts.description')}</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              {t('customPrompts.description')}
+            </p>
           </div>
 
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => handleOpenDialog()} className="flex items-center gap-2">
+              <Button
+                onClick={() => handleOpenDialog()}
+                className="flex items-center gap-2">
                 <Plus className="h-4 w-4" />
                 {t('customPrompts.addPrompt')}
               </Button>
@@ -129,37 +153,56 @@ export function CustomPromptsPage() {
             <DialogContent className="max-w-2xl max-h-[90vh]">
               <DialogHeader>
                 <DialogTitle>
-                  {editingPrompt ? t('customPrompts.editPrompt') : t('customPrompts.addPrompt')}
+                  {editingPrompt
+                    ? t('customPrompts.editPrompt')
+                    : t('customPrompts.addPrompt')}
                 </DialogTitle>
               </DialogHeader>
 
               <ScrollArea className="max-h-[calc(90vh-180px)] pr-4">
                 <div className="space-y-4 py-4">
                   <div className="space-y-2">
-                    <Label htmlFor="prompt-name">{t('customPrompts.promptName')}</Label>
+                    <Label htmlFor="prompt-name">
+                      {t('customPrompts.promptName')}
+                    </Label>
                     <Input
                       id="prompt-name"
                       placeholder={t('customPrompts.promptNamePlaceholder')}
                       value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="prompt-description">{t('customPrompts.promptDescription')}</Label>
+                    <Label htmlFor="prompt-description">
+                      {t('customPrompts.promptDescription')}
+                    </Label>
                     <Input
                       id="prompt-description"
-                      placeholder={t('customPrompts.promptDescriptionPlaceholder')}
+                      placeholder={t(
+                        'customPrompts.promptDescriptionPlaceholder'
+                      )}
                       value={formData.description}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          description: e.target.value,
+                        })
+                      }
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="prompt-content">{t('customPrompts.promptContent')}</Label>
+                    <Label htmlFor="prompt-content">
+                      {t('customPrompts.promptContent')}
+                    </Label>
                     <Textarea
                       id="prompt-content"
                       placeholder={t('customPrompts.promptContentPlaceholder')}
                       value={formData.content}
-                      onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, content: e.target.value })
+                      }
                       rows={8}
                       className="min-h-[200px] resize-y"
                     />
@@ -171,12 +214,12 @@ export function CustomPromptsPage() {
               </ScrollArea>
 
               <DialogFooter>
-                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsDialogOpen(false)}>
                   {t('common.cancel')}
                 </Button>
-                <Button onClick={handleSave}>
-                  {t('common.save')}
-                </Button>
+                <Button onClick={handleSave}>{t('common.save')}</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -191,10 +234,14 @@ export function CustomPromptsPage() {
             ) : (
               <div className="divide-y divide-gray-200 dark:divide-gray-800">
                 {prompts.map((prompt) => (
-                  <div key={prompt.id} className="p-4 hover:bg-muted/50 transition-colors">
+                  <div
+                    key={prompt.id}
+                    className="p-4 hover:bg-muted/50 transition-colors">
                     {/* 标题和操作按钮 */}
                     <div className="flex items-start justify-between mb-3">
-                      <h3 className="font-medium text-foreground flex-1 pr-2 truncate" title={prompt.name}>
+                      <h3
+                        className="font-medium text-foreground flex-1 pr-2 truncate"
+                        title={prompt.name}>
                         {prompt.name}
                       </h3>
                       <div className="flex gap-1 flex-shrink-0">
@@ -203,8 +250,7 @@ export function CustomPromptsPage() {
                           size="sm"
                           onClick={() => handleCopy(prompt)}
                           className="h-8 w-8 p-0"
-                          title={t('customPrompts.copy')}
-                        >
+                          title={t('customPrompts.copy')}>
                           <Copy className="h-4 w-4" />
                         </Button>
                         <Button
@@ -212,8 +258,7 @@ export function CustomPromptsPage() {
                           size="sm"
                           onClick={() => handleOpenDialog(prompt)}
                           className="h-8 w-8 p-0"
-                          title={t('customPrompts.edit')}
-                        >
+                          title={t('customPrompts.edit')}>
                           <Pencil className="h-4 w-4" />
                         </Button>
                         <Button
@@ -221,8 +266,7 @@ export function CustomPromptsPage() {
                           size="sm"
                           onClick={() => handleDelete(prompt.id)}
                           className="h-8 w-8 p-0"
-                          title={t('customPrompts.delete')}
-                        >
+                          title={t('customPrompts.delete')}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>

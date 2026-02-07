@@ -1,10 +1,27 @@
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { Settings, Brain } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useConfigStore, useProcessingOptions } from '../../stores/configStore'
@@ -31,18 +48,24 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
     setApiKey,
     setApiUrl,
     setModel,
-    setTemperature
+    setTemperature,
   } = useConfigStore()
 
-  const { processingMode, bookType, skipNonEssentialChapters, outputLanguage, forceUseSpine } = processingOptions
+  const {
+    processingMode,
+    bookType,
+    skipNonEssentialChapters,
+    outputLanguage,
+    forceUseSpine,
+  } = processingOptions
 
   const [selectedModelId, setSelectedModelId] = useState<string>('')
 
-  const selectedModel = models.find(m => m.id === selectedModelId)
+  const selectedModel = models.find((m) => m.id === selectedModelId)
 
   const handleModelChange = (id: string) => {
     setSelectedModelId(id)
-    const model = models.find(m => m.id === id)
+    const model = models.find((m) => m.id === id)
     if (model) {
       setAiProvider(model.provider)
       setApiKey(model.apiKey)
@@ -57,7 +80,7 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
     if (defaultModel && !selectedModelId) {
       handleModelChange(defaultModel.id)
     }
-  });
+  })
 
   useEffect(() => {
     onInit()
@@ -68,11 +91,7 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
       <Tooltip>
         <TooltipTrigger asChild>
           <DialogTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={processing}
-            >
+            <Button variant="outline" size="sm" disabled={processing}>
               <Settings className="h-3.5 w-3.5" />
             </Button>
           </DialogTrigger>
@@ -87,9 +106,7 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
             <Settings className="h-5 w-5" />
             {t('config.title')}
           </DialogTitle>
-          <DialogDescription>
-            {t('config.description')}
-          </DialogDescription>
+          <DialogDescription>{t('config.description')}</DialogDescription>
         </DialogHeader>
         <ScrollArea className="max-h-[60vh] pr-4">
           <div className="space-y-4">
@@ -97,7 +114,9 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
             <div className="space-y-3 p-5 bg-card rounded-xl border border-border">
               <div className="flex items-center gap-2 mb-2">
                 <Brain className="h-4 w-4" />
-                <Label className="text-sm font-medium text-foreground">{t('models.selectModel')}</Label>
+                <Label className="text-sm font-medium text-foreground">
+                  {t('models.selectModel')}
+                </Label>
               </div>
 
               {models.length === 0 ? (
@@ -108,10 +127,11 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
                 <Select
                   value={selectedModelId}
                   onValueChange={handleModelChange}
-                  disabled={processing}
-                >
+                  disabled={processing}>
                   <SelectTrigger>
-                    <SelectValue placeholder={t('models.selectModelPlaceholder')} />
+                    <SelectValue
+                      placeholder={t('models.selectModelPlaceholder')}
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     {models.map((model) => (
@@ -126,11 +146,15 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
               {selectedModel && (
                 <div className="text-xs text-muted-foreground mt-2 space-y-1">
                   <div>
-                    <span className="font-medium">{t('config.aiProvider')}:</span>{' '}
+                    <span className="font-medium">
+                      {t('config.aiProvider')}:
+                    </span>{' '}
                     {selectedModel.provider}
                   </div>
                   <div>
-                    <span className="font-medium">{t('config.modelName')}:</span>{' '}
+                    <span className="font-medium">
+                      {t('config.modelName')}:
+                    </span>{' '}
                     {selectedModel.model}
                   </div>
                 </div>
@@ -139,15 +163,26 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
 
             <div className="p-5 bg-card rounded-xl border border-border">
               <div className="space-y-3">
-                <Label htmlFor="output-language" className="text-sm font-medium text-foreground">
+                <Label
+                  htmlFor="output-language"
+                  className="text-sm font-medium text-foreground">
                   {t('config.outputLanguage')}
                 </Label>
-                <Select value={outputLanguage} onValueChange={(value: SupportedLanguage) => setOutputLanguage(value)} disabled={processing}>
+                <Select
+                  value={outputLanguage}
+                  onValueChange={(value: SupportedLanguage) =>
+                    setOutputLanguage(value)
+                  }
+                  disabled={processing}>
                   <SelectTrigger>
-                    <SelectValue placeholder={t('config.selectOutputLanguage')} />
+                    <SelectValue
+                      placeholder={t('config.selectOutputLanguage')}
+                    />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="auto">{t('config.outputLanguageAuto')}</SelectItem>
+                    <SelectItem value="auto">
+                      {t('config.outputLanguageAuto')}
+                    </SelectItem>
                     <SelectItem value="en">English</SelectItem>
                     <SelectItem value="zh">中文</SelectItem>
                     <SelectItem value="ja">日本語</SelectItem>
@@ -166,17 +201,32 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
             <div className="p-5 bg-card rounded-xl border border-border">
               <div className="space-y-4">
                 <div className="space-y-3">
-                  <Label htmlFor="processing-mode" className="text-sm font-medium text-foreground">
+                  <Label
+                    htmlFor="processing-mode"
+                    className="text-sm font-medium text-foreground">
                     {t('config.processingMode')}
                   </Label>
-                  <Select value={processingMode} onValueChange={(value: 'summary' | 'mindmap' | 'whole-mindmap') => setProcessingMode(value)} disabled={processing}>
+                  <Select
+                    value={processingMode}
+                    onValueChange={(
+                      value: 'summary' | 'mindmap' | 'whole-mindmap'
+                    ) => setProcessingMode(value)}
+                    disabled={processing}>
                     <SelectTrigger>
-                      <SelectValue placeholder={t('config.selectProcessingMode')} />
+                      <SelectValue
+                        placeholder={t('config.selectProcessingMode')}
+                      />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="summary">{t('config.summaryMode')}</SelectItem>
-                      <SelectItem value="mindmap">{t('config.mindmapMode')}</SelectItem>
-                      <SelectItem value="whole-mindmap">{t('config.combinedMindmapMode')}</SelectItem>
+                      <SelectItem value="summary">
+                        {t('config.summaryMode')}
+                      </SelectItem>
+                      <SelectItem value="mindmap">
+                        {t('config.mindmapMode')}
+                      </SelectItem>
+                      <SelectItem value="whole-mindmap">
+                        {t('config.combinedMindmapMode')}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground">
@@ -185,29 +235,46 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
                 </div>
 
                 <div className="space-y-3">
-                  <Label htmlFor="book-type" className="text-sm font-medium text-foreground">
+                  <Label
+                    htmlFor="book-type"
+                    className="text-sm font-medium text-foreground">
                     {t('config.bookType')}
                   </Label>
-                  <Select value={bookType} onValueChange={(value: 'fiction' | 'non-fiction') => setBookType(value)} disabled={processing}>
+                  <Select
+                    value={bookType}
+                    onValueChange={(value: 'fiction' | 'non-fiction') =>
+                      setBookType(value)
+                    }
+                    disabled={processing}>
                     <SelectTrigger>
                       <SelectValue placeholder={t('config.selectBookType')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="non-fiction">{t('config.socialType')}</SelectItem>
-                      <SelectItem value="fiction">{t('config.novelType')}</SelectItem>
+                      <SelectItem value="non-fiction">
+                        {t('config.socialType')}
+                      </SelectItem>
+                      <SelectItem value="fiction">
+                        {t('config.novelType')}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground">
-                    {t('config.bookTypeDescription', { type: processingMode === 'summary' ? t('config.summary') : t('config.mindmap') })}
+                    {t('config.bookTypeDescription', {
+                      type:
+                        processingMode === 'summary'
+                          ? t('config.summary')
+                          : t('config.mindmap'),
+                    })}
                   </p>
                 </div>
               </div>
             </div>
 
-
             <div className="flex items-center justify-between p-5 bg-card rounded-xl border border-border">
               <div className="space-y-0.5">
-                <Label htmlFor="skip-non-essential" className="text-sm font-medium text-foreground">
+                <Label
+                  htmlFor="skip-non-essential"
+                  className="text-sm font-medium text-foreground">
                   {t('config.skipIrrelevantChapters')}
                 </Label>
                 <p className="text-xs text-muted-foreground">
@@ -224,7 +291,9 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
 
             <div className="flex items-center justify-between p-5 bg-card rounded-xl border border-border">
               <div className="space-y-0.5">
-                <Label htmlFor="force-use-spine" className="text-sm font-medium text-foreground">
+                <Label
+                  htmlFor="force-use-spine"
+                  className="text-sm font-medium text-foreground">
                   {t('config.forceUseSpine')}
                 </Label>
                 <p className="text-xs text-muted-foreground">
@@ -241,24 +310,41 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
 
             <div className="p-5 bg-card rounded-xl border border-border">
               <div className="space-y-3">
-                <Label htmlFor="max-sub-chapter-depth" className="text-sm font-medium text-foreground">
+                <Label
+                  htmlFor="max-sub-chapter-depth"
+                  className="text-sm font-medium text-foreground">
                   {t('config.recursionDepth')}
                 </Label>
                 <Select
                   value={processingOptions.maxSubChapterDepth?.toString()}
-                  onValueChange={(value) => useConfigStore.getState().setMaxSubChapterDepth(parseInt(value))}
-                  disabled={processing}
-                >
+                  onValueChange={(value) =>
+                    useConfigStore
+                      .getState()
+                      .setMaxSubChapterDepth(parseInt(value))
+                  }
+                  disabled={processing}>
                   <SelectTrigger>
-                    <SelectValue placeholder={t('config.selectRecursionDepth')} />
+                    <SelectValue
+                      placeholder={t('config.selectRecursionDepth')}
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="0">{t('config.noRecursion')}</SelectItem>
-                    <SelectItem value="1">{t('config.recursion1Layer')}</SelectItem>
-                    <SelectItem value="2">{t('config.recursion2Layers')}</SelectItem>
-                    <SelectItem value="3">{t('config.recursion3Layers')}</SelectItem>
-                    <SelectItem value="4">{t('config.recursion4Layers')}</SelectItem>
-                    <SelectItem value="5">{t('config.recursion5Layers')}</SelectItem>
+                    <SelectItem value="1">
+                      {t('config.recursion1Layer')}
+                    </SelectItem>
+                    <SelectItem value="2">
+                      {t('config.recursion2Layers')}
+                    </SelectItem>
+                    <SelectItem value="3">
+                      {t('config.recursion3Layers')}
+                    </SelectItem>
+                    <SelectItem value="4">
+                      {t('config.recursion4Layers')}
+                    </SelectItem>
+                    <SelectItem value="5">
+                      {t('config.recursion5Layers')}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground">
@@ -266,9 +352,6 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
                 </p>
               </div>
             </div>
-
-
-
           </div>
         </ScrollArea>
       </DialogContent>

@@ -3,7 +3,6 @@ import { SKIP_CHAPTER_KEYWORDS } from './constants'
 import { htmlToMarkdown } from '../utils/htmlToMarkdown'
 import type Section from '@ssshooter/epubjs/types/section'
 
-
 export interface ChapterData {
   id: string
   title: string
@@ -40,22 +39,39 @@ export class EpubProcessor {
       return {
         book,
         title,
-        author
+        author,
       }
     } catch (error) {
-      throw new Error(`解析EPUB文件失败: ${error instanceof Error ? error.message : '未知错误'}`)
+      throw new Error(
+        `解析EPUB文件失败: ${error instanceof Error ? error.message : '未知错误'}`
+      )
     }
   }
 
-  async extractChapters(book: Book, skipNonEssentialChapters: boolean = true, maxSubChapterDepth: number = 0, forceUseSpine: boolean = false): Promise<ChapterData[]> {
+  async extractChapters(
+    book: Book,
+    skipNonEssentialChapters: boolean = true,
+    maxSubChapterDepth: number = 0,
+    forceUseSpine: boolean = false
+  ): Promise<ChapterData[]> {
     try {
       const chapters: ChapterData[] = []
 
       try {
-        const toc = book.navigation.toc.filter(item => !item.href.includes('#'))
+        const toc = book.navigation.toc.filter(
+          (item) => !item.href.includes('#')
+        )
         // 获取章节信息（先按原始 TOC）
-        let chapterInfos = await this.extractChaptersFromToc(book, toc, 0, maxSubChapterDepth)
-        console.log(`📚 [DEBUG] 找到 ${chapterInfos.length} 个章节信息`, chapterInfos)
+        let chapterInfos = await this.extractChaptersFromToc(
+          book,
+          toc,
+          0,
+          maxSubChapterDepth
+        )
+        console.log(
+          `📚 [DEBUG] 找到 ${chapterInfos.length} 个章节信息`,
+          chapterInfos
+        )
 
         // 回退：当 TOC 长度≤3 或强制使用 Spine 时，直接用 spineItems 生成章节信息
         if (toc.length <= 3 || forceUseSpine) {
@@ -65,24 +81,33 @@ export class EpubProcessor {
                 id: spineItem.idref || `spine-${idx + 1}`,
                 href: spineItem.href,
                 label: spineItem.idref || `章节 ${idx + 1}`,
-                subitems: []
+                subitems: [],
               }
               return {
                 title: navItem.label || `章节 ${idx + 1}`,
                 href: navItem.href!,
                 subitems: [],
                 tocItem: navItem,
-                depth: 0
+                depth: 0,
               }
             })
-            .filter(item => !!item.href)
-          console.log('🔁 [DEBUG] 使用 spineItems 生成章节信息', fallbackChapterInfos)
+            .filter((item) => !!item.href)
+          console.log(
+            '🔁 [DEBUG] 使用 spineItems 生成章节信息',
+            fallbackChapterInfos
+          )
 
           if (forceUseSpine) {
-            console.log('🔁 [DEBUG] 强制使用Spine获取章节，章节数:', fallbackChapterInfos.length)
+            console.log(
+              '🔁 [DEBUG] 强制使用Spine获取章节，章节数:',
+              fallbackChapterInfos.length
+            )
             chapterInfos = fallbackChapterInfos
           } else {
-            console.log('🔁 [DEBUG] TOC长度≤3，直接用 spineItems 生成章节信息，fallback 章节数:', fallbackChapterInfos.length)
+            console.log(
+              '🔁 [DEBUG] TOC长度≤3，直接用 spineItems 生成章节信息，fallback 章节数:',
+              fallbackChapterInfos.length
+            )
             if (fallbackChapterInfos.length >= chapterInfos.length) {
               chapterInfos = fallbackChapterInfos
             }
@@ -92,14 +117,26 @@ export class EpubProcessor {
           // 根据章节信息提取内容
           for (const chapterInfo of chapterInfos) {
             // 检查是否需要跳过此章节
-            if (skipNonEssentialChapters && this.shouldSkipChapter(chapterInfo.title)) {
-              console.log(`⏭️ [DEBUG] 跳过无关键内容章节: "${chapterInfo.title}"`)
+            if (
+              skipNonEssentialChapters &&
+              this.shouldSkipChapter(chapterInfo.title)
+            ) {
+              console.log(
+                `⏭️ [DEBUG] 跳过无关键内容章节: "${chapterInfo.title}"`
+              )
               continue
             }
 
-            console.log(`📄 [DEBUG] 提取章节 "${chapterInfo.title}" (href: ${chapterInfo.href})`)
+            console.log(
+              `📄 [DEBUG] 提取章节 "${chapterInfo.title}" (href: ${chapterInfo.href})`
+            )
 
-            const { title: extractedTitle, content: chapterContent } = await this.extractContentFromHref(book, chapterInfo.href, chapterInfo.subitems)
+            const { title: extractedTitle, content: chapterContent } =
+              await this.extractContentFromHref(
+                book,
+                chapterInfo.href,
+                chapterInfo.subitems
+              )
 
             if (chapterContent.trim().length > 100) {
               // 如果从HTML中提取到了h2标题，优先使用；否则保留原标题
@@ -110,7 +147,7 @@ export class EpubProcessor {
                 content: chapterContent,
                 href: chapterInfo.href,
                 tocItem: chapterInfo.tocItem,
-                depth: chapterInfo.depth
+                depth: chapterInfo.depth,
               })
             }
           }
@@ -122,25 +159,62 @@ export class EpubProcessor {
       return chapters
     } catch (error) {
       console.error(`❌ [DEBUG] 提取章节失败:`, error)
-      throw new Error(`提取章节失败: ${error instanceof Error ? error.message : '未知错误'}`)
+      throw new Error(
+        `提取章节失败: ${error instanceof Error ? error.message : '未知错误'}`
+      )
     }
   }
 
-  private async extractChaptersFromToc(book: Book, toc: NavItem[], currentDepth: number = 0, maxDepth: number = 0): Promise<{ title: string, href: string, subitems?: NavItem[], tocItem: NavItem, depth: number }[]> {
-    const chapterInfos: { title: string, href: string, subitems?: NavItem[], tocItem: NavItem, depth: number }[] = []
+  private async extractChaptersFromToc(
+    book: Book,
+    toc: NavItem[],
+    currentDepth: number = 0,
+    maxDepth: number = 0
+  ): Promise<
+    {
+      title: string
+      href: string
+      subitems?: NavItem[]
+      tocItem: NavItem
+      depth: number
+    }[]
+  > {
+    const chapterInfos: {
+      title: string
+      href: string
+      subitems?: NavItem[]
+      tocItem: NavItem
+      depth: number
+    }[] = []
 
     for (const item of toc) {
       try {
-        if (item.subitems && item.subitems.length > 0 && maxDepth > 0 && currentDepth < maxDepth) {
-          const subChapters = await this.extractChaptersFromToc(book, item.subitems, currentDepth + 1, maxDepth)
+        if (
+          item.subitems &&
+          item.subitems.length > 0 &&
+          maxDepth > 0 &&
+          currentDepth < maxDepth
+        ) {
+          const subChapters = await this.extractChaptersFromToc(
+            book,
+            item.subitems,
+            currentDepth + 1,
+            maxDepth
+          )
           chapterInfos.push(...subChapters)
         } else if (item.href) {
-          const chapterInfo: { title: string, href: string, subitems?: NavItem[], tocItem: NavItem, depth: number } = {
+          const chapterInfo: {
+            title: string
+            href: string
+            subitems?: NavItem[]
+            tocItem: NavItem
+            depth: number
+          } = {
             title: item.label || `章节 ${chapterInfos.length + 1}`,
             href: item.href,
             subitems: item.subitems,
             tocItem: item, // 保存原始TOC项目信息
-            depth: currentDepth // 保存章节层级深度
+            depth: currentDepth, // 保存章节层级深度
           }
           chapterInfos.push(chapterInfo)
         }
@@ -152,7 +226,11 @@ export class EpubProcessor {
     return chapterInfos
   }
 
-  private async extractContentFromHref(book: Book, href: string, subitems?: NavItem[]): Promise<{ title: string; content: string }> {
+  private async extractContentFromHref(
+    book: Book,
+    href: string,
+    subitems?: NavItem[]
+  ): Promise<{ title: string; content: string }> {
     try {
       console.log(`🔍 [DEBUG] 尝试通过href获取章节内容: ${href}`)
 
@@ -163,7 +241,8 @@ export class EpubProcessor {
       let extractedTitle = ''
 
       // 首先获取主章节内容
-      const { title: mainTitle, content: mainContent } = await this.getSingleChapterContent(book, cleanHref)
+      const { title: mainTitle, content: mainContent } =
+        await this.getSingleChapterContent(book, cleanHref)
       if (mainContent) {
         allContent += mainContent
       }
@@ -174,14 +253,16 @@ export class EpubProcessor {
 
       // 如果有子项目，也要获取子项目的内容
       if (subitems && subitems.length > 0) {
-
         for (const subitem of subitems) {
           if (subitem.href) {
             const subCleanHref = subitem.href.split('#')[0]
             if (cleanHref === subCleanHref) {
               continue
             }
-            const { content: subContent } = await this.getSingleChapterContent(book, subCleanHref)
+            const { content: subContent } = await this.getSingleChapterContent(
+              book,
+              subCleanHref
+            )
             if (subContent) {
               allContent += '\n\n' + subContent
             }
@@ -197,7 +278,10 @@ export class EpubProcessor {
     }
   }
 
-  private async getSingleChapterContent(book: Book, href: string): Promise<{ title: string; content: string }> {
+  private async getSingleChapterContent(
+    book: Book,
+    href: string
+  ): Promise<{ title: string; content: string }> {
     try {
       let section = null
       const spineItems = book.spine.spineItems
@@ -235,12 +319,15 @@ export class EpubProcessor {
   private shouldSkipChapter(title: string): boolean {
     if (!title) return false
 
-    return SKIP_CHAPTER_KEYWORDS.some(keyword =>
+    return SKIP_CHAPTER_KEYWORDS.some((keyword) =>
       title.toLowerCase().includes(keyword.toLowerCase())
     )
   }
 
-  private extractTextFromXHTML(xhtmlContent: string): { title: string; textContent: string } {
+  private extractTextFromXHTML(xhtmlContent: string): {
+    title: string
+    textContent: string
+  } {
     try {
       console.log(`🔍 [DEBUG] 开始解析XHTML内容，长度: ${xhtmlContent.length}`)
 
@@ -272,7 +359,7 @@ export class EpubProcessor {
 
       // 移除脚本和样式标签
       const scripts = body.querySelectorAll('script, style')
-      scripts.forEach(el => el.remove())
+      scripts.forEach((el) => el.remove())
 
       // 获取Markdown内容
       let textContent = htmlToMarkdown(body.innerHTML)
@@ -287,8 +374,13 @@ export class EpubProcessor {
     }
   }
 
-  private extractTextWithRegex(xhtmlContent: string): { title: string; textContent: string } {
-    console.log(`🔧 [DEBUG] 使用正则表达式方案解析内容，长度: ${xhtmlContent.length}`)
+  private extractTextWithRegex(xhtmlContent: string): {
+    title: string
+    textContent: string
+  } {
+    console.log(
+      `🔧 [DEBUG] 使用正则表达式方案解析内容，长度: ${xhtmlContent.length}`
+    )
 
     // 移除XML声明和DOCTYPE
     let cleanContent = xhtmlContent
@@ -322,7 +414,9 @@ export class EpubProcessor {
       .replace(/\n\s*\n/g, '\n')
       .trim()
 
-    console.log(`✨ [DEBUG] 正则表达式方案 - 标题: "${title}", 文本长度: ${textContent.length}`)
+    console.log(
+      `✨ [DEBUG] 正则表达式方案 - 标题: "${title}", 文本长度: ${textContent.length}`
+    )
 
     return { title, textContent }
   }

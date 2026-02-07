@@ -121,7 +121,6 @@ For books with comprehensive content, you can merge multiple small chapters into
 You can manage your dedicated prompts on the "Custom Prompts" page and use them when processing books to get results that better fit your needs.
 
 1. **Manage Prompts**:
-
    - Click "Custom Prompts" in the navigation bar to enter the management page
    - Click "Add Prompt" to create a new prompt template
    - Fill in the name, description, and specific prompt content

@@ -19,7 +19,12 @@ interface TagDialogProps {
   onConfirm: (tag: string) => void
 }
 
-export function TagDialog({ open, onOpenChange, selectedCount, onConfirm }: TagDialogProps) {
+export function TagDialog({
+  open,
+  onOpenChange,
+  selectedCount,
+  onConfirm,
+}: TagDialogProps) {
   const { t } = useTranslation()
   const [tagInput, setTagInput] = useState('')
 

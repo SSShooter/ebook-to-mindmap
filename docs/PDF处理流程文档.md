@@ -18,17 +18,20 @@
 **文件**: `src/services/pdfProcessor.ts` - `parsePdf()` 方法
 
 **功能**:
+
 - 将上传的PDF文件转换为ArrayBuffer
 - 使用PDF.js解析PDF文档
 - 提取元数据（标题、作者、总页数）
 - 返回基本书籍信息
 
 **关键代码逻辑**:
+
 ```typescript
 const arrayBuffer = await file.arrayBuffer()
 const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
 const metadata = await pdf.getMetadata()
-const title = metadata.info?.Title || file.name.replace('.pdf', '') || '未知标题'
+const title =
+  metadata.info?.Title || file.name.replace('.pdf', '') || '未知标题'
 const author = metadata.info?.Author || '未知作者'
 ```
 
@@ -43,12 +46,14 @@ const author = metadata.info?.Author || '未知作者'
 > **注意**: 智能章节检测现在是可选功能，用户可以通过UI开关控制是否启用
 
 #### 2.1 基于PDF目录（Outline）提取
+
 - 尝试获取PDF的书签/目录结构
 - 解析目录项的页面索引
 - 根据目录结构划分章节
 - 提取每个章节对应页面范围的文本内容
 
 #### 2.2 智能章节检测（可选备用方案）
+
 - 逐页提取所有文本内容
 - **用户可选择**：通过UI开关控制是否启用智能检测
 - 使用`detectChapters()`方法基于常见章节标识进行智能分割
@@ -56,11 +61,13 @@ const author = metadata.info?.Author || '未知作者'
 - **默认关闭**：因为大多数PDF都有目录结构
 
 #### 2.3 固定分页（最后备用）
+
 - 当无法检测到章节结构时
 - 按固定页数分组（每章最多10页）
 - 确保每个分组有足够的内容（>100字符）
 
 **文本提取核心逻辑**:
+
 ```typescript
 const page = await pdf.getPage(pageNum)
 const textContent = await page.getTextContent()
@@ -75,6 +82,7 @@ const pageText = textContent.items
 **文件**: `src/services/aiService.ts` - `summarizeChapter()` 方法
 
 **处理流程**:
+
 - 逐章节调用Gemini API
 - 使用结构化提示词生成详细总结
 - 每个总结包含：主要内容概述、关键观点、重要概念、章节意义
@@ -82,6 +90,7 @@ const pageText = textContent.items
 - 支持缓存机制避免重复处理
 
 **提示词模板**:
+
 ```
 请为以下章节内容生成一个详细的中文总结：
 章节标题：${title}
@@ -89,7 +98,7 @@ const pageText = textContent.items
 
 请提供一个结构化的总结，包括：
 1. 主要内容概述
-2. 关键观点或情节  
+2. 关键观点或情节
 3. 重要人物或概念
 4. 本章的意义或作用
 ```
@@ -99,6 +108,7 @@ const pageText = textContent.items
 **文件**: `src/services/aiService.ts` - `analyzeConnections()` 方法
 
 **分析维度**:
+
 - 章节间的逻辑递进关系
 - 主题和概念的发展脉络
 - 人物或情节的连贯性
@@ -113,6 +123,7 @@ const pageText = textContent.items
 **文件**: `src/services/aiService.ts` - `generateOverallSummary()` 方法
 
 **生成内容**:
+
 - **核心主题**: 书籍的主要思想和核心观点
 - **内容架构**: 全书的逻辑结构和组织方式
 - **关键洞察**: 最重要的观点、发现或启示
@@ -127,12 +138,14 @@ const pageText = textContent.items
 **文件**: `src/services/cacheService.ts`
 
 **缓存策略**:
+
 - 使用LocalStorage持久化缓存
 - 缓存有效期：7天
 - 最大缓存条目：100个
 - 缓存键值生成规则：`${fileName}_${chapterId}` 或 `${fileName}_${type}_v1`
 
 **缓存内容**:
+
 - 章节总结
 - 章节关联分析
 - 全书总结
@@ -142,6 +155,7 @@ const pageText = textContent.items
 **文件**: `src/App.tsx` - `processFile()` 方法
 
 **进度跟踪**:
+
 - 0-10%: PDF解析
 - 10-20%: 章节提取
 - 20-80%: 逐章总结（按章节数平均分配）
@@ -149,6 +163,7 @@ const pageText = textContent.items
 - 85-100%: 全书总结生成
 
 **错误处理**:
+
 - 每个阶段都有独立的错误捕获
 - 提供详细的错误信息反馈
 - 支持处理中断和重试

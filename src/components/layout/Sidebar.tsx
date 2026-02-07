@@ -1,6 +1,13 @@
 import { useTranslation } from 'react-i18next'
 import { Link, useLocation } from 'wouter'
-import { BookOpen, Settings, Brain, MessageSquarePlus, X, Database } from 'lucide-react'
+import {
+  BookOpen,
+  Settings,
+  Brain,
+  MessageSquarePlus,
+  X,
+  Database,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Footer } from '../Footer'
 
@@ -10,7 +17,11 @@ interface SidebarProps {
   isMobile?: boolean
 }
 
-export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarProps) {
+export function Sidebar({
+  isOpen = true,
+  onClose,
+  isMobile = false,
+}: SidebarProps) {
   const { t } = useTranslation()
   const [location] = useLocation()
 
@@ -44,14 +55,8 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
 
   const sidebarClasses = cn(
     'bg-sidebar text-sidebar-foreground flex flex-col h-screen shrink-0 z-50 transition-transform duration-300 ease-in-out',
-    isMobile
-      ? 'fixed top-0 left-0 w-64 transform'
-      : 'w-56',
-    isMobile && isOpen
-      ? 'translate-x-0'
-      : isMobile
-        ? '-translate-x-full'
-        : ''
+    isMobile ? 'fixed top-0 left-0 w-64 transform' : 'w-56',
+    isMobile && isOpen ? 'translate-x-0' : isMobile ? '-translate-x-full' : ''
   )
 
   const handleLinkClick = () => {
@@ -73,13 +78,14 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <img src="/icon.png" alt="icon" className="h-8 w-8" />
-              <span className="font-semibold text-base whitespace-nowrap">eBook To Mindmap</span>
+              <span className="font-semibold text-base whitespace-nowrap">
+                eBook To Mindmap
+              </span>
             </div>
             {isMobile && (
               <button
                 onClick={onClose}
-                className="text-sidebar-foreground/60 hover:text-sidebar-foreground transition-colors"
-              >
+                className="text-sidebar-foreground/60 hover:text-sidebar-foreground transition-colors">
                 <X className="h-5 w-5" />
               </button>
             )}
@@ -102,8 +108,7 @@ export function Sidebar({ isOpen = true, onClose, isMobile = false }: SidebarPro
                       isActive
                         ? 'bg-sidebar-accent text-sidebar-accent-foreground'
                         : 'text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
-                    )}
-                  >
+                    )}>
                     <Icon className="h-5 w-5" />
                     <span>{item.label}</span>
                   </Link>

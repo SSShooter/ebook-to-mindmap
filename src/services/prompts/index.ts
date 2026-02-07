@@ -2,28 +2,25 @@
 
 export {
   getFictionChapterSummaryPrompt,
-  getNonFictionChapterSummaryPrompt
+  getNonFictionChapterSummaryPrompt,
 } from './chapterSummary'
 
 export {
   getChapterConnectionsAnalysisPrompt,
-  getFictionChapterConnectionsAnalysisPrompt
+  getFictionChapterConnectionsAnalysisPrompt,
 } from './connectionAnalysis'
 
 export {
   getOverallSummaryPrompt,
-  getFictionOverallSummaryPrompt
+  getFictionOverallSummaryPrompt,
 } from './overallSummary'
 
 // 测试连接的prompt
 export const getTestConnectionPrompt = () => '请回复"连接成功"'
 
-export {
-  getChapterMindMapPrompt,
-  getMindMapArrowPrompt
-} from './mindmap'
+export { getChapterMindMapPrompt, getMindMapArrowPrompt } from './mindmap'
 
 export {
   getCharacterRelationshipPrompt,
-  getFictionCharacterRelationshipPrompt
+  getFictionCharacterRelationshipPrompt,
 } from './characterRelationship'

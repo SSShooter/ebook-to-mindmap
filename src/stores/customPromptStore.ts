@@ -12,7 +12,9 @@ export interface CustomPrompt {
 
 interface CustomPromptStore {
   prompts: CustomPrompt[]
-  addPrompt: (prompt: Omit<CustomPrompt, 'id' | 'createdAt' | 'updatedAt'>) => void
+  addPrompt: (
+    prompt: Omit<CustomPrompt, 'id' | 'createdAt' | 'updatedAt'>
+  ) => void
   updatePrompt: (id: string, prompt: Partial<CustomPrompt>) => void
   deletePrompt: (id: string) => void
   getPrompt: (id: string) => CustomPrompt | undefined
@@ -32,23 +34,21 @@ export const useCustomPromptStore = create<CustomPromptStore>()(
         }
 
         set((state) => ({
-          prompts: [...state.prompts, newPrompt]
+          prompts: [...state.prompts, newPrompt],
         }))
       },
 
       updatePrompt: (id, prompt) => {
         set((state) => ({
           prompts: state.prompts.map((p) =>
-            p.id === id
-              ? { ...p, ...prompt, updatedAt: Date.now() }
-              : p
-          )
+            p.id === id ? { ...p, ...prompt, updatedAt: Date.now() } : p
+          ),
         }))
       },
 
       deletePrompt: (id) => {
         set((state) => ({
-          prompts: state.prompts.filter((p) => p.id !== id)
+          prompts: state.prompts.filter((p) => p.id !== id),
         }))
       },
 

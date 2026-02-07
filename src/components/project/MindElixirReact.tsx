@@ -1,12 +1,7 @@
-import type { MindElixirData, MindElixirInstance, Options } from "mind-elixir"
-import MindElixir from "mind-elixir"
-import "mind-elixir/style.css"
-import {
-  forwardRef,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-} from "react"
+import type { MindElixirData, MindElixirInstance, Options } from 'mind-elixir'
+import MindElixir from 'mind-elixir'
+import 'mind-elixir/style.css'
+import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react'
 
 interface MindElixirReactProps {
   data: MindElixirData
@@ -22,7 +17,7 @@ export interface MindElixirReactRef {
   instance: MindElixirInstance | null
 }
 
-const sanitizeNodeData = (nodeData: MindElixirData["nodeData"]) => {
+const sanitizeNodeData = (nodeData: MindElixirData['nodeData']) => {
   // TODO
   if (!nodeData) return
   if (nodeData.children) {
@@ -43,15 +38,15 @@ const MindElixirReact = forwardRef<MindElixirReactRef, MindElixirReactProps>(
       (data.nodeData.children?.length || 0)
 
     useImperativeHandle(ref, () => ({
-      instance: meInstance.current
+      instance: meInstance.current,
     }))
 
     useEffect(() => {
-      if (!mindmapEl.current || typeof window === "undefined") return
+      if (!mindmapEl.current || typeof window === 'undefined') return
 
       const mergedOptions = {
         ...(options || {}),
-        el: mindmapEl.current!
+        el: mindmapEl.current!,
       }
 
       meInstance.current = new MindElixir(mergedOptions)
@@ -70,10 +65,10 @@ const MindElixirReact = forwardRef<MindElixirReactRef, MindElixirReactProps>(
       }
 
       if (meInstance.current) {
-        meInstance.current.map.style.opacity = "0"
+        meInstance.current.map.style.opacity = '0'
       }
 
-      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
       const changeTheme = (e: MediaQueryListEvent) => {
         if (e.matches) {
           meInstance.current?.changeTheme(MindElixir.DARK_THEME)
@@ -81,7 +76,7 @@ const MindElixirReact = forwardRef<MindElixirReactRef, MindElixirReactProps>(
           meInstance.current?.changeTheme(MindElixir.THEME)
         }
       }
-      mediaQuery.addEventListener("change", changeTheme)
+      mediaQuery.addEventListener('change', changeTheme)
       isInitialized.current = true
 
       // Initialize with data if available
@@ -91,12 +86,12 @@ const MindElixirReact = forwardRef<MindElixirReactRef, MindElixirReactProps>(
         // meInstance.current.toCenter()
         // meInstance.current.scale(0.5)
         fitPage && meInstance.current.scaleFit()
-        meInstance.current.map.style.opacity = "1"
+        meInstance.current.map.style.opacity = '1'
       }
 
       // Return cleanup function
       return () => {
-        mediaQuery.removeEventListener("change", changeTheme)
+        mediaQuery.removeEventListener('change', changeTheme)
       }
     }, [options, plugins, initScale, data, fitPage])
 
@@ -109,21 +104,21 @@ const MindElixirReact = forwardRef<MindElixirReactRef, MindElixirReactProps>(
       meInstance.current.refresh(data)
       // meInstance.current.toCenter()
       fitPage && meInstance.current.scaleFit()
-      meInstance.current.map.style.opacity = "1"
+      meInstance.current.map.style.opacity = '1'
     }, [data, dataHash, fitPage])
 
     return (
       <div
         ref={mindmapEl}
         className={className}
-        onWheelCapture={
-          e => { if (!e.ctrlKey) e.stopPropagation() }
-        }
+        onWheelCapture={(e) => {
+          if (!e.ctrlKey) e.stopPropagation()
+        }}
       />
     )
   }
 )
 
-MindElixirReact.displayName = "MindElixirReact"
+MindElixirReact.displayName = 'MindElixirReact'
 
 export default MindElixirReact

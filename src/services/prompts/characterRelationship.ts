@@ -19,7 +19,9 @@ ${chapterSummaries}
 }
 
 // 专门针对小说的人物关系图prompt
-export const getFictionCharacterRelationshipPrompt = (chapterSummaries: string) => {
+export const getFictionCharacterRelationshipPrompt = (
+  chapterSummaries: string
+) => {
   const userPrompt = `请根据以下小说章节内容，生成一个mermaid格式的人物关系图：
 
 ${chapterSummaries}

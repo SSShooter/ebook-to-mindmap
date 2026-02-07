@@ -1,6 +1,8 @@
 // 章节关联分析相关的prompt模板
 
-export const getChapterConnectionsAnalysisPrompt = (chapterSummaries: string) => {
+export const getChapterConnectionsAnalysisPrompt = (
+  chapterSummaries: string
+) => {
   const userPrompt = `请帮我分析这本书各章节之间的关系，并总结全书的核心内容：
 
 ${chapterSummaries}
@@ -28,12 +30,14 @@ ${chapterSummaries}
 - 阅读这本书的最大收获是什么
 
 请用通俗易懂的语言来分析，让普通读者也能轻松理解书籍的价值和意义。`
-  
+
   return userPrompt
 }
 
 // 专门针对小说的章节关联分析prompt
-export const getFictionChapterConnectionsAnalysisPrompt = (chapterSummaries: string) => {
+export const getFictionChapterConnectionsAnalysisPrompt = (
+  chapterSummaries: string
+) => {
   const userPrompt = `请帮我分析这本小说各章节之间的联系，并总结全书的核心内容：
 
 ${chapterSummaries}
@@ -61,6 +65,6 @@ ${chapterSummaries}
 - 阅读这本小说可能带来的情感体验或思考
 
 请用生动的语言来分析，让读者能够感受到小说的情感深度和文学价值。`
-  
+
   return userPrompt
 }

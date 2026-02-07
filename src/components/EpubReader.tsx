@@ -20,7 +20,14 @@ interface EpubReaderProps {
 
 const epubProcessor = new EpubProcessor()
 
-export function EpubReader({ initialChapterId, chapterIds, chapters, bookData, onClose, className }: EpubReaderProps) {
+export function EpubReader({
+  initialChapterId,
+  chapterIds,
+  chapters,
+  bookData,
+  onClose,
+  className,
+}: EpubReaderProps) {
   const { t } = useTranslation()
   const [currentIndex, setCurrentIndex] = useState(() =>
     chapterIds.indexOf(initialChapterId)
@@ -30,7 +37,7 @@ export function EpubReader({ initialChapterId, chapterIds, chapters, bookData, o
   const shadowRef = useRef<HTMLDivElement>(null)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
 
-  const chapter = chapters.find(ch => ch.id === chapterIds[currentIndex])!
+  const chapter = chapters.find((ch) => ch.id === chapterIds[currentIndex])!
   const hasMultipleChapters = chapterIds.length > 1
   const canGoPrevious = hasMultipleChapters && currentIndex > 0
   const canGoNext = hasMultipleChapters && currentIndex < chapterIds.length - 1
@@ -54,7 +61,9 @@ export function EpubReader({ initialChapterId, chapterIds, chapters, bookData, o
     const content = chapterHtmlContent || chapter.content
     if (!content) return
 
-    const shadowRoot = shadowRef.current.shadowRoot || shadowRef.current.attachShadow({ mode: 'open' })
+    const shadowRoot =
+      shadowRef.current.shadowRoot ||
+      shadowRef.current.attachShadow({ mode: 'open' })
     shadowRoot.innerHTML = `
       <style>
         * {
@@ -85,7 +94,10 @@ export function EpubReader({ initialChapterId, chapterIds, chapters, bookData, o
 
       setIsLoadingHtml(true)
       try {
-        const htmlContent = await epubProcessor.getSingleChapterHTML(bookData.book, chapter.href || '')
+        const htmlContent = await epubProcessor.getSingleChapterHTML(
+          bookData.book,
+          chapter.href || ''
+        )
         setChapterHtmlContent(htmlContent)
       } catch (error) {
         console.error('加载章节HTML失败:', error)
@@ -95,7 +107,9 @@ export function EpubReader({ initialChapterId, chapterIds, chapters, bookData, o
         setIsLoadingHtml(false)
         // 章节加载完成后滚动到顶部
         if (scrollAreaRef.current) {
-          const scrollViewport = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]')
+          const scrollViewport = scrollAreaRef.current.querySelector(
+            '[data-radix-scroll-area-viewport]'
+          )
           if (scrollViewport) {
             scrollViewport.scrollTop = 0
           }
@@ -107,7 +121,7 @@ export function EpubReader({ initialChapterId, chapterIds, chapters, bookData, o
   }, [chapter, bookData])
 
   return (
-    <div className={cn("w-full h-full flex flex-col", className)}>
+    <div className={cn('w-full h-full flex flex-col', className)}>
       {/* Header */}
       <div className="flex-shrink-0 p-2">
         <div className="flex items-center justify-between gap-4 mb-3">
@@ -123,8 +137,7 @@ export function EpubReader({ initialChapterId, chapterIds, chapters, bookData, o
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="h-8 w-8"
-          >
+            className="h-8 w-8">
             <X className="h-4 w-4" />
           </Button>
         </div>
@@ -137,8 +150,7 @@ export function EpubReader({ initialChapterId, chapterIds, chapters, bookData, o
               size="icon"
               onClick={handlePrevious}
               disabled={!canGoPrevious}
-              className="h-8 w-8"
-            >
+              className="h-8 w-8">
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <span className="text-sm text-muted-foreground min-w-[80px] text-center">
@@ -149,8 +161,7 @@ export function EpubReader({ initialChapterId, chapterIds, chapters, bookData, o
               size="icon"
               onClick={handleNext}
               disabled={!canGoNext}
-              className="h-8 w-8"
-            >
+              className="h-8 w-8">
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>

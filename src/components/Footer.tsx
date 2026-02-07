@@ -7,9 +7,12 @@ export function Footer() {
           href="https://mind-elixir.com/"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-block align-bottom"
-        >
-          <img src="/mind-elixir-desktop-logo.svg" alt="MindElixir" className="w-10 inline-block" />
+          className="inline-block align-bottom">
+          <img
+            src="/mind-elixir-desktop-logo.svg"
+            alt="MindElixir"
+            className="w-10 inline-block"
+          />
         </a>
       </p>
     </div>

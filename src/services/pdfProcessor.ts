@@ -1,11 +1,11 @@
 import * as pdfjsLib from 'pdfjs-dist'
 import workerSrc from 'pdfjs-dist/build/pdf.worker?worker&url'
 import { SKIP_CHAPTER_KEYWORDS } from './constants'
-import type { PDFDocumentProxy } from 'pdfjs-dist';
+import type { PDFDocumentProxy } from 'pdfjs-dist'
 
 // 设置 PDF.js worker - 使用本地文件
 if (typeof window !== 'undefined') {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc;
+  pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc
 }
 
 interface TextItem {
@@ -36,7 +36,6 @@ export interface BookData {
 }
 
 export class PdfProcessor {
-
   async parsePdf(file: File): Promise<BookData> {
     try {
       // 将File转换为ArrayBuffer
@@ -48,27 +47,36 @@ export class PdfProcessor {
       // 获取PDF元数据
       const metadata = await pdf.getMetadata()
       console.log('metadata', metadata)
-      const title = (metadata.info as any)?.Title || file.name.replace('.pdf', '') || '未知标题'
+      const title =
+        (metadata.info as any)?.Title ||
+        file.name.replace('.pdf', '') ||
+        '未知标题'
       const author = (metadata.info as any)?.Author || '未知作者'
 
       console.log(`📚 [DEBUG] PDF解析完成:`, {
         title,
         author,
-        totalPages: pdf.numPages
+        totalPages: pdf.numPages,
       })
 
       return {
         title,
         author,
         totalPages: pdf.numPages,
-        pdfDocument: pdf
+        pdfDocument: pdf,
       }
     } catch (error) {
-      throw new Error(`解析PDF文件失败: ${error instanceof Error ? error.message : '未知错误'}`)
+      throw new Error(
+        `解析PDF文件失败: ${error instanceof Error ? error.message : '未知错误'}`
+      )
     }
   }
 
-  async extractChapters(file: File, skipNonEssentialChapters: boolean = true, maxSubChapterDepth: number = 0): Promise<ChapterData[]> {
+  async extractChapters(
+    file: File,
+    skipNonEssentialChapters: boolean = true,
+    maxSubChapterDepth: number = 0
+  ): Promise<ChapterData[]> {
     try {
       const arrayBuffer = await file.arrayBuffer()
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
@@ -84,7 +92,12 @@ export class PdfProcessor {
         console.log(`📚 [DEBUG] 获取到PDF目录:`, outline)
         if (outline && outline.length > 0) {
           // 获取章节信息
-          const chapterInfos = await this.extractChaptersFromOutline(pdf, outline, 0, maxSubChapterDepth)
+          const chapterInfos = await this.extractChaptersFromOutline(
+            pdf,
+            outline,
+            0,
+            maxSubChapterDepth
+          )
           console.log(chapterInfos, 'chapterInfos')
           if (chapterInfos.length > 0) {
             // 根据章节信息提取内容
@@ -92,19 +105,32 @@ export class PdfProcessor {
               const chapterInfo = chapterInfos[i]
 
               // 检查是否需要跳过此章节
-              if (skipNonEssentialChapters && this.shouldSkipChapter(chapterInfo.title)) {
-                console.log(`⏭️ [DEBUG] 跳过无关键内容章节: "${chapterInfo.title}"`)
+              if (
+                skipNonEssentialChapters &&
+                this.shouldSkipChapter(chapterInfo.title)
+              ) {
+                console.log(
+                  `⏭️ [DEBUG] 跳过无关键内容章节: "${chapterInfo.title}"`
+                )
                 continue
               }
 
               const nextChapterInfo = chapterInfos[i + 1]
 
               const startPage = chapterInfo.pageIndex + 1
-              const endPage = nextChapterInfo ? nextChapterInfo.pageIndex : totalPages
+              const endPage = nextChapterInfo
+                ? nextChapterInfo.pageIndex
+                : totalPages
 
-              console.log(`📄 [DEBUG] 提取章节 "${chapterInfo.title}" (第${startPage}-${endPage}页)`)
+              console.log(
+                `📄 [DEBUG] 提取章节 "${chapterInfo.title}" (第${startPage}-${endPage}页)`
+              )
 
-              const chapterContent = await this.extractTextFromPages(pdf, startPage, endPage)
+              const chapterContent = await this.extractTextFromPages(
+                pdf,
+                startPage,
+                endPage
+              )
 
               if (chapterContent.trim().length > 100) {
                 chapters.push({
@@ -113,7 +139,7 @@ export class PdfProcessor {
                   content: chapterContent,
                   startPage: startPage,
                   endPage: endPage,
-                  pageIndex: chapterInfo.pageIndex
+                  pageIndex: chapterInfo.pageIndex,
                 })
               }
             }
@@ -144,7 +170,9 @@ export class PdfProcessor {
               .trim()
 
             allPageTexts.push(pageText)
-            console.log(`📄 [DEBUG] 第${pageNum}页文本长度: ${pageText.length} 字符`)
+            console.log(
+              `📄 [DEBUG] 第${pageNum}页文本长度: ${pageText.length} 字符`
+            )
           } catch (pageError) {
             console.warn(`❌ [DEBUG] 跳过第${pageNum}页:`, pageError)
             allPageTexts.push('')
@@ -153,10 +181,7 @@ export class PdfProcessor {
 
         let detectedChapters: ChapterData[] = []
 
-
-
         chapters.push(...detectedChapters)
-
       }
 
       console.log(`📊 [DEBUG] 最终提取到 ${chapters.length} 个章节`)
@@ -168,19 +193,36 @@ export class PdfProcessor {
       return chapters
     } catch (error) {
       console.error(`❌ [DEBUG] 提取章节失败:`, error)
-      throw new Error(`提取章节失败: ${error instanceof Error ? error.message : '未知错误'}`)
+      throw new Error(
+        `提取章节失败: ${error instanceof Error ? error.message : '未知错误'}`
+      )
     }
   }
 
-  private async extractChaptersFromOutline(pdf: any, outline: any[], currentDepth: number = 0, maxDepth: number = 0): Promise<{ title: string, pageIndex: number }[]> {
-    const chapterInfos: { title: string, pageIndex: number }[] = []
+  private async extractChaptersFromOutline(
+    pdf: any,
+    outline: any[],
+    currentDepth: number = 0,
+    maxDepth: number = 0
+  ): Promise<{ title: string; pageIndex: number }[]> {
+    const chapterInfos: { title: string; pageIndex: number }[] = []
 
     for (const item of outline) {
       try {
         // 递归处理子章节
         // 只有当maxDepth大于0且当前深度小于最大深度时才递归处理子章节
-        if (item.items && item.items.length > 0 && maxDepth > 0 && currentDepth < maxDepth) {
-          const subChapters = await this.extractChaptersFromOutline(pdf, item.items, currentDepth + 1, maxDepth)
+        if (
+          item.items &&
+          item.items.length > 0 &&
+          maxDepth > 0 &&
+          currentDepth < maxDepth
+        ) {
+          const subChapters = await this.extractChaptersFromOutline(
+            pdf,
+            item.items,
+            currentDepth + 1,
+            maxDepth
+          )
           chapterInfos.push(...subChapters)
         } else if (item.dest) {
           // 处理目标引用
@@ -197,10 +239,12 @@ export class PdfProcessor {
 
             chapterInfos.push({
               title: item.title || `章节 ${chapterInfos.length + 1}`,
-              pageIndex: pageIndex
+              pageIndex: pageIndex,
             })
 
-            console.log(`📖 [DEBUG] 章节: "${item.title}" -> 第${pageIndex + 1}页`)
+            console.log(
+              `📖 [DEBUG] 章节: "${item.title}" -> 第${pageIndex + 1}页`
+            )
           }
         }
       } catch (error) {
@@ -214,7 +258,11 @@ export class PdfProcessor {
     return chapterInfos
   }
 
-  private async extractTextFromPages(pdf: PDFDocumentProxy, startPage: number, endPage: number): Promise<string> {
+  private async extractTextFromPages(
+    pdf: PDFDocumentProxy,
+    startPage: number,
+    endPage: number
+  ): Promise<string> {
     const allStructuredContent: TextItem[][] = []
 
     for (let pageNum = startPage; pageNum <= endPage; pageNum++) {
@@ -231,8 +279,9 @@ export class PdfProcessor {
 
         if (fontSizes.length === 0) continue
 
-        const avgFontSize = fontSizes.reduce((a: number, b: number) => a + b, 0) / fontSizes.length
-
+        const avgFontSize =
+          fontSizes.reduce((a: number, b: number) => a + b, 0) /
+          fontSizes.length
 
         const pageStructuredContent: TextItem[] = []
         let prevY = -1
@@ -270,11 +319,16 @@ export class PdfProcessor {
       if (items.length === 0) return
 
       // 合并行内所有文本
-      const lineText = items.map((item: any) => item.str).join('').trim()
+      const lineText = items
+        .map((item: any) => item.str)
+        .join('')
+        .trim()
       if (!lineText) return
 
       // 使用行中最大的字体大小和第一个项的属性
-      const maxItemFontSize = Math.max(...items.map((item: any) => item.height || 0))
+      const maxItemFontSize = Math.max(
+        ...items.map((item: any) => item.height || 0)
+      )
       const firstItem = items[0]
       const fontSize = maxItemFontSize
       const fontName = firstItem.fontName || ''
@@ -287,12 +341,16 @@ export class PdfProcessor {
       // 判断是否是标题（字体明显大于平均）
       if (fontSize > avgSize * 1.4) {
         type = 'title'
-      } else if (fontSize > avgSize * 1.15 || (isBold && fontSize > avgSize * 1.05)) {
+      } else if (
+        fontSize > avgSize * 1.15 ||
+        (isBold && fontSize > avgSize * 1.05)
+      ) {
         type = 'subtitle'
       }
 
       // 判断列表（检查常见列表标记）
-      const listPattern = /^[\-\*\•●○◦►▪▫■□☐☑☒✓✔✗✘]|\d+[\.\)、]|[\(（][a-zA-Z0-9一二三四五六七八九十][\)）]|^[a-zA-Z一二三四五六七八九十][\.\)、]/
+      const listPattern =
+        /^[\-\*\•●○◦►▪▫■□☐☑☒✓✔✗✘]|\d+[\.\)、]|[\(（][a-zA-Z0-9一二三四五六七八九十][\)）]|^[a-zA-Z一二三四五六七八九十][\.\)、]/
       if (listPattern.test(lineText)) {
         type = 'list'
       }
@@ -309,44 +367,46 @@ export class PdfProcessor {
         fontSize,
         isBold,
         x,
-        y
+        y,
       })
-
     }
 
     // 格式化输出
-    const formattedPages = allStructuredContent.map(pageContent => {
-      return pageContent.map(item => {
-        switch (item.type) {
-          case 'title':
-            return `\n# ${item.str}\n`
-          case 'subtitle':
-            return `\n## ${item.str}\n`
-          case 'list':
-            return `- ${item.str}`
-          case 'quote':
-            return `> ${item.str}`
-          default:
-            return item.str
-        }
-      }).join('\n')
+    const formattedPages = allStructuredContent.map((pageContent) => {
+      return pageContent
+        .map((item) => {
+          switch (item.type) {
+            case 'title':
+              return `\n# ${item.str}\n`
+            case 'subtitle':
+              return `\n## ${item.str}\n`
+            case 'list':
+              return `- ${item.str}`
+            case 'quote':
+              return `> ${item.str}`
+            default:
+              return item.str
+          }
+        })
+        .join('\n')
     })
 
     return formattedPages.join('\n\n')
   }
 
-
-
   // 检查是否应该跳过某个章节
   private shouldSkipChapter(title: string): boolean {
     const normalizedTitle = title.toLowerCase().trim()
-    return SKIP_CHAPTER_KEYWORDS.some(keyword =>
+    return SKIP_CHAPTER_KEYWORDS.some((keyword) =>
       normalizedTitle.includes(keyword.toLowerCase())
     )
   }
 
   // 新增方法：获取PDF页面的渲染内容（用于阅读器显示）
-  async getPageContent(pdfDocument: PDFDocumentProxy, pageNumber: number): Promise<{ textContent: string; canvas?: HTMLCanvasElement }> {
+  async getPageContent(
+    pdfDocument: PDFDocumentProxy,
+    pageNumber: number
+  ): Promise<{ textContent: string; canvas?: HTMLCanvasElement }> {
     try {
       const page = await pdfDocument.getPage(pageNumber)
 
@@ -368,14 +428,14 @@ export class PdfProcessor {
       if (context) {
         const renderContext = {
           canvasContext: context,
-          viewport: viewport
+          viewport: viewport,
         }
         await page.render(renderContext).promise
       }
 
       return {
         textContent: pageText,
-        canvas: canvas
+        canvas: canvas,
       }
     } catch (error) {
       console.warn(`❌ [DEBUG] 获取页面内容失败 (页面 ${pageNumber}):`, error)
@@ -384,14 +444,21 @@ export class PdfProcessor {
   }
 
   // 新增方法：获取章节的所有页面内容（用于阅读器显示）
-  async getChapterPages(pdfDocument: any, chapter: ChapterData): Promise<{ textContent: string; canvas?: HTMLCanvasElement }[]> {
+  async getChapterPages(
+    pdfDocument: any,
+    chapter: ChapterData
+  ): Promise<{ textContent: string; canvas?: HTMLCanvasElement }[]> {
     const pages: { textContent: string; canvas?: HTMLCanvasElement }[] = []
 
     if (!chapter.startPage || !chapter.endPage) {
       return pages
     }
 
-    for (let pageNum = chapter.startPage; pageNum <= chapter.endPage; pageNum++) {
+    for (
+      let pageNum = chapter.startPage;
+      pageNum <= chapter.endPage;
+      pageNum++
+    ) {
       const pageContent = await this.getPageContent(pdfDocument, pageNum)
       pages.push(pageContent)
     }

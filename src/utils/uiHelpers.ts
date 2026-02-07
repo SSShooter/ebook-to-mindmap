@@ -11,7 +11,7 @@ export const scrollToTop = () => {
   if (scrollContainer) {
     scrollContainer.scrollTo({
       top: 0,
-      behavior: 'smooth'
+      behavior: 'smooth',
     })
   }
 }
@@ -21,7 +21,10 @@ export const scrollToTop = () => {
  * @param mindmapData 思维导图数据
  * @param title 思维导图标题
  */
-export const openInMindElixir = async (mindmapData: MindElixirData, title: string) => {
+export const openInMindElixir = async (
+  mindmapData: MindElixirData,
+  title: string
+) => {
   try {
     await launchMindElixir(mindmapData)
     toast.success(`已成功发送"${title}"到 Mind Elixir Desktop`, {
@@ -43,7 +46,11 @@ export const openInMindElixir = async (mindmapData: MindElixirData, title: strin
  * @param title 思维导图标题
  * @param format 导出格式
  */
-export const downloadMindMap = async (mindElixirInstance: MindElixirInstance, title: string, format: string) => {
+export const downloadMindMap = async (
+  mindElixirInstance: MindElixirInstance,
+  title: string,
+  format: string
+) => {
   try {
     // 查找对应的下载方法
     const method = downloadMethodList.find((item) => item.type === format)
@@ -60,9 +67,12 @@ export const downloadMindMap = async (mindElixirInstance: MindElixirInstance, ti
     })
   } catch (error) {
     console.error('导出思维导图失败:', error)
-    toast.error(`导出失败: ${error instanceof Error ? error.message : '未知错误'}`, {
-      duration: 5000,
-      position: 'top-center',
-    })
+    toast.error(
+      `导出失败: ${error instanceof Error ? error.message : '未知错误'}`,
+      {
+        duration: 5000,
+        position: 'top-center',
+      }
+    )
   }
 }

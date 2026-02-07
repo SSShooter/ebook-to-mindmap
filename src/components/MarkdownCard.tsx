@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Trash2, BookOpen, ChevronDown, ChevronUp, Loader2 } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import remarkCjkFriendly from "remark-cjk-friendly";
+import remarkCjkFriendly from 'remark-cjk-friendly'
 import { CopyButton } from '@/components/ui/copy-button'
 import { ViewContentDialog } from './ViewContentDialog'
 import { useTranslation } from 'react-i18next'
@@ -72,7 +72,7 @@ export const MarkdownCard: React.FC<MarkdownCardProps> = ({
             {title}
           </div>
           {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
             <>
               {showCopyButton && (
@@ -87,8 +87,7 @@ export const MarkdownCard: React.FC<MarkdownCardProps> = ({
                   variant="outline"
                   size="sm"
                   onClick={() => onClearCache(id)}
-                  title={t('common.clearCache')}
-                >
+                  title={t('common.clearCache')}>
                   <Trash2 className="h-4 w-4" />
                 </Button>
               )}
@@ -110,8 +109,7 @@ export const MarkdownCard: React.FC<MarkdownCardProps> = ({
             variant="ghost"
             size="sm"
             onClick={() => setIsCollapsed(!isCollapsed)}
-            title={isCollapsed ? t('common.expand') : t('common.collapse')}
-          >
+            title={isCollapsed ? t('common.expand') : t('common.collapse')}>
             {isCollapsed ? (
               <ChevronDown className="h-4 w-4" />
             ) : (
@@ -132,9 +130,13 @@ export const MarkdownCard: React.FC<MarkdownCardProps> = ({
               {reasoning && !markdownContent && (
                 <div className="mb-4 p-4 bg-muted rounded-lg border border-border text-sm text-muted-foreground">
                   <div className="font-medium mb-2 flex items-center gap-2">
-                    <span className="text-xs uppercase tracking-wider text-muted-foreground/60">{t('common.reasoning')}</span>
+                    <span className="text-xs uppercase tracking-wider text-muted-foreground/60">
+                      {t('common.reasoning')}
+                    </span>
                   </div>
-                  <div className="whitespace-pre-wrap font-mono text-xs">{reasoning}</div>
+                  <div className="whitespace-pre-wrap font-mono text-xs">
+                    {reasoning}
+                  </div>
                 </div>
               )}
               <ReactMarkdown remarkPlugins={[remarkGfm, remarkCjkFriendly]}>

@@ -3,9 +3,15 @@
  * 统一的 AI 提供商类型定义，避免在多个文件中重复定义
  */
 
-export const AI_PROVIDERS = ['gemini', 'openai', 'ollama', '302.ai', 'openrouter'] as const
+export const AI_PROVIDERS = [
+  'gemini',
+  'openai',
+  'ollama',
+  '302.ai',
+  'openrouter',
+] as const
 
-export type AIProvider = typeof AI_PROVIDERS[number]
+export type AIProvider = (typeof AI_PROVIDERS)[number]
 
 export interface AIConfig {
   provider: AIProvider
@@ -52,4 +58,3 @@ export const PROVIDER_CONFIGS: Record<AIProvider, ProviderConfig> = {
     websiteUrl: 'https://openrouter.ai/',
   },
 }
-

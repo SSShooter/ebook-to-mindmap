@@ -36,13 +36,18 @@ function App() {
             {/* Mobile Header */}
             <div className="lg:hidden flex items-center justify-between p-4 border-b border-border bg-card max-w-full">
               <div className="flex items-center gap-2 min-w-0">
-                <img src="/icon.png" alt="icon" className="h-8 w-8 flex-shrink-0" />
-                <span className="font-semibold text-base truncate">eBook To Mindmap</span>
+                <img
+                  src="/icon.png"
+                  alt="icon"
+                  className="h-8 w-8 flex-shrink-0"
+                />
+                <span className="font-semibold text-base truncate">
+                  eBook To Mindmap
+                </span>
               </div>
               <button
                 onClick={() => setMobileSidebarOpen(true)}
-                className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
-              >
+                className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0">
                 <Menu className="h-6 w-6" />
               </button>
             </div>

@@ -3,8 +3,19 @@ import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { BookOpen, Network, Loader2, ArrowLeft, Download, RefreshCw } from 'lucide-react'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import {
+  BookOpen,
+  Network,
+  Loader2,
+  ArrowLeft,
+  Download,
+  RefreshCw,
+} from 'lucide-react'
 import { MarkdownCard } from './MarkdownCard'
 import { MermaidDiagram } from './MermaidDiagram'
 import { MindMapCard } from './MindMapCard'
@@ -56,7 +67,14 @@ interface Step2ResultsProps {
   extractedChapters: ChapterData[] | null
   onBackToConfig: () => void
   onClearChapterCache: (chapterId: string) => void
-  onClearSpecificCache: (cacheType: 'connections' | 'overall_summary' | 'character_relationship' | 'combined_mindmap' | 'merged_mindmap') => void
+  onClearSpecificCache: (
+    cacheType:
+      | 'connections'
+      | 'overall_summary'
+      | 'character_relationship'
+      | 'combined_mindmap'
+      | 'merged_mindmap'
+  ) => void
   onReadChapter: (chapterId: string, chapterIds: string[]) => void
   onRetry?: () => void
   mindElixirOptions: Options
@@ -76,10 +94,10 @@ export function Step2Results({
   onClearSpecificCache,
   onReadChapter,
   onRetry,
-  mindElixirOptions
+  mindElixirOptions,
 }: Step2ResultsProps) {
   const { t } = useTranslation()
-  const { bookType } = useConfigStore(state => state.processingOptions)
+  const { bookType } = useConfigStore((state) => state.processingOptions)
   const showCharacterRelationship = bookType !== 'non-fiction'
 
   const downloadAllMarkdown = () => {
@@ -121,7 +139,9 @@ ${bookSummary.overallSummary}
 `
     }
 
-    const blob = new Blob([markdownContent], { type: 'text/markdown;charset=utf-8' })
+    const blob = new Blob([markdownContent], {
+      type: 'text/markdown;charset=utf-8',
+    })
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
@@ -138,7 +158,7 @@ ${bookSummary.overallSummary}
   }
 
   return (
-    <div className='h-full flex flex-col p-4 gap-3'>
+    <div className="h-full flex flex-col p-4 gap-3">
       {/* 顶部固定区域 */}
       <div className="shrink-0">
         <div className="p-4 bg-muted rounded-lg space-y-3">
@@ -150,8 +170,7 @@ ${bookSummary.overallSummary}
                   variant="outline"
                   size="sm"
                   onClick={onBackToConfig}
-                  className="flex items-center gap-2 shrink-0"
-                >
+                  className="flex items-center gap-2 shrink-0">
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
@@ -162,15 +181,46 @@ ${bookSummary.overallSummary}
             <div className="flex items-center justify-between flex-1 min-w-0">
               <div className="flex items-center gap-2 min-w-0">
                 {processingMode === 'summary' ? (
-                  <><BookOpen className="h-5 w-5 text-muted-foreground shrink-0" /><span className="font-medium text-sm truncate">{t('results.summaryTitle', { title: bookSummary?.title })}</span></>
+                  <>
+                    <BookOpen className="h-5 w-5 text-muted-foreground shrink-0" />
+                    <span className="font-medium text-sm truncate">
+                      {t('results.summaryTitle', { title: bookSummary?.title })}
+                    </span>
+                  </>
                 ) : processingMode === 'mindmap' ? (
-                  <><Network className="h-5 w-5 text-muted-foreground shrink-0" /><span className="font-medium text-sm truncate">{t('results.chapterMindMapTitle', { title: bookMindMap?.title })}</span></>
+                  <>
+                    <Network className="h-5 w-5 text-muted-foreground shrink-0" />
+                    <span className="font-medium text-sm truncate">
+                      {t('results.chapterMindMapTitle', {
+                        title: bookMindMap?.title,
+                      })}
+                    </span>
+                  </>
                 ) : (
-                  <><Network className="h-5 w-5 text-muted-foreground shrink-0" /><span className="font-medium text-sm truncate">{t('results.wholeMindMapTitle', { title: bookMindMap?.title })}</span></>
+                  <>
+                    <Network className="h-5 w-5 text-muted-foreground shrink-0" />
+                    <span className="font-medium text-sm truncate">
+                      {t('results.wholeMindMapTitle', {
+                        title: bookMindMap?.title,
+                      })}
+                    </span>
+                  </>
                 )}
               </div>
               <p className="text-xs text-muted-foreground/80 shrink-0">
-                {t('results.author', { author: bookSummary?.author || bookMindMap?.author })} • {bookSummary ? t('results.groupCount', { count: bookSummary.groups.length }) : bookMindMap ? t('results.groupCount', { count: bookMindMap.groups.length }) : ''}
+                {t('results.author', {
+                  author: bookSummary?.author || bookMindMap?.author,
+                })}{' '}
+                •{' '}
+                {bookSummary
+                  ? t('results.groupCount', {
+                      count: bookSummary.groups.length,
+                    })
+                  : bookMindMap
+                    ? t('results.groupCount', {
+                        count: bookMindMap.groups.length,
+                      })
+                    : ''}
               </p>
             </div>
             {processingMode === 'summary' && bookSummary && (
@@ -180,8 +230,7 @@ ${bookSummary.overallSummary}
                     variant="outline"
                     size="sm"
                     onClick={downloadAllMarkdown}
-                    className="flex items-center gap-2 shrink-0"
-                  >
+                    className="flex items-center gap-2 shrink-0">
                     <Download className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
@@ -199,7 +248,9 @@ ${bookSummary.overallSummary}
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                   {error ? (
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className="text-red-500 font-medium truncate" title={error || ''}>
+                      <span
+                        className="text-red-500 font-medium truncate"
+                        title={error || ''}>
                         Error: {error}
                       </span>
                       {onRetry && (
@@ -207,8 +258,7 @@ ${bookSummary.overallSummary}
                           variant="outline"
                           size="sm"
                           onClick={onRetry}
-                          className="flex items-center gap-1 text-xs shrink-0"
-                        >
+                          className="flex items-center gap-1 text-xs shrink-0">
                           <RefreshCw className="h-3 w-3" />
                           {t('common.retry')}
                         </Button>
@@ -226,7 +276,6 @@ ${bookSummary.overallSummary}
               {!error && <Progress value={progress} className="w-full" />}
             </div>
           )}
-
         </div>
       </div>
 
@@ -237,13 +286,34 @@ ${bookSummary.overallSummary}
             <div className="pr-2">
               {processingMode === 'summary' && bookSummary ? (
                 <Tabs defaultValue="chapters" className="w-full">
-                  <TabsList className={`grid w-full ${showCharacterRelationship ? 'grid-cols-4' : 'grid-cols-3'}`}>
-                    <TabsTrigger value="chapters">📑 <span className="hidden md:inline">{t('results.tabs.chapterSummary')}</span></TabsTrigger>
-                    <TabsTrigger value="connections">🔗 <span className="hidden md:inline">{t('results.tabs.connections')}</span></TabsTrigger>
+                  <TabsList
+                    className={`grid w-full ${showCharacterRelationship ? 'grid-cols-4' : 'grid-cols-3'}`}>
+                    <TabsTrigger value="chapters">
+                      📑{' '}
+                      <span className="hidden md:inline">
+                        {t('results.tabs.chapterSummary')}
+                      </span>
+                    </TabsTrigger>
+                    <TabsTrigger value="connections">
+                      🔗{' '}
+                      <span className="hidden md:inline">
+                        {t('results.tabs.connections')}
+                      </span>
+                    </TabsTrigger>
                     {showCharacterRelationship && (
-                      <TabsTrigger value="characterRelationship">👥 <span className="hidden md:inline">{t('results.tabs.characterRelationship')}</span></TabsTrigger>
+                      <TabsTrigger value="characterRelationship">
+                        👥{' '}
+                        <span className="hidden md:inline">
+                          {t('results.tabs.characterRelationship')}
+                        </span>
+                      </TabsTrigger>
                     )}
-                    <TabsTrigger value="overall">📄 <span className="hidden md:inline">{t('results.tabs.overallSummary')}</span></TabsTrigger>
+                    <TabsTrigger value="overall">
+                      📄{' '}
+                      <span className="hidden md:inline">
+                        {t('results.tabs.overallSummary')}
+                      </span>
+                    </TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="chapters" className="space-y-3">
@@ -251,10 +321,16 @@ ${bookSummary.overallSummary}
                       const groupTitle = group.tag
                         ? `${group.tag} (${group.chapterTitles.join(', ')})`
                         : group.chapterTitles[0]
-                      const groupContent = group.chapterIds.map(id => {
-                        const chapter = extractedChapters?.find(ch => ch.id === id)
-                        return chapter ? `## ${chapter.title}\n\n${chapter.content}` : ''
-                      }).join('\n\n')
+                      const groupContent = group.chapterIds
+                        .map((id) => {
+                          const chapter = extractedChapters?.find(
+                            (ch) => ch.id === id
+                          )
+                          return chapter
+                            ? `## ${chapter.title}\n\n${chapter.content}`
+                            : ''
+                        })
+                        .join('\n\n')
 
                       return (
                         <MarkdownCard
@@ -298,12 +374,15 @@ ${bookSummary.overallSummary}
                     <TabsContent value="characterRelationship">
                       <div className="bg-card rounded-lg p-6 border border-border">
                         <div className="flex items-center justify-between mb-4">
-                          <h3 className="text-lg font-semibold">{t('results.tabs.characterRelationship')}</h3>
+                          <h3 className="text-lg font-semibold">
+                            {t('results.tabs.characterRelationship')}
+                          </h3>
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => onClearSpecificCache('character_relationship')}
-                          >
+                            onClick={() =>
+                              onClearSpecificCache('character_relationship')
+                            }>
                             {t('common.clearCache')}
                           </Button>
                         </div>
@@ -331,7 +410,9 @@ ${bookSummary.overallSummary}
                       showClearCache={true}
                       showViewContent={false}
                       showCopyButton={true}
-                      onClearCache={() => onClearSpecificCache('overall_summary')}
+                      onClearCache={() =>
+                        onClearSpecificCache('overall_summary')
+                      }
                       isLoading={bookSummary.overallSummaryLoading}
                     />
                   </TabsContent>
@@ -339,19 +420,37 @@ ${bookSummary.overallSummary}
               ) : processingMode === 'mindmap' && bookMindMap ? (
                 <Tabs defaultValue="chapters" className="w-full">
                   <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="chapters">🧩 <span className="hidden md:inline">{t('results.tabs.chapterMindMaps')}</span></TabsTrigger>
-                    <TabsTrigger value="combined">🌳 <span className="hidden md:inline">{t('results.tabs.combinedMindMap')}</span></TabsTrigger>
+                    <TabsTrigger value="chapters">
+                      🧩{' '}
+                      <span className="hidden md:inline">
+                        {t('results.tabs.chapterMindMaps')}
+                      </span>
+                    </TabsTrigger>
+                    <TabsTrigger value="combined">
+                      🌳{' '}
+                      <span className="hidden md:inline">
+                        {t('results.tabs.combinedMindMap')}
+                      </span>
+                    </TabsTrigger>
                   </TabsList>
 
-                  <TabsContent value="chapters" className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <TabsContent
+                    value="chapters"
+                    className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {bookMindMap.groups.map((group, index) => {
                       const groupTitle = group.tag
                         ? `${group.tag} (${group.chapterTitles.join(', ')})`
                         : group.chapterTitles[0]
-                      const groupContent = group.chapterIds.map(id => {
-                        const chapter = extractedChapters?.find(ch => ch.id === id)
-                        return chapter ? `## ${chapter.title}\n\n${chapter.content}` : ''
-                      }).join('\n\n')
+                      const groupContent = group.chapterIds
+                        .map((id) => {
+                          const chapter = extractedChapters?.find(
+                            (ch) => ch.id === id
+                          )
+                          return chapter
+                            ? `## ${chapter.title}\n\n${chapter.content}`
+                            : ''
+                        })
+                        .join('\n\n')
 
                       return (
                         <MindMapCard
@@ -360,7 +459,11 @@ ${bookSummary.overallSummary}
                           title={groupTitle}
                           isLoading={group.isLoading}
                           content={groupContent}
-                          mindMapData={group.mindMap || { nodeData: { topic: '', id: '', children: [] } }}
+                          mindMapData={
+                            group.mindMap || {
+                              nodeData: { topic: '', id: '', children: [] },
+                            }
+                          }
                           index={index}
                           onClearCache={onClearChapterCache}
                           onOpenInMindElixir={openInMindElixir}
@@ -377,7 +480,7 @@ ${bookSummary.overallSummary}
                     })}
                   </TabsContent>
 
-                  <TabsContent value="combined" className='grid grid-cols-1'>
+                  <TabsContent value="combined" className="grid grid-cols-1">
                     {bookMindMap.mergedMindMap ? (
                       <MindMapCard
                         direction={2}
@@ -386,9 +489,18 @@ ${bookSummary.overallSummary}
                         content=""
                         mindMapData={bookMindMap.mergedMindMap}
                         index={0}
-                        onOpenInMindElixir={(mindmapData) => openInMindElixir(mindmapData, t('results.combinedMindMapTitle', { title: bookMindMap.title }))}
+                        onOpenInMindElixir={(mindmapData) =>
+                          openInMindElixir(
+                            mindmapData,
+                            t('results.combinedMindMapTitle', {
+                              title: bookMindMap.title,
+                            })
+                          )
+                        }
                         onDownloadMindMap={downloadMindMap}
-                        onClearCache={() => onClearSpecificCache('merged_mindmap')}
+                        onClearCache={() =>
+                          onClearSpecificCache('merged_mindmap')
+                        }
                         showClearCache={true}
                         showViewContent={false}
                         mindMapClassName="w-full h-[600px] mx-auto"
@@ -405,13 +517,24 @@ ${bookSummary.overallSummary}
                 bookMindMap.wholeMindMap ? (
                   <MindMapCard
                     id="whole-book"
-                    title={t('results.wholeMindMapTitle', { title: bookMindMap.title })}
+                    title={t('results.wholeMindMapTitle', {
+                      title: bookMindMap.title,
+                    })}
                     content=""
                     mindMapData={bookMindMap.wholeMindMap}
                     index={0}
-                    onOpenInMindElixir={(mindmapData) => openInMindElixir(mindmapData, t('results.wholeMindMapTitle', { title: bookMindMap.title }))}
+                    onOpenInMindElixir={(mindmapData) =>
+                      openInMindElixir(
+                        mindmapData,
+                        t('results.wholeMindMapTitle', {
+                          title: bookMindMap.title,
+                        })
+                      )
+                    }
                     onDownloadMindMap={downloadMindMap}
-                    onClearCache={() => onClearSpecificCache('combined_mindmap')}
+                    onClearCache={() =>
+                      onClearSpecificCache('combined_mindmap')
+                    }
                     showClearCache={true}
                     showViewContent={false}
                     mindMapClassName="w-full h-[600px] mx-auto"
