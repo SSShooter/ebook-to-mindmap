@@ -177,17 +177,21 @@ export const MindMapCard: React.FC<MindMapCardProps> = ({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {isLoading && !reasoning && !mindMapData?.nodeData ? (
-          <div className="text-center text-muted-foreground py-8">
+        {isLoading && !reasoning && !mindMapData?.nodeData?.topic ? (
+          <div className="text-center text-muted-foreground py-8 aspect-square">
             <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
             <p>{t('common.generatingMindMap')}</p>
           </div>
         ) : (
           <div className="space-y-0">
-            <div className="border rounded-lg overflow-hidden">
-              {!mindMapData?.nodeData?.topic ? (
-                <ReasoningDisplay reasoning={reasoning} />
-              ) : (
+            {!mindMapData?.nodeData?.topic ? (
+              <ReasoningDisplay
+                reasoning={reasoning}
+                className="aspect-square"
+                scrollable
+              />
+            ) : (
+              <div className="border rounded-lg overflow-hidden">
                 <MindMap
                   ref={localMindElixirRef}
                   direction={direction}
@@ -196,8 +200,8 @@ export const MindMapCard: React.FC<MindMapCardProps> = ({
                   readonly>
                   <MindMapControls position="top-right" showExport={false} />
                 </MindMap>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         )}
       </CardContent>
