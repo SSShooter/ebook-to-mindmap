@@ -15,9 +15,6 @@ export {
   getFictionOverallSummaryPrompt,
 } from './overallSummary'
 
-// 测试连接的prompt
-export const getTestConnectionPrompt = () => '请回复"连接成功"'
-
 export {
   getChapterMindMapPrompt,
   getMindMapArrowPrompt,

@@ -353,10 +353,11 @@ export function SummaryPage() {
                   const targetGroupIndex = newGroups.findIndex(
                     (g) => g.groupId === group.groupId
                   )
-                  if (targetGroupIndex !== -1 && data.mindMap) {
+                  if (targetGroupIndex !== -1) {
                     newGroups[targetGroupIndex] = {
                       ...newGroups[targetGroupIndex],
-                      mindMap: data.mindMap,
+                      mindMap: data.mindMap || undefined,
+                      reasoning: data.reasoning,
                       isLoading: false,
                     }
                   }

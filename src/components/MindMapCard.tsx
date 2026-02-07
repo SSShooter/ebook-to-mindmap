@@ -177,25 +177,27 @@ export const MindMapCard: React.FC<MindMapCardProps> = ({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {isLoading ? (
+        {isLoading && !reasoning && !mindMapData?.nodeData ? (
           <div className="text-center text-muted-foreground py-8">
             <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
             <p>{t('common.generatingMindMap')}</p>
           </div>
         ) : (
-          <div className="border rounded-lg overflow-hidden">
-            <ReasoningDisplay
-              reasoning={reasoning}
-              className="rounded-none border-x-0 border-t-0"
-            />
-            <MindMap
-              ref={localMindElixirRef}
-              direction={direction}
-              className={mindMapClassName}
-              data={mindMapData}
-              readonly>
-              <MindMapControls position="top-right" showExport={false} />
-            </MindMap>
+          <div className="space-y-0">
+            <div className="border rounded-lg overflow-hidden">
+              {!mindMapData?.nodeData?.topic ? (
+                <ReasoningDisplay reasoning={reasoning} />
+              ) : (
+                <MindMap
+                  ref={localMindElixirRef}
+                  direction={direction}
+                  className={mindMapClassName}
+                  data={mindMapData}
+                  readonly>
+                  <MindMapControls position="top-right" showExport={false} />
+                </MindMap>
+              )}
+            </div>
           </div>
         )}
       </CardContent>

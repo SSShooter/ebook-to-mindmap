@@ -5,7 +5,6 @@ import {
   getFictionChapterConnectionsAnalysisPrompt,
   getOverallSummaryPrompt,
   getFictionOverallSummaryPrompt,
-  getTestConnectionPrompt,
   getChapterMindMapPrompt,
   getChapterMindMapStreamPrompt,
   getMindMapArrowPrompt,
@@ -248,46 +247,16 @@ export class AIService {
     }
   }
 
-  async generateChapterMindMap(
-    content: string,
-    outputLanguage: SupportedLanguage = 'en',
-    customPrompt?: string,
-    abortSignal?: AbortSignal
-  ) {
-    try {
-      const basePrompt = getChapterMindMapPrompt()
-      let prompt = basePrompt + `章节内容：\n${content}`
-
-      // 如果有自定义提示词，则拼接到原始prompt后面
-      if (customPrompt && customPrompt.trim()) {
-        prompt += `\n\n补充要求：${customPrompt.trim()}`
-      }
-
-      const result = await this.generateContent(
-        prompt,
-        outputLanguage,
-        abortSignal,
-        true
-      )
-      const mindMapJson = result.content
-
-      return this.parseJsonResponse(mindMapJson, '思维导图') as MindElixirData
-    } catch (error) {
-      throw new Error(
-        `章节思维导图生成失败: ${error instanceof Error ? error.message : '未知错误'}`
-      )
-    }
-  }
-
   async generateChapterMindMapStream(
     content: string,
     outputLanguage: SupportedLanguage = 'en',
-    customPrompt?: string,
-    abortSignal?: AbortSignal,
-    onStreamUpdate?: (data: {
+    onStreamUpdate: (data: {
       plaintext: string
       mindMap: MindElixirData | null
-    }) => void
+      reasoning?: string
+    }) => void,
+    customPrompt?: string,
+    abortSignal?: AbortSignal
   ): Promise<MindElixirData> {
     try {
       const basePrompt = getChapterMindMapStreamPrompt()
@@ -301,18 +270,20 @@ export class AIService {
       let accumulatedPlaintext = ''
       let lastUpdateTime = 0
 
+      let accumulatedReasoning = ''
+
       const handleStreamUpdate = (data: {
         content: string
         reasoning?: string
       }) => {
         accumulatedPlaintext += data.content
+        if (data.reasoning) {
+          accumulatedReasoning += data.reasoning
+        }
 
         // 节流更新：每500ms更新一次
         const now = Date.now()
-        if (
-          onStreamUpdate &&
-          (now - lastUpdateTime >= 500 || lastUpdateTime === 0)
-        ) {
+        if (now - lastUpdateTime >= 500 || lastUpdateTime === 0) {
           try {
             // 清理可能的markdown代码块包裹
             const cleanedText = accumulatedPlaintext
@@ -322,10 +293,18 @@ export class AIService {
 
             // 尝试解析为MindElixir数据
             const mindMapData = plaintextToMindElixir(cleanedText)
-            onStreamUpdate({ plaintext: cleanedText, mindMap: mindMapData })
+            onStreamUpdate({
+              plaintext: cleanedText,
+              mindMap: mindMapData,
+              reasoning: accumulatedReasoning,
+            })
           } catch {
             // 解析失败时仍然传递plaintext，mindMap为null
-            onStreamUpdate({ plaintext: accumulatedPlaintext, mindMap: null })
+            onStreamUpdate({
+              plaintext: accumulatedPlaintext,
+              mindMap: null,
+              reasoning: accumulatedReasoning,
+            })
           }
           lastUpdateTime = now
         }
@@ -347,9 +326,11 @@ export class AIService {
       const mindMapData = plaintextToMindElixir(cleanedText)
 
       // 确保最后一次更新包含完整内容
-      if (onStreamUpdate) {
-        onStreamUpdate({ plaintext: cleanedText, mindMap: mindMapData })
-      }
+      onStreamUpdate({
+        plaintext: cleanedText,
+        mindMap: mindMapData,
+        reasoning: result.reasoning,
+      })
 
       return mindMapData
     } catch (error) {
@@ -423,12 +404,12 @@ export class AIService {
   async generateCombinedMindMapStream(
     bookTitle: string,
     chapters: Chapter[],
-    customPrompt?: string,
-    abortSignal?: AbortSignal,
-    onStreamUpdate?: (data: {
+    onStreamUpdate: (data: {
       plaintext: string
       mindMap: MindElixirData | null
-    }) => void
+    }) => void,
+    customPrompt?: string,
+    abortSignal?: AbortSignal
   ): Promise<MindElixirData> {
     try {
       const basePrompt = getChapterMindMapStreamPrompt()
@@ -455,10 +436,7 @@ export class AIService {
 
         // 节流更新：每500ms更新一次
         const now = Date.now()
-        if (
-          onStreamUpdate &&
-          (now - lastUpdateTime >= 500 || lastUpdateTime === 0)
-        ) {
+        if (now - lastUpdateTime >= 500 || lastUpdateTime === 0) {
           try {
             // 清理可能的markdown代码块包裹
             const cleanedText = accumulatedPlaintext
@@ -493,9 +471,7 @@ export class AIService {
       const mindMapData = plaintextToMindElixir(cleanedText)
 
       // 确保最后一次更新包含完整内容
-      if (onStreamUpdate) {
-        onStreamUpdate({ plaintext: cleanedText, mindMap: mindMapData })
-      }
+      onStreamUpdate({ plaintext: cleanedText, mindMap: mindMapData })
 
       return mindMapData
     } catch (error) {
@@ -699,23 +675,6 @@ export class AIService {
       throw new Error(
         `Stream generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
-    }
-  }
-
-  // 辅助方法：检查API连接
-  async testConnection(): Promise<boolean> {
-    try {
-      const result = await this.generateContent(
-        getTestConnectionPrompt(),
-        undefined,
-        undefined,
-        false
-      )
-      return (
-        result.content.includes('连接成功') || result.content.includes('成功')
-      )
-    } catch {
-      return false
     }
   }
 }
