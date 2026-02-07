@@ -37,8 +37,6 @@ interface MindMapCardProps {
   showClearCache?: boolean;
   /** 是否显示查看内容按钮 */
   showViewContent?: boolean;
-  /** 是否显示复制按钮 */
-  showCopyButton?: boolean;
   /** 是否显示在MindElixir中打开按钮 */
   showOpenInMindElixir?: boolean;
   /** 是否显示下载按钮 */
