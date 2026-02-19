@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button'
 import { Trash2, ExternalLink, BookOpen, Loader2 } from 'lucide-react'
 import { ViewContentDialog } from './ViewContentDialog'
 import { DownloadMindMapButton } from './DownloadMindMapButton'
-// import MindElixirReact from "./project/MindElixirReact";
 import type {
   MindElixirData,
   MindElixirInstance,
