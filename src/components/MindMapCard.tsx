@@ -131,8 +131,15 @@ export const MindMapCard: React.FC<MindMapCardProps> = ({
     <Card className={`gap-2 ${className}`}>
       <CardHeader>
         <CardTitle className="text-lg w-full overflow-hidden">
-          <div className="truncate w-full">{title}</div>
-          {isLoading ? null : (
+          <div className="flex items-center justify-between gap-2 w-full">
+            <div className="truncate flex-1">{title}</div>
+          </div>
+          {isLoading ? (
+            <div className="flex items-center gap-1.5 text-muted-foreground flex-shrink-0 font-normal mt-2 h-8">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="text-xs">{t('common.processing')}</span>
+            </div>
+          ) : (
             <div className="flex items-center gap-2 mt-2">
               {showOpenInMindElixir && onOpenInMindElixir && (
                 <Button

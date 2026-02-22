@@ -358,7 +358,6 @@ export function SummaryPage() {
                       ...newGroups[targetGroupIndex],
                       mindMap: data.mindMap || undefined,
                       reasoning: data.reasoning,
-                      isLoading: false,
                     }
                   }
                   return {

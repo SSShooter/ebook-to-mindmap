@@ -541,6 +541,7 @@ ${bookSummary.overallSummary}
                     mindMapClassName="w-full h-[600px] mx-auto"
                     mindElixirOptions={mindElixirOptions}
                     direction={2}
+                    isLoading={processing}
                   />
                 ) : (
                   <div className="text-center text-muted-foreground py-8 bg-muted rounded-lg">
