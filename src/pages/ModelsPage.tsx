@@ -387,26 +387,38 @@ export function ModelsPage() {
                   <Label htmlFor="model-id">{t('models.modelId')}</Label>
                   <div className="flex gap-2">
                     <div className="flex-1">
-                      <Combobox
-                        options={availableModels}
-                        value={formData.model}
-                        onValueChange={(value) =>
-                          setFormData({ ...formData, model: value })
-                        }
-                        placeholder={
-                          providerSettings[formData.provider].modelPlaceholder
-                        }
-                        searchPlaceholder={t(
-                          'models.searchModels',
-                          'Search models...'
-                        )}
-                        emptyText={
-                          availableModels.length === 0
-                            ? 'Type model name and press Enter'
-                            : 'No matching models found.'
-                        }
-                        allowCustomInput={true}
-                      />
+                      {availableModels.length > 0 ? (
+                        <Combobox
+                          options={availableModels}
+                          value={formData.model}
+                          onValueChange={(value) =>
+                            setFormData({ ...formData, model: value })
+                          }
+                          placeholder={
+                            providerSettings[formData.provider].modelPlaceholder
+                          }
+                          searchPlaceholder={t(
+                            'models.searchModels',
+                            'Search models...'
+                          )}
+                          emptyText={t(
+                            'models.noModelsFound',
+                            'No matching models found.'
+                          )}
+                          allowCustomInput={true}
+                        />
+                      ) : (
+                        <Input
+                          id="model-id"
+                          placeholder={
+                            providerSettings[formData.provider].modelPlaceholder
+                          }
+                          value={formData.model}
+                          onChange={(e) =>
+                            setFormData({ ...formData, model: e.target.value })
+                          }
+                        />
+                      )}
                     </div>
                     {formData.apiUrl && formData.apiKey && (
                       <Button
