@@ -512,7 +512,7 @@ export function Step1Config({
       <div
         className={`m-4 relative border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
           isDragging
-            ? 'border-blue-500 bg-blue-50'
+            ? 'border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/20'
             : 'border-border hover:border-border/60 hover:bg-muted/50'
         }`}
         onDragOver={handleDragOver}
