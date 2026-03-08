@@ -83,22 +83,12 @@ export class AIService {
               useCustomOnly
             )
 
-      let result: { content: string; reasoning: string }
-      if (onStreamUpdate) {
-        result = await this.generateContentStream(
-          prompt,
-          onStreamUpdate,
-          outputLanguage,
-          abortSignal
-        )
-      } else {
-        result = await this.generateContent(
-          prompt,
-          outputLanguage,
-          abortSignal,
-          false
-        )
-      }
+      const result = await this.generateContentStream(
+        prompt,
+        onStreamUpdate || (() => {}),
+        outputLanguage,
+        abortSignal
+      )
 
       if (!result.content || result.content.trim().length === 0) {
         throw new Error('AI返回了空的总结')
@@ -133,17 +123,12 @@ export class AIService {
           ? getFictionChapterConnectionsAnalysisPrompt(chapterSummaries)
           : getChapterConnectionsAnalysisPrompt(chapterSummaries)
 
-      let result: { content: string; reasoning: string }
-      if (onStreamUpdate) {
-        result = await this.generateContentStream(
-          prompt,
-          onStreamUpdate,
-          outputLanguage,
-          abortSignal
-        )
-      } else {
-        result = await this.generateContent(prompt, outputLanguage, abortSignal)
-      }
+      const result = await this.generateContentStream(
+        prompt,
+        onStreamUpdate || (() => {}),
+        outputLanguage,
+        abortSignal
+      )
       const connections = result.content
 
       if (!connections || connections.trim().length === 0) {
@@ -180,17 +165,12 @@ export class AIService {
           ? getFictionOverallSummaryPrompt(bookTitle, chapterInfo)
           : getOverallSummaryPrompt(bookTitle, chapterInfo)
 
-      let result: { content: string; reasoning: string }
-      if (onStreamUpdate) {
-        result = await this.generateContentStream(
-          prompt,
-          onStreamUpdate,
-          outputLanguage,
-          abortSignal
-        )
-      } else {
-        result = await this.generateContent(prompt, outputLanguage, abortSignal)
-      }
+      const result = await this.generateContentStream(
+        prompt,
+        onStreamUpdate || (() => {}),
+        outputLanguage,
+        abortSignal
+      )
       const summary = result.content
 
       if (!summary || summary.trim().length === 0) {
@@ -222,11 +202,11 @@ export class AIService {
           ? getFictionCharacterRelationshipPrompt(chapterSummaries)
           : getCharacterRelationshipPrompt(chapterSummaries)
 
-      const result = await this.generateContent(
+      const result = await this.generateContentStream(
         prompt,
+        () => {},
         outputLanguage,
-        abortSignal,
-        false
+        abortSignal
       )
       const relationship = result.content
 
@@ -353,11 +333,11 @@ export class AIService {
         basePrompt +
         `\n\n当前思维导图数据：\n${JSON.stringify(combinedMindMapData, null, 2)}`
 
-      const result = await this.generateContent(
+      const result = await this.generateContentStream(
         prompt,
+        () => {},
         outputLanguage,
-        abortSignal,
-        true
+        abortSignal
       )
       const arrowsJson = result.content
 
@@ -391,8 +371,12 @@ export class AIService {
       if (customPrompt && customPrompt.trim()) {
         prompt += `\n\n补充要求：${customPrompt.trim()}`
       }
-
-      const result = await this.generateContent(prompt, 'en', abortSignal, true)
+      const result = await this.generateContentStream(
+        prompt,
+        () => {},
+        'en',
+        abortSignal
+      )
       const mindMapJson = result.content
 
       return this.parseJsonResponse(mindMapJson, '思维导图') as MindElixirData
@@ -503,96 +487,6 @@ export class AIService {
         }
       }
       throw new Error(`AI返回的${errorContext}数据格式不正确`)
-    }
-  }
-
-  // 此方法已废弃，请使用generateContentStream
-  private async generateContent(
-    prompt: string,
-    outputLanguage?: SupportedLanguage,
-    abortSignal?: AbortSignal,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _requireJsonFormat: boolean = false
-  ): Promise<{ content: string; reasoning: string }> {
-    const config = this.getCurrentConfig()
-    const language = outputLanguage || 'en'
-    const systemPrompt = getLanguageInstruction(language)
-
-    // 合并系统提示和用户提示
-    const messages: Array<{ role: 'system' | 'user'; content: string }> = [
-      {
-        role: 'user',
-        content: prompt + '\n\n' + systemPrompt,
-      },
-    ]
-
-    // 检查是否已取消
-    if (abortSignal?.aborted) {
-      throw new DOMException('Request was aborted', 'AbortError')
-    }
-
-    let endpoint = `${this.model.apiUrl}/chat/completions`
-    let requestBody: unknown
-
-    if (config.provider === 'openai-responses') {
-      endpoint = `${this.model.apiUrl}/responses`
-      requestBody = {
-        model: this.model.model,
-        instructions: systemPrompt,
-        input: prompt,
-        temperature: config.temperature || 0.7,
-      }
-    } else {
-      requestBody = {
-        model: this.model.model,
-        messages,
-        temperature: config.temperature || 0.7,
-      }
-
-      // 只有在生成思维导图时才要求JSON格式
-      // if (requireJsonFormat) {
-      //   requestBody.response_format = {
-      //     type: 'json_object',
-      //   }
-      // }
-    }
-
-    let finalEndpoint = endpoint
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${this.model.apiKey}`,
-    }
-
-    if (this.model.useCorsProxy) {
-      const url = new URL(endpoint)
-      finalEndpoint = `/api/proxy${url.pathname}${url.search}`
-      headers['X-Target-Url'] = this.model.apiUrl
-    }
-
-    const response = await fetch(finalEndpoint, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(requestBody),
-      signal: abortSignal,
-    })
-
-    if (!response.ok) {
-      const errorBody = await response.text()
-      throw new Error(
-        `Error: ${response.status} ${response.statusText} - ${errorBody}`
-      )
-    }
-
-    const data = await response.json()
-
-    if (data.choices?.[0]?.error) {
-      const error = data.choices[0].error
-      throw new Error(`AI Provider Error: ${error.code} - ${error.message}`)
-    }
-
-    return {
-      content: data.choices[0]?.message?.content || '',
-      reasoning: data.choices[0]?.message?.reasoning_content || '',
     }
   }
 
