@@ -18,7 +18,11 @@ import { PdfReader } from '../components/PdfReader'
 import { Step1Config } from '../components/Step1Config'
 import { Step2Results } from '../components/Step2Results'
 import { toast } from 'sonner'
-import { useConfigStore } from '../stores/configStore'
+import {
+  useConfigStore,
+  useAIConfig,
+  getDefaultModelFromStorage,
+} from '../stores/configStore'
 
 const options = {
   direction: 1,
@@ -79,7 +83,8 @@ export function SummaryPage() {
   const abortControllerRef = useRef<AbortController | null>(null)
 
   const configStore = useConfigStore()
-  const { apiKey } = configStore.aiConfig
+  const aiConfig = useAIConfig()
+  const { apiKey } = aiConfig
   const { processingMode, bookType } = configStore.processingOptions
 
   const handleFileChange = useCallback((selectedFile: File | null) => {
@@ -209,15 +214,9 @@ export function SummaryPage() {
 
       try {
         const aiService = new AIService(() => {
-          const currentState = useConfigStore.getState()
-          const currentAiConfig = currentState.aiConfig
-          return {
-            provider: currentAiConfig.provider,
-            apiKey: currentAiConfig.apiKey,
-            apiUrl: currentAiConfig.apiUrl,
-            model: currentAiConfig.model || undefined,
-            temperature: currentAiConfig.temperature,
-          }
+          return (
+            getDefaultModelFromStorage() || useConfigStore.getState().aiConfig
+          )
         })
 
         const bookProcessingService = new BookProcessingService(

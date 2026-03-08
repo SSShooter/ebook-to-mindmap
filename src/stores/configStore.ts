@@ -140,7 +140,7 @@ export const useConfigStore = create<ConfigState>()(
 )
 
 // Helper to get default model from model store
-const getDefaultModelFromStorage = (): AIConfig | null => {
+export const getDefaultModelFromStorage = (): AIConfig | null => {
   if (typeof window === 'undefined') return null
 
   try {
@@ -155,6 +155,7 @@ const getDefaultModelFromStorage = (): AIConfig | null => {
         apiUrl: string
         model: string
         temperature: number
+        useCorsProxy?: boolean
       }) => m.isDefault
     )
 
@@ -165,6 +166,7 @@ const getDefaultModelFromStorage = (): AIConfig | null => {
         apiUrl: defaultModel.apiUrl,
         model: defaultModel.model,
         temperature: defaultModel.temperature,
+        useCorsProxy: defaultModel.useCorsProxy,
       }
     }
   } catch (error) {

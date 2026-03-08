@@ -34,12 +34,9 @@ interface ModelConfig {
 
 export class AIService {
   private config: AIConfig | (() => AIConfig)
-  private model!: ModelConfig
 
   constructor(config: AIConfig | (() => AIConfig)) {
     this.config = config
-    const currentConfig = typeof config === 'function' ? config() : config
-    this.model = this.getModelConfig(currentConfig)
   }
 
   private getModelConfig(config: AIConfig): ModelConfig {
@@ -498,6 +495,7 @@ export class AIService {
     abortSignal?: AbortSignal
   ): Promise<{ content: string; reasoning: string }> {
     const config = this.getCurrentConfig()
+    const modelConfig = this.getModelConfig(config)
     const language = outputLanguage || 'en'
     const systemPrompt = getLanguageInstruction(language)
 
@@ -513,18 +511,18 @@ export class AIService {
     }
 
     try {
-      let endpoint = `${this.model.apiUrl}/chat/completions`
+      let endpoint = `${modelConfig.apiUrl}/chat/completions`
       let requestBody: unknown = {
-        model: this.model.model,
+        model: modelConfig.model,
         messages,
         temperature: config.temperature || 0.7,
         stream: true, // 开启流式传输
       }
 
       if (config.provider === 'openai-responses') {
-        endpoint = `${this.model.apiUrl}/responses`
+        endpoint = `${modelConfig.apiUrl}/responses`
         requestBody = {
-          model: this.model.model,
+          model: modelConfig.model,
           instructions: systemPrompt,
           input: [
             {
@@ -543,13 +541,13 @@ export class AIService {
       let finalEndpoint = endpoint
       const headers: HeadersInit = {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.model.apiKey}`,
+        Authorization: `Bearer ${modelConfig.apiKey}`,
       }
 
-      if (this.model.useCorsProxy) {
+      if (modelConfig.useCorsProxy) {
         const url = new URL(endpoint)
         finalEndpoint = `/api/proxy${url.pathname}${url.search}`
-        headers['X-Target-Url'] = this.model.apiUrl
+        headers['X-Target-Url'] = modelConfig.apiUrl
       }
 
       const response = await fetch(finalEndpoint, {
