@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
 import {
   Select,
   SelectContent,
@@ -48,6 +49,7 @@ export function ModelsPage() {
     apiUrl: '',
     model: '',
     temperature: 0.7,
+    useCorsProxy: false,
   })
 
   const [availableModels, setAvailableModels] = useState<string[]>([])
@@ -58,10 +60,12 @@ export function ModelsPage() {
     apiUrl?: string
     apiKey?: string
     provider?: string
+    useCorsProxy?: boolean
   }) => {
     const apiUrl = params?.apiUrl ?? formData.apiUrl
     const apiKey = params?.apiKey ?? formData.apiKey
     const provider = params?.provider ?? formData.provider
+    const useCorsProxy = params?.useCorsProxy ?? formData.useCorsProxy
 
     if (!apiUrl || !apiKey) {
       setAvailableModels([])
@@ -70,7 +74,14 @@ export function ModelsPage() {
 
     // Only fetch for openai compatible providers
     if (
-      !['openai', 'ollama', '302.ai', 'gemini', 'openrouter'].includes(provider)
+      ![
+        'openai',
+        'openai-responses',
+        'ollama',
+        '302.ai',
+        'gemini',
+        'openrouter',
+      ].includes(provider)
     ) {
       setAvailableModels([])
       return
@@ -78,11 +89,20 @@ export function ModelsPage() {
 
     setIsLoadingModels(true)
     try {
-      const response = await fetch(`${apiUrl}/models`, {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
+      let finalApiUrl = apiUrl
+      const headers: HeadersInit = {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      }
+
+      if (useCorsProxy) {
+        const url = new URL(apiUrl)
+        finalApiUrl = `/api/proxy${url.pathname}`
+        headers['X-Target-Url'] = apiUrl
+      }
+
+      const response = await fetch(`${finalApiUrl}/models`, {
+        headers,
       })
 
       if (!response.ok) {
@@ -125,6 +145,13 @@ export function ModelsPage() {
       modelPlaceholder: t('config.modelPlaceholder'),
       url: PROVIDER_CONFIGS.openai.websiteUrl,
     },
+    'openai-responses': {
+      apiKeyLabel: 'API Token',
+      apiKeyPlaceholder: t('config.enterApiToken'),
+      apiUrlPlaceholder: PROVIDER_CONFIGS['openai-responses'].defaultApiUrl,
+      modelPlaceholder: t('config.modelPlaceholder'),
+      url: PROVIDER_CONFIGS['openai-responses'].websiteUrl,
+    },
     ollama: {
       apiKeyLabel: 'API Token',
       apiKeyPlaceholder: 'API Token',
@@ -158,6 +185,7 @@ export function ModelsPage() {
         apiUrl: model.apiUrl,
         model: model.model,
         temperature: model.temperature,
+        useCorsProxy: model.useCorsProxy ?? false,
       }
       setFormData(newFormData)
       fetchAvailableModels(newFormData)
@@ -170,6 +198,7 @@ export function ModelsPage() {
         apiUrl: PROVIDER_CONFIGS.gemini.defaultApiUrl,
         model: PROVIDER_CONFIGS.gemini.defaultModel,
         temperature: 0.7,
+        useCorsProxy: false,
       }
       setFormData(newFormData)
       fetchAvailableModels(newFormData)
@@ -242,6 +271,7 @@ export function ModelsPage() {
       apiUrl: model.apiUrl,
       model: model.model,
       temperature: model.temperature,
+      useCorsProxy: model.useCorsProxy ?? false,
     })
     setIsDialogOpen(true)
   }
@@ -287,6 +317,7 @@ export function ModelsPage() {
                           ...formData,
                           provider: value,
                           apiUrl: PROVIDER_CONFIGS[value].defaultApiUrl,
+                          useCorsProxy: false,
                         }
                         setFormData(newFormData)
                         fetchAvailableModels(newFormData)
@@ -298,6 +329,9 @@ export function ModelsPage() {
                         <SelectItem value="gemini">Google Gemini</SelectItem>
                         <SelectItem value="openai">
                           {t('config.openaiCompatible')}
+                        </SelectItem>
+                        <SelectItem value="openai-responses">
+                          OpenAI Responses API
                         </SelectItem>
                         <SelectItem value="ollama">Ollama</SelectItem>
                         <SelectItem value="302.ai">302.AI</SelectItem>
@@ -352,6 +386,7 @@ export function ModelsPage() {
                 </div>
 
                 {(formData.provider === 'openai' ||
+                  formData.provider === 'openai-responses' ||
                   formData.provider === 'ollama' ||
                   formData.provider === '302.ai' ||
                   formData.provider === 'gemini' ||
@@ -457,6 +492,28 @@ export function ModelsPage() {
                     {t('config.temperatureDescription')}
                   </p>
                 </div>
+
+                {import.meta.env.DEV && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label>
+                        {t('models.useCorsProxy', 'Use CORS Proxy')}
+                      </Label>
+                      <Switch
+                        checked={formData.useCorsProxy}
+                        onCheckedChange={(checked) =>
+                          setFormData({ ...formData, useCorsProxy: checked })
+                        }
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {t(
+                        'models.useCorsProxyDescription',
+                        'Enable this to bypass browser CORS restrictions. Using local dev server as proxy.'
+                      )}
+                    </p>
+                  </div>
+                )}
               </div>
 
               <DialogFooter>
@@ -510,6 +567,8 @@ export function ModelsPage() {
                           {model.provider === 'gemini' && 'Google Gemini'}
                           {model.provider === 'openai' &&
                             t('config.openaiCompatible')}
+                          {model.provider === 'openai-responses' &&
+                            'OpenAI Responses API'}
                           {model.provider === 'ollama' && 'Ollama'}
                           {model.provider === '302.ai' && '302.AI'}
                           {model.provider === 'openrouter' && 'OpenRouter'}

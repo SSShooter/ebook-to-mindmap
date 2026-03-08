@@ -11,6 +11,7 @@ export interface AIModel {
   model: string
   temperature: number
   isDefault: boolean
+  useCorsProxy: boolean
 }
 
 interface ModelState {

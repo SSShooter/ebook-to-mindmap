@@ -29,6 +29,7 @@ interface ModelConfig {
   apiUrl: string
   apiKey: string
   model: string
+  useCorsProxy?: boolean
 }
 
 export class AIService {
@@ -48,6 +49,7 @@ export class AIService {
       apiUrl: config.apiUrl || providerConfig.defaultApiUrl,
       apiKey: config.apiKey || '',
       model: config.model || providerConfig.defaultModel,
+      useCorsProxy: config.useCorsProxy ?? false,
     }
   }
 
@@ -504,12 +506,13 @@ export class AIService {
     }
   }
 
-  // 统一的内容生成方法
+  // 此方法已废弃，请使用generateContentStream
   private async generateContent(
     prompt: string,
     outputLanguage?: SupportedLanguage,
     abortSignal?: AbortSignal,
-    requireJsonFormat: boolean = false
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _requireJsonFormat: boolean = false
   ): Promise<{ content: string; reasoning: string }> {
     const config = this.getCurrentConfig()
     const language = outputLanguage || 'en'
@@ -528,31 +531,47 @@ export class AIService {
       throw new DOMException('Request was aborted', 'AbortError')
     }
 
-    // 构建请求体，只在需要JSON格式时添加response_format
-    const requestBody: {
-      model: string
-      messages: Array<{ role: 'system' | 'user'; content: string }>
-      temperature: number
-      response_format?: { type: string }
-    } = {
-      model: this.model.model,
-      messages,
-      temperature: config.temperature || 0.7,
-    }
+    let endpoint = `${this.model.apiUrl}/chat/completions`
+    let requestBody: unknown
 
-    // 只有在生成思维导图时才要求JSON格式
-    if (requireJsonFormat) {
-      requestBody.response_format = {
-        type: 'json_object',
+    if (config.provider === 'openai-responses') {
+      endpoint = `${this.model.apiUrl}/responses`
+      requestBody = {
+        model: this.model.model,
+        instructions: systemPrompt,
+        input: prompt,
+        temperature: config.temperature || 0.7,
       }
+    } else {
+      requestBody = {
+        model: this.model.model,
+        messages,
+        temperature: config.temperature || 0.7,
+      }
+
+      // 只有在生成思维导图时才要求JSON格式
+      // if (requireJsonFormat) {
+      //   requestBody.response_format = {
+      //     type: 'json_object',
+      //   }
+      // }
     }
 
-    const response = await fetch(`${this.model.apiUrl}/chat/completions`, {
+    let finalEndpoint = endpoint
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${this.model.apiKey}`,
+    }
+
+    if (this.model.useCorsProxy) {
+      const url = new URL(endpoint)
+      finalEndpoint = `/api/proxy${url.pathname}${url.search}`
+      headers['X-Target-Url'] = this.model.apiUrl
+    }
+
+    const response = await fetch(finalEndpoint, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.model.apiKey}`,
-      },
+      headers,
       body: JSON.stringify(requestBody),
       signal: abortSignal,
     })
@@ -600,18 +619,49 @@ export class AIService {
     }
 
     try {
-      const response = await fetch(`${this.model.apiUrl}/chat/completions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${this.model.apiKey}`,
-        },
-        body: JSON.stringify({
+      let endpoint = `${this.model.apiUrl}/chat/completions`
+      let requestBody: unknown = {
+        model: this.model.model,
+        messages,
+        temperature: config.temperature || 0.7,
+        stream: true, // 开启流式传输
+      }
+
+      if (config.provider === 'openai-responses') {
+        endpoint = `${this.model.apiUrl}/responses`
+        requestBody = {
           model: this.model.model,
-          messages,
+          instructions: systemPrompt,
+          input: [
+            {
+              role: 'user',
+              content: prompt,
+            },
+          ],
           temperature: config.temperature || 0.7,
-          stream: true, // 开启流式传输
-        }),
+          stream: true,
+          store: false,
+          text: { verbosity: 'medium' },
+          include: ['reasoning.encrypted_content'],
+        }
+      }
+
+      let finalEndpoint = endpoint
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${this.model.apiKey}`,
+      }
+
+      if (this.model.useCorsProxy) {
+        const url = new URL(endpoint)
+        finalEndpoint = `/api/proxy${url.pathname}${url.search}`
+        headers['X-Target-Url'] = this.model.apiUrl
+      }
+
+      const response = await fetch(finalEndpoint, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(requestBody),
         signal: abortSignal,
       })
 
@@ -650,10 +700,20 @@ export class AIService {
             try {
               const jsonStr = trimmedLine.slice(6)
               const json = JSON.parse(jsonStr)
-              const delta = json.choices?.[0]?.delta
-              const contentChunk = delta?.content || ''
-              const reasoningChunk =
-                delta?.reasoning_content || delta?.reasoning || ''
+
+              let contentChunk = ''
+              let reasoningChunk = ''
+
+              if (config.provider === 'openai-responses') {
+                if (json.type === 'response.output_text.delta') {
+                  contentChunk = json.delta || ''
+                }
+              } else {
+                const delta = json.choices?.[0]?.delta
+                contentChunk = delta?.content || ''
+                reasoningChunk =
+                  delta?.reasoning_content || delta?.reasoning || ''
+              }
 
               if (contentChunk || reasoningChunk) {
                 fullContent += contentChunk

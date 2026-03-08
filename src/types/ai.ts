@@ -6,6 +6,7 @@
 export const AI_PROVIDERS = [
   'gemini',
   'openai',
+  'openai-responses',
   'ollama',
   '302.ai',
   'openrouter',
@@ -19,6 +20,7 @@ export interface AIConfig {
   apiUrl?: string
   model?: string
   temperature?: number
+  useCorsProxy?: boolean
 }
 
 /**
@@ -41,6 +43,11 @@ export const PROVIDER_CONFIGS: Record<AIProvider, ProviderConfig> = {
     defaultApiUrl: 'https://api.openai.com/v1',
     defaultModel: 'gpt-3.5-turbo',
     websiteUrl: 'https://platform.openai.com/',
+  },
+  'openai-responses': {
+    defaultApiUrl: 'https://api.openai.com/v1',
+    defaultModel: 'gpt-4o',
+    websiteUrl: 'https://platform.openai.com/docs/api-reference/responses',
   },
   ollama: {
     defaultApiUrl: 'http://localhost:11434/v1',
