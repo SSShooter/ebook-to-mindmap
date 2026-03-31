@@ -4,6 +4,8 @@ import httpProxy from 'http-proxy'
 // import react from '@vitejs/plugin-react-swc'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import wasm from 'vite-plugin-wasm'
+import topLevelAwait from 'vite-plugin-top-level-await'
 
 function corsProxyPlugin(): Plugin {
   return {
@@ -62,6 +64,8 @@ export default defineConfig({
     }),
     tailwindcss(),
     corsProxyPlugin(),
+    wasm(),
+    topLevelAwait(),
   ],
   resolve: {
     alias: {

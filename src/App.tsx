@@ -8,6 +8,7 @@ import { SettingsPage } from './pages/SettingsPage'
 import { ModelsPage } from './pages/ModelsPage'
 import { CustomPromptsPage } from './pages/CustomPromptsPage'
 import { CacheManagementPage } from './pages/CacheManagementPage'
+import { ChatPage } from './pages/ChatPage'
 import { Menu } from 'lucide-react'
 import { useState } from 'react'
 
@@ -57,6 +58,7 @@ function App() {
               <Route path="/models" component={ModelsPage} />
               <Route path="/custom-prompts" component={CustomPromptsPage} />
               <Route path="/cache" component={CacheManagementPage} />
+              {import.meta.env.DEV && <Route path="/chat" component={ChatPage} />}
               <Route path="/settings" component={SettingsPage} />
             </Switch>
           </div>

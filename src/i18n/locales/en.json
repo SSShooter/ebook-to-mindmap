@@ -8,7 +8,8 @@
     "models": "Models",
     "customPrompts": "Custom Prompts",
     "cacheManagement": "Cache",
-    "settings": "Settings"
+    "settings": "Settings",
+    "chatWithBook": "Talk with Book (Beta)"
   },
   "upload": {
     "title": "File Upload & Configuration",
@@ -375,5 +376,21 @@
       "customPrompt": "Custom Prompt",
       "useCustomOnly": "Custom Only"
     }
+  },
+  "chat": {
+    "title": "Talk with Book",
+    "description": "Index the book content using RAG and ask questions",
+    "configTitle": "Configuration",
+    "openRouterKey": "OpenRouter API Key",
+    "openRouterKeyPlaceholder": "sk-or-v1-...",
+    "embeddingModel": "Embedding Model Name",
+    "embeddingModelPlaceholder": "e.g., nomic-embed-text",
+    "startIndexing": "Start Indexing",
+    "indexing": "Indexing in progress...",
+    "indexingComplete": "Indexing complete!",
+    "askQuestion": "Ask a question about the book...",
+    "send": "Send",
+    "retrieving": "Retrieving context...",
+    "generating": "Generating answer..."
   }
 }

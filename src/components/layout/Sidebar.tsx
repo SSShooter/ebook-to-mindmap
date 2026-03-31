@@ -7,6 +7,7 @@ import {
   MessageSquarePlus,
   X,
   Database,
+  MessageCircle,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Footer } from '../Footer'
@@ -51,6 +52,16 @@ export function Sidebar({
       icon: Settings,
       label: t('nav.settings'),
     },
+    ...(import.meta.env.DEV
+      ? [
+          {
+            path: '/chat',
+            icon: MessageCircle,
+            label: t('nav.chatWithBook'),
+            isBeta: true,
+          },
+        ]
+      : []),
   ]
 
   const sidebarClasses = cn(
@@ -104,13 +115,18 @@ export function Sidebar({
                     href={item.path}
                     onClick={handleLinkClick}
                     className={cn(
-                      'flex items-center gap-3 px-3 py-2 rounded-lg transition-colors',
+                      'flex items-center gap-3 px-3 py-2 rounded-lg transition-colors relative',
                       isActive
                         ? 'bg-sidebar-accent text-sidebar-accent-foreground'
                         : 'text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
                     )}>
                     <Icon className="h-5 w-5" />
                     <span>{item.label}</span>
+                    {item.isBeta && (
+                      <span className="ml-auto text-[10px] font-medium bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">
+                        Beta
+                      </span>
+                    )}
                   </Link>
                 </li>
               )
