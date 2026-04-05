@@ -8,9 +8,12 @@ import {
   X,
   Database,
   MessageCircle,
+  LogIn,
+  LogOut,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Footer } from '../Footer'
+import { authService } from '@/services/authService'
 
 interface SidebarProps {
   isOpen?: boolean
@@ -76,6 +79,17 @@ export function Sidebar({
     }
   }
 
+  const isLoggedIn = authService.isLoggedIn()
+
+  const handleAuthAction = () => {
+    if (isLoggedIn) {
+      authService.logout()
+      window.location.reload()
+    } else {
+      authService.login()
+    }
+  }
+
   return (
     <>
       {isMobile && isOpen && (
@@ -133,6 +147,24 @@ export function Sidebar({
             })}
           </ul>
         </nav>
+
+        <div className="p-3 border-t border-sidebar-border mt-auto">
+          <button
+            onClick={handleAuthAction}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors">
+            {isLoggedIn ? (
+              <>
+                <LogOut className="h-5 w-5 text-red-500" />
+                <span className="text-red-500 font-medium">Logout</span>
+              </>
+            ) : (
+              <>
+                <LogIn className="h-5 w-5 text-primary" />
+                <span className="text-primary font-medium">Login with OAuth</span>
+              </>
+            )}
+          </button>
+        </div>
         <Footer />
       </div>
     </>

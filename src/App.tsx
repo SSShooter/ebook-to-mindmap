@@ -9,6 +9,7 @@ import { ModelsPage } from './pages/ModelsPage'
 import { CustomPromptsPage } from './pages/CustomPromptsPage'
 import { CacheManagementPage } from './pages/CacheManagementPage'
 import { ChatPage } from './pages/ChatPage'
+import { CallbackPage } from './pages/CallbackPage'
 import { Menu } from 'lucide-react'
 import { useState } from 'react'
 
@@ -55,6 +56,7 @@ function App() {
 
             <Switch>
               <Route path="/" component={SummaryPage} />
+              <Route path="/callback" component={CallbackPage} />
               <Route path="/models" component={ModelsPage} />
               <Route path="/custom-prompts" component={CustomPromptsPage} />
               <Route path="/cache" component={CacheManagementPage} />
