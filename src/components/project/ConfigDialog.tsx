@@ -22,10 +22,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { Settings, Brain } from 'lucide-react'
+import { Settings, Brain, Star, ExternalLink } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useConfigStore, useProcessingOptions } from '../../stores/configStore'
 import { useModelStore } from '../../stores/modelStore'
+import { useAuthStore } from '../../stores/authStore'
 import type { SupportedLanguage } from '../../services/prompts/utils'
 import { useState, useEffect, useEffectEvent } from 'react'
 
@@ -38,6 +39,7 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
   const { t } = useTranslation()
   const processingOptions = useProcessingOptions()
   const { models, getDefaultModel } = useModelStore()
+  const { user } = useAuthStore()
   const {
     setProcessingMode,
     setBookType,
@@ -136,11 +138,52 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
                   <SelectContent>
                     {models.map((model) => (
                       <SelectItem key={model.id} value={model.id}>
-                        {model.name} {model.isDefault && '⭐'}
+                        <div className="flex items-center gap-2">
+                          {model.name} {model.isDefault && '⭐'}
+                          {model.costDescription && (
+                            <Star className="h-3 w-3 text-amber-500 fill-amber-500" />
+                          )}
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+              )}
+
+              {selectedModel?.costDescription && (
+                <div className="mt-3 space-y-2">
+                  <div className="flex items-center gap-1.5 text-xs font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2.5 py-1.5 rounded-lg border border-amber-200/50 dark:border-amber-800/30">
+                    <Star className="h-3.5 w-3.5 fill-current" />
+                    {t(selectedModel.costDescription)}
+                  </div>
+
+                  {user && (
+                    <div className="flex items-center justify-between px-2.5 py-1.5 bg-muted/30 rounded-lg border border-border/50">
+                      <div className="flex items-center gap-2 text-xs">
+                        <span className="text-muted-foreground">
+                          {t('models.balance')}:
+                        </span>
+                        <span className="font-bold text-foreground flex items-center gap-1">
+                          <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                          {user.star?.toFixed(2) || '0.00'}
+                        </span>
+                      </div>
+                      <Button
+                        variant="link"
+                        size="sm"
+                        className="h-auto p-0 text-xs gap-1"
+                        asChild>
+                        <a
+                          href="https://cloud.mind-elixir.com"
+                          target="_blank"
+                          rel="noopener noreferrer">
+                          {t('models.recharge')}
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </Button>
+                    </div>
+                  )}
+                </div>
               )}
 
               {selectedModel && (

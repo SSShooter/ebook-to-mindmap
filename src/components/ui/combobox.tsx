@@ -27,6 +27,7 @@ interface ComboboxProps {
   emptyText?: string
   className?: string
   allowCustomInput?: boolean
+  disabled?: boolean
 }
 
 export function Combobox({
@@ -38,6 +39,7 @@ export function Combobox({
   emptyText = "No results found.",
   className,
   allowCustomInput = false,
+  disabled = false,
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false)
   const [inputValue, setInputValue] = React.useState(value)
@@ -47,13 +49,14 @@ export function Combobox({
   }, [value])
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={disabled ? false : open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
           role="combobox"
           aria-expanded={open}
           className={cn("w-full justify-between", className)}
+          disabled={disabled}
         >
           <span className="truncate">{value || placeholder}</span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />

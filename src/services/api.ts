@@ -7,6 +7,7 @@ export interface User {
   id: string
   name: string
   _id: string
+  star?: number
 }
 
 export interface UserResponse {

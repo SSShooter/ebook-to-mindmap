@@ -555,6 +555,7 @@ export class AIService {
         headers,
         body: JSON.stringify(requestBody),
         signal: abortSignal,
+        credentials: 'include',
       })
 
       if (!response.ok) {

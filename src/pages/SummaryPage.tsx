@@ -177,7 +177,7 @@ export function SummaryPage() {
       customPrompt: string,
       useCustomOnly: boolean
     ) => {
-      if (!extractedChapters || !bookData || !apiKey) {
+      if (!extractedChapters || !bookData) {
         toast.error(t('chapters.extractAndApiKey'), {
           duration: 3000,
           position: 'top-center',

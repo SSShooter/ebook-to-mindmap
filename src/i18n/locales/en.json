@@ -3,6 +3,12 @@
     "title": "eBook to Mind Map",
     "description": "Mindmap powered by MindElixir"
   },
+  "user": {
+    "title": "My Account",
+    "logout": "Logout",
+    "star": "My star",
+    "profile": "Profile (Mind Elixir Cloud)"
+  },
   "nav": {
     "summary": "AI Summary",
     "models": "Models",
@@ -296,7 +302,14 @@
     "selectModelPlaceholder": "Select a model",
     "fetchModelsFailed": "Failed to fetch models",
     "searchModels": "Search models...",
-    "refreshModels": "Refresh models"
+    "refreshModels": "Refresh models",
+    "fixed": "Fixed",
+    "cannotDeleteFixed": "Cannot delete fixed model",
+    "fixedModelCostHint": "Login and recharge stars to use",
+    "balance": "Balance",
+    "recharge": "Recharge",
+    "view": "View",
+    "viewModel": "View Model"
   },
   "customPrompts": {
     "title": "Custom Prompts",

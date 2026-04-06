@@ -10,7 +10,6 @@ import {
   MessageCircle,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { Footer } from '../Footer'
 import { UserMenu } from './UserMenu'
 
 interface SidebarProps {
@@ -134,10 +133,7 @@ export function Sidebar({
             })}
           </ul>
         </nav>
-        <div className="border-t border-sidebar-border mt-auto">
-          <Footer />
-          <UserMenu />
-        </div>
+        <UserMenu />
       </div>
     </>
   )

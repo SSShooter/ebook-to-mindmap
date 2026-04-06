@@ -30,6 +30,7 @@ import {
   ExternalLink,
   Copy,
   RefreshCw,
+  Eye,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useModelStore, type AIModel } from '../stores/modelStore'
@@ -41,6 +42,7 @@ export function ModelsPage() {
     useModelStore()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingModel, setEditingModel] = useState<AIModel | null>(null)
+  const [isReadOnly, setIsReadOnly] = useState(false)
 
   const [formData, setFormData] = useState({
     name: '',
@@ -103,6 +105,7 @@ export function ModelsPage() {
 
       const response = await fetch(`${finalApiUrl}/models`, {
         headers,
+        credentials: 'include',
       })
 
       if (!response.ok) {
@@ -175,7 +178,8 @@ export function ModelsPage() {
     },
   }
 
-  const handleOpenDialog = (model?: AIModel) => {
+  const handleOpenDialog = (model?: AIModel, readOnly = false) => {
+    setIsReadOnly(readOnly)
     if (model) {
       setEditingModel(model)
       const newFormData = {
@@ -245,6 +249,11 @@ export function ModelsPage() {
       toast.error(t('models.cannotDeleteLast'))
       return
     }
+    const model = models.find((m) => m.id === id)
+    if (model?.isFixed) {
+      toast.error(t('models.cannotDeleteFixed', 'Cannot delete fixed model'))
+      return
+    }
     deleteModel(id)
     toast.success(t('models.deleteSuccess'))
   }
@@ -302,9 +311,20 @@ export function ModelsPage() {
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>
-                  {editingModel ? t('models.editModel') : t('models.addModel')}
+                  {isReadOnly
+                    ? t('models.viewModel', 'View Model')
+                    : editingModel
+                      ? t('models.editModel')
+                      : t('models.addModel')}
                 </DialogTitle>
               </DialogHeader>
+
+              {isReadOnly && editingModel?.costDescription && (
+                <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/30 rounded-lg text-amber-700 dark:text-amber-400 text-sm font-medium">
+                  <Star className="h-4 w-4 fill-current" />
+                  {t(editingModel.costDescription)}
+                </div>
+              )}
 
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
@@ -321,7 +341,8 @@ export function ModelsPage() {
                         }
                         setFormData(newFormData)
                         fetchAvailableModels(newFormData)
-                      }}>
+                      }}
+                      disabled={isReadOnly}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -361,6 +382,7 @@ export function ModelsPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, name: e.target.value })
                     }
+                    readOnly={isReadOnly}
                   />
                 </div>
                 <div className="space-y-2">
@@ -382,6 +404,7 @@ export function ModelsPage() {
                       setFormData(newFormData)
                       fetchAvailableModels(newFormData)
                     }}
+                    readOnly={isReadOnly}
                   />
                 </div>
 
@@ -441,6 +464,7 @@ export function ModelsPage() {
                             'No matching models found.'
                           )}
                           allowCustomInput={true}
+                          disabled={isReadOnly}
                         />
                       ) : (
                         <Input
@@ -452,6 +476,7 @@ export function ModelsPage() {
                           onChange={(e) =>
                             setFormData({ ...formData, model: e.target.value })
                           }
+                          readOnly={isReadOnly}
                         />
                       )}
                     </div>
@@ -461,7 +486,7 @@ export function ModelsPage() {
                         variant="outline"
                         size="sm"
                         onClick={() => fetchAvailableModels()}
-                        disabled={isLoadingModels}
+                        disabled={isLoadingModels || isReadOnly}
                         title={t('models.refreshModels', 'Refresh models')}
                         className="px-3">
                         <RefreshCw
@@ -487,6 +512,7 @@ export function ModelsPage() {
                         temperature: parseFloat(e.target.value) || 0.7,
                       })
                     }
+                    readOnly={isReadOnly}
                   />
                   <p className="text-xs text-muted-foreground">
                     {t('config.temperatureDescription')}
@@ -504,6 +530,7 @@ export function ModelsPage() {
                         onCheckedChange={(checked) =>
                           setFormData({ ...formData, useCorsProxy: checked })
                         }
+                        disabled={isReadOnly}
                       />
                     </div>
                     <p className="text-xs text-muted-foreground">
@@ -522,7 +549,7 @@ export function ModelsPage() {
                   onClick={() => setIsDialogOpen(false)}>
                   {t('common.cancel')}
                 </Button>
-                <Button onClick={handleSave}>{t('common.save')}</Button>
+                {!isReadOnly && <Button onClick={handleSave}>{t('common.save')}</Button>}
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -562,44 +589,55 @@ export function ModelsPage() {
                           {model.name}
                         </h3>
 
-                        {/* 提供商信息 */}
-                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 hidden md:block">
-                          {model.provider === 'gemini' && 'Google Gemini'}
-                          {model.provider === 'openai' &&
-                            t('config.openaiCompatible')}
-                          {model.provider === 'openai-responses' &&
-                            'OpenAI Responses API'}
-                          {model.provider === 'ollama' && 'Ollama'}
-                          {model.provider === '302.ai' && '302.AI'}
-                          {model.provider === 'openrouter' && 'OpenRouter'}
-                        </span>
+                        {model.costDescription && (
+                          <div className="flex items-center gap-1.5 text-[10px] text-amber-700 dark:text-amber-400 font-bold bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-800/50 shadow-sm ml-2">
+                            <Star className="h-3 w-3 fill-current" />
+                            {t(model.costDescription)}
+                          </div>
+                        )}
                       </div>
                       <div className="flex gap-1 flex-shrink-0">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleCopy(model)}
-                          className="h-8 w-8 p-0"
-                          title={t('models.copy')}>
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleOpenDialog(model)}
-                          className="h-8 w-8 p-0"
-                          title={t('models.edit')}>
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDelete(model.id)}
-                          disabled={models.length === 1}
-                          className="h-8 w-8 p-0"
-                          title={t('models.delete')}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        {!model.isFixed && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleCopy(model)}
+                            className="h-8 w-8 p-0"
+                            title={t('models.copy')}>
+                             <Copy className="h-4 w-4" />
+                           </Button>
+                         )}
+                         {model.isFixed && (
+                           <Button
+                             variant="ghost"
+                             size="sm"
+                             onClick={() => handleOpenDialog(model, true)}
+                             className="h-8 w-8 p-0"
+                             title={t('models.view', '查看详情')}>
+                             <Eye className="h-4 w-4" />
+                           </Button>
+                         )}
+                         {!model.isFixed && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleOpenDialog(model)}
+                            className="h-8 w-8 p-0"
+                            title={t('models.edit')}>
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        )}
+                        {!model.isFixed && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(model.id)}
+                            disabled={models.length === 1}
+                            className="h-8 w-8 p-0"
+                            title={t('models.delete')}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
                       </div>
                     </div>
 

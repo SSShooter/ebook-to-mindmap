@@ -33,7 +33,7 @@ import { ConfigDialog } from './project/ConfigDialog'
 import { TagDialog } from './TagDialog'
 import { ViewContentDialog } from './ViewContentDialog'
 import { CacheService } from '@/services/cacheService'
-import { useConfigStore, useAIConfig } from '@/stores/configStore'
+import { useConfigStore } from '@/stores/configStore'
 import { useCustomPromptStore } from '@/stores/customPromptStore'
 import { toast } from 'sonner'
 import {
@@ -99,8 +99,6 @@ export function Step1Config({
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const configStore = useConfigStore()
-  const aiConfig = useAIConfig()
-  const { apiKey } = aiConfig
   const {
     processingMode,
     skipNonEssentialChapters,
@@ -829,13 +827,6 @@ export function Step1Config({
           </div>
           <Button
             onClick={() => {
-              if (!apiKey) {
-                toast.error(t('chapters.apiKeyRequired'), {
-                  duration: 3000,
-                  position: 'top-center',
-                })
-                return
-              }
               onStartProcessing(
                 selectedChapters,
                 chapterTags,
