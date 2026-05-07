@@ -174,7 +174,7 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
                         className="h-auto p-0 text-xs gap-1"
                         asChild>
                         <a
-                          href="https://cloud.mind-elixir.com"
+                          href="https://app.mind-elixir.com"
                           target="_blank"
                           rel="noopener noreferrer">
                           {t('models.recharge')}

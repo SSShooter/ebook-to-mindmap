@@ -6,15 +6,21 @@ interface AuthState {
   user: User | null
   isLoading: boolean
   isInitialized: boolean
-  fetchUser: () => Promise<void>
+  fetchUser: (force?: boolean) => Promise<void>
   logout: () => Promise<void>
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   isLoading: false,
   isInitialized: false,
-  fetchUser: async () => {
+  fetchUser: async (force = false) => {
+    const { isLoading, isInitialized } = get()
+    // 如果已经在加载，或者非强制刷新且已经初始化过，则不重复请求
+    if (isLoading || (!force && isInitialized)) {
+      return
+    }
+
     set({ isLoading: true })
     try {
       const response = await api.user.getCurrentUser()

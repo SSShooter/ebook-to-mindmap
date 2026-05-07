@@ -10,10 +10,17 @@ import { CustomPromptsPage } from './pages/CustomPromptsPage'
 import { CacheManagementPage } from './pages/CacheManagementPage'
 import { ChatPage } from './pages/ChatPage'
 import { Menu } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useAuthStore } from './stores/authStore'
 
 function App() {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
+  const { fetchUser } = useAuthStore()
+
+  useEffect(() => {
+    // Fetch user data on app mount
+    fetchUser()
+  }, [])
 
   return (
     <ThemeProvider>

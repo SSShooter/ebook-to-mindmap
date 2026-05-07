@@ -279,7 +279,14 @@
     "balance": "当前余额",
     "recharge": "去充值",
     "view": "查看",
-    "viewModel": "查看详情"
+    "viewModel": "查看详情",
+    "notLoggedIn": "未登录",
+    "pleaseLogin": "请先登录",
+    "starBalance": "星星余额",
+    "starDescription": "使用星星访问高级 AI 模型",
+    "rechargeStars": "充值星星",
+    "rechargeHint": "点击上方按钮前往充值页面",
+    "loginRequired": "请先登录以查看星星余额并充值"
   },
   "customPrompts": {
     "title": "自定义提示词",

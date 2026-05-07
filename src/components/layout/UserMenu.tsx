@@ -9,17 +9,12 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { LogOut, User as UserIcon, LogIn, Star } from 'lucide-react'
-import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Footer } from '../Footer'
 
 export function UserMenu() {
   const { t } = useTranslation()
-  const { user, isLoading, fetchUser, logout } = useAuthStore()
-
-  useEffect(() => {
-    fetchUser()
-  }, [fetchUser])
+  const { user, isLoading, logout } = useAuthStore()
 
   const handleLogin = () => {
     window.location.href = 'http://localhost:7001/oauth/authme/login/eb2me'
@@ -104,7 +99,7 @@ export function UserMenu() {
                 className="w-full justify-start gap-3 h-11"
                 asChild>
                 <a
-                  href="https://cloud.mind-elixir.com"
+                  href="https://app.mind-elixir.com"
                   target="_blank"
                   rel="noopener noreferrer">
                   <UserIcon className="h-4 w-4" />

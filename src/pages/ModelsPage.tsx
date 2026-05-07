@@ -35,6 +35,7 @@ import {
 import { toast } from 'sonner'
 import { useModelStore, type AIModel } from '../stores/modelStore'
 import { PROVIDER_CONFIGS } from '../types/ai'
+import { MindElixirStarModal } from '@/components/MindElixirStarModal'
 
 export function ModelsPage() {
   const { t } = useTranslation()
@@ -43,6 +44,7 @@ export function ModelsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingModel, setEditingModel] = useState<AIModel | null>(null)
   const [isReadOnly, setIsReadOnly] = useState(false)
+  const [isStarModalOpen, setIsStarModalOpen] = useState(false)
 
   const [formData, setFormData] = useState({
     name: '',
@@ -179,6 +181,12 @@ export function ModelsPage() {
   }
 
   const handleOpenDialog = (model?: AIModel, readOnly = false) => {
+    // Open custom modal for MindElixirStar
+    if (model?.id === 'mind-elixir-star') {
+      setIsStarModalOpen(true)
+      return
+    }
+
     setIsReadOnly(readOnly)
     if (model) {
       setEditingModel(model)
@@ -659,6 +667,12 @@ export function ModelsPage() {
           </div>
         </ScrollArea>
       </div>
+
+      {/* MindElixir Star Modal */}
+      <MindElixirStarModal
+        open={isStarModalOpen}
+        onOpenChange={setIsStarModalOpen}
+      />
     </div>
   )
 }

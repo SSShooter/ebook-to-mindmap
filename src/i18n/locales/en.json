@@ -309,7 +309,14 @@
     "balance": "Balance",
     "recharge": "Recharge",
     "view": "View",
-    "viewModel": "View Model"
+    "viewModel": "View Model",
+    "notLoggedIn": "Not logged in",
+    "pleaseLogin": "Please login first",
+    "starBalance": "Star Balance",
+    "starDescription": "Use stars to access premium AI models",
+    "rechargeStars": "Recharge Stars",
+    "rechargeHint": "Click the button above to visit the recharge page",
+    "loginRequired": "Please login to view your star balance and recharge"
   },
   "customPrompts": {
     "title": "Custom Prompts",
