@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
-import mermaid from 'mermaid'
 import { CopyButton } from '@/components/ui/copy-button'
 import { ViewContentDialog } from './ViewContentDialog'
 import { Button } from '@/components/ui/button'
 import { ZoomIn, ZoomOut, RotateCcw, Maximize2, Minimize2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import type mermaidAPI from 'mermaid'
 
 interface MermaidDiagramProps {
   chart: string
@@ -14,17 +14,26 @@ interface MermaidDiagramProps {
   showViewCode?: boolean
 }
 
-// 延迟初始化mermaid配置，避免在模块加载时初始化导致D3依赖问题
+// 动态导入mermaid，避免在模块加载时初始化导致D3依赖问题
+let mermaidInstance: typeof mermaidAPI | null = null
 let mermaidInitialized = false
-const initializeMermaid = () => {
+
+const getMermaid = async () => {
+  if (!mermaidInstance) {
+    const mermaidModule = await import('mermaid')
+    mermaidInstance = mermaidModule.default
+  }
+
   if (!mermaidInitialized) {
-    mermaid.initialize({
+    mermaidInstance.initialize({
       startOnLoad: false,
       theme: 'default',
       securityLevel: 'loose',
     })
     mermaidInitialized = true
   }
+
+  return mermaidInstance
 }
 
 export function MermaidDiagram({
@@ -140,8 +149,8 @@ export function MermaidDiagram({
 
     const renderDiagram = async () => {
       try {
-        // 确保mermaid已初始化
-        initializeMermaid()
+        // 动态加载并初始化mermaid
+        const mermaid = await getMermaid()
 
         // 生成唯一ID
         const id = `mermaid-${Math.random().toString(36).substr(2, 9)}`
