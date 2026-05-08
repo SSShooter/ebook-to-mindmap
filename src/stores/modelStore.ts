@@ -30,7 +30,7 @@ const DEFAULT_FIXED_MODEL: AIModel = {
   name: 'MindElixirStar',
   provider: 'openai',
   apiKey: 'mind-elixir',
-  apiUrl: 'http://localhost:7001/api/v1',
+  apiUrl: import.meta.env.VITE_API_URL || 'http://localhost:7001/api/v1',
   model: 'MindElixirStar',
   temperature: 0.7,
   isDefault: false,
