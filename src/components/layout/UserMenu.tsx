@@ -17,9 +17,8 @@ export function UserMenu() {
   const { user, isLoading, logout } = useAuthStore()
 
   const handleLogin = () => {
-    window.location.href =
-      import.meta.env.VITE_API_URL ||
-      'http://localhost:7001/oauth/authme/login/eb2me'
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:7001'
+    window.location.href = `${baseUrl}/oauth/authme/login/eb2me`
   }
 
   if (isLoading) {
