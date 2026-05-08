@@ -14,12 +14,18 @@ interface MermaidDiagramProps {
   showViewCode?: boolean
 }
 
-// 初始化mermaid配置
-mermaid.initialize({
-  startOnLoad: false,
-  theme: 'default',
-  securityLevel: 'loose',
-})
+// 延迟初始化mermaid配置，避免在模块加载时初始化导致D3依赖问题
+let mermaidInitialized = false
+const initializeMermaid = () => {
+  if (!mermaidInitialized) {
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'default',
+      securityLevel: 'loose',
+    })
+    mermaidInitialized = true
+  }
+}
 
 export function MermaidDiagram({
   chart,
@@ -134,6 +140,9 @@ export function MermaidDiagram({
 
     const renderDiagram = async () => {
       try {
+        // 确保mermaid已初始化
+        initializeMermaid()
+
         // 生成唯一ID
         const id = `mermaid-${Math.random().toString(36).substr(2, 9)}`
 
