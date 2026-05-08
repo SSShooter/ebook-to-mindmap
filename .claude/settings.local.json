@@ -6,7 +6,9 @@
       "Bash(pnpm dlx shadcn@latest add:*)",
       "Bash(npx shadcn@latest add:*)",
       "Bash(powershell:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(npm run *)",
+      "Bash(git add *)"
     ],
     "deny": [],
     "ask": []
