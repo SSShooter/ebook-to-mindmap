@@ -18,13 +18,24 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 const THEME_STORAGE_KEY = 'ebook-to-mindmap-theme'
 
-export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>(() => {
-    const stored = localStorage.getItem(THEME_STORAGE_KEY)
-    return (stored as Theme) || 'system'
-  })
+const getInitialTheme = (): Theme => {
+  if (typeof window === 'undefined') return 'system'
+  const stored = localStorage.getItem(THEME_STORAGE_KEY)
+  return (stored as Theme) || 'system'
+}
 
-  const [actualTheme, setActualTheme] = useState<'light' | 'dark'>('light')
+const getActualTheme = (theme: Theme): 'light' | 'dark' => {
+  if (typeof window === 'undefined') return 'light'
+  if (theme === 'system') {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  }
+  return theme === 'dark' ? 'dark' : 'light'
+}
+
+export function ThemeProvider({ children }: { children: ReactNode }) {
+  const [theme, setThemeState] = useState<Theme>(getInitialTheme)
+
+  const [actualTheme, setActualTheme] = useState<'light' | 'dark'>(() => getActualTheme(getInitialTheme()))
 
   useEffect(() => {
     const root = document.documentElement
@@ -58,6 +69,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme)
     localStorage.setItem(THEME_STORAGE_KEY, newTheme)
+    setActualTheme(getActualTheme(newTheme))
   }
 
   return (
