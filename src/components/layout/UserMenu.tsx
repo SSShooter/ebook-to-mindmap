@@ -38,7 +38,7 @@ export function UserMenu() {
           className="w-full justify-start gap-2"
           onClick={handleLogin}>
           <LogIn className="h-4 w-4" />
-          <span>Login / Sign up</span>
+          <span>{t('models.login', 'Login / Sign up')}</span>
         </Button>
       </div>
     )
