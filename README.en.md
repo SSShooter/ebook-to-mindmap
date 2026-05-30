@@ -11,9 +11,20 @@
 
 An intelligent e-book parsing tool powered by AI technology that converts EPUB and PDF format e-books into structured mind maps and text summaries.
 
+Official Website: https://app.mind-elixir.com/en/ebook-to-mindmap
+
 Try it now: https://ebook2me-next.mind-elixir.com/
 
-[Use Legacy Version](https://ebook2me.mind-elixir.com/)
+Use Legacy Version: https://ebook2me.mind-elixir.com/
+
+## 💡 Comparison with NotebookLM
+
+If you have used Google NotebookLM, you might have noticed some limitations when processing e-books. This tool is designed to address those pain points, offering a more professional and flexible e-book reading and mind-mapping experience:
+
+| Feature | This Tool (ebook-to-mindmap) | Google NotebookLM |
+| :--- | :--- | :--- |
+| **Mind Map Export & Editing** | 🛠️ **Export for Editing**: Although the online interface is read-only, you can **export the mind map as a data file** and import it into the Mind Elixir Desktop Client or other editors for full editing and modification. | ❌ **No Export or Editing**: Mind maps are only for read-only viewing, cannot be exported, and do not support any post-editing. |
+| **Prompt Flexibility** | 🎯 **Total Customization**: Supports custom prompts and offers a "Use Custom Prompt Only" mode to completely override system prompts. AI fully respects your instructions. | 🚫 **Overpowering System Prompts**: Primarily optimized for retrieval and summarization (RAG). Its built-in system prompts are highly dominant, making it unable to fully follow your own custom instructions. |
 
 ## ✨ Features
 
