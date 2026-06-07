@@ -50,7 +50,7 @@ export function UserMenu() {
         <DialogTrigger asChild>
           <Button
             variant="ghost"
-            className="w-full justify-start gap-3 p-2 h-auto hover:bg-sidebar-accent">
+            className="w-full justify-start text-left gap-3 p-2 h-auto hover:bg-sidebar-accent">
             <Avatar className="h-8 w-8">
               <AvatarImage src={user.image} alt={user.name} />
               <AvatarFallback>
@@ -100,7 +100,7 @@ export function UserMenu() {
                 className="w-full justify-start gap-3 h-11"
                 asChild>
                 <a
-                  href="https://app.mind-elixir.com"
+                  href="https://app.mind-elixir.com/profile"
                   target="_blank"
                   rel="noopener noreferrer">
                   <UserIcon className="h-4 w-4" />
