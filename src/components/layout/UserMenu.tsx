@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useAuthStore } from '@/stores/authStore'
 import {
   Dialog,
@@ -8,15 +9,17 @@ import {
 } from '@/components/ui/dialog'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { LogOut, User as UserIcon, LogIn, Star } from 'lucide-react'
+import { LogOut, User as UserIcon, LogIn, Star, Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Footer } from '../Footer'
 
 export function UserMenu() {
   const { t } = useTranslation()
   const { user, isLoading, logout } = useAuthStore()
+  const [isLoginLoading, setIsLoginLoading] = useState(false)
 
   const handleLogin = () => {
+    setIsLoginLoading(true)
     const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:7001'
     window.location.href = `${baseUrl}/oauth/authme/login/eb2me`
   }
@@ -36,8 +39,13 @@ export function UserMenu() {
         <Button
           variant="outline"
           className="w-full justify-start gap-2"
-          onClick={handleLogin}>
-          <LogIn className="h-4 w-4" />
+          onClick={handleLogin}
+          disabled={isLoginLoading}>
+          {isLoginLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <LogIn className="h-4 w-4" />
+          )}
           <span>{t('models.login', 'Login / Sign up')}</span>
         </Button>
       </div>
