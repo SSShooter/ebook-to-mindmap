@@ -561,7 +561,7 @@ export class AIService {
         headers,
         body: JSON.stringify(requestBody),
         signal: abortSignal,
-        credentials: 'include',
+        ...(modelConfig.apiKey === 'mind-elixir' ? { credentials: 'include' } : {}),
       })
 
       if (!response.ok) {

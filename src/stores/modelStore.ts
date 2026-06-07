@@ -33,11 +33,12 @@ const DEFAULT_FIXED_MODEL: AIModel = {
   apiUrl: `${import.meta.env.VITE_API_URL || 'http://localhost:7001'}/api/v1`,
   model: 'MindElixirStar',
   temperature: 0.7,
-  isDefault: false,
+  isDefault: true,
   useCorsProxy: false,
   isFixed: true,
   costDescription: 'models.fixedModelCostHint',
 }
+
 
 export const useModelStore = create<ModelState>()(
   persist(
@@ -102,17 +103,29 @@ export const useModelStore = create<ModelState>()(
           const index = state.models.findIndex(
             (m) => m.id === DEFAULT_FIXED_MODEL.id
           )
+          const otherDefaultExists = state.models.some(
+            (m) => m.id !== DEFAULT_FIXED_MODEL.id && m.isDefault
+          )
+
           if (index === -1) {
-            state.models = [DEFAULT_FIXED_MODEL, ...state.models]
+            state.models = [
+              {
+                ...DEFAULT_FIXED_MODEL,
+                isDefault: !otherDefaultExists,
+              },
+              ...state.models,
+            ]
           } else {
             // Force update fixed model properties (e.g. costDescription)
             state.models[index] = {
               ...state.models[index],
               ...DEFAULT_FIXED_MODEL,
+              isDefault: !otherDefaultExists,
             }
           }
         }
       },
+
     }
   )
 )

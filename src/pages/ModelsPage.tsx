@@ -107,7 +107,7 @@ export function ModelsPage() {
 
       const response = await fetch(`${finalApiUrl}/models`, {
         headers,
-        credentials: 'include',
+        ...(apiKey === 'mind-elixir' ? { credentials: 'include' } : {}),
       })
 
       if (!response.ok) {

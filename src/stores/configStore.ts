@@ -43,12 +43,13 @@ interface ConfigState {
 
 // 默认配置
 const defaultAIConfig: AIConfig = {
-  provider: 'gemini',
-  apiKey: '',
-  apiUrl: 'https://api.openai.com/v1',
-  model: 'gemini-1.5-flash',
+  provider: 'openai',
+  apiKey: 'mind-elixir',
+  apiUrl: `${import.meta.env.VITE_API_URL || 'http://localhost:7001'}/api/v1`,
+  model: 'MindElixirStar',
   temperature: 0.7,
 }
+
 
 const getBrowserLanguage = (): SupportedLanguage => {
   if (typeof navigator === 'undefined') return 'en'
