@@ -116,7 +116,9 @@
     "launchError": "Failed to launch Mind Elixir Desktop, please ensure Mind Elixir Desktop app is installed",
     "exportSuccess": "{{title}} successfully exported as {{format}} format",
     "exportError": "Failed to export {{format}} format: {{error}}",
-    "unsupportedFormat": "Unsupported format: {{format}}"
+    "unsupportedFormat": "Unsupported format: {{format}}",
+    "loginRequired": "Please log in to Mind Elixir on the 'Models' page, or configure your own AI API Key",
+    "insufficientBalance": "Mind Elixir Star balance is insufficient, please recharge, or configure your own AI API Key on the 'Models' page"
   },
   "backToTop": "Back to Top",
   "common": {

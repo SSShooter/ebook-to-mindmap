@@ -16,6 +16,7 @@ import { plaintextToMindElixir } from 'mind-elixir/plaintextConverter'
 import { getLanguageInstruction, type SupportedLanguage } from './prompts/utils'
 import type { AIConfig } from '../types/ai'
 import { PROVIDER_CONFIGS } from '../types/ai'
+import i18n from '../i18n'
 
 interface Chapter {
   id: string
@@ -314,7 +315,7 @@ export class AIService {
       return mindMapData
     } catch (error) {
       throw new Error(
-        `章节思维导图生成失败: ${error instanceof Error ? error.message : '未知错误'}`
+        `${error instanceof Error ? error.message : 'Unknown error'}`
       )
     }
   }
@@ -561,10 +562,20 @@ export class AIService {
         headers,
         body: JSON.stringify(requestBody),
         signal: abortSignal,
-        ...(modelConfig.apiKey === 'mind-elixir' ? { credentials: 'include' } : {}),
+        ...(modelConfig.apiKey === 'mind-elixir'
+          ? { credentials: 'include' }
+          : {}),
       })
 
       if (!response.ok) {
+        if (modelConfig.apiKey === 'mind-elixir') {
+          if (response.status === 402) {
+            throw new Error(i18n.t('mindElixir.insufficientBalance'))
+          }
+          if (response.status === 401 || response.status === 403) {
+            throw new Error(i18n.t('mindElixir.loginRequired'))
+          }
+        }
         const errorBody = await response.text()
         throw new Error(
           `Error: ${response.status} ${response.statusText} - ${errorBody}`

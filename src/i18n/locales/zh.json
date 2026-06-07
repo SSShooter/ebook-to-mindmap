@@ -243,7 +243,9 @@
   "mindElixir": {
     "launchSuccess": "已成功发送到 Mind Elixir Desktop",
     "launchError": "启动 Mind Elixir Desktop 失败",
-    "exportError": "导出思维导图失败"
+    "exportError": "导出思维导图失败",
+    "loginRequired": "请在「模型管理」页面登录 Mind Elixir，或配置自己的 AI API Key",
+    "insufficientBalance": "Mind Elixir 星星余额不足，请充值，或在「模型管理」页面配置自己的 AI API Key"
   },
   "models": {
     "title": "模型管理",
