@@ -8,7 +8,7 @@
 
 [中文](README.md) | English
 
-![E-book to Mind Map Screenshot1](/img/screenshot1.jpg)
+![E-book to Mind Map Screenshot1](/img/screenshot2.png)
 
 An intelligent e-book parsing tool powered by AI technology that converts EPUB and PDF format e-books into structured mind maps and text summaries.
 
@@ -22,10 +22,10 @@ Use Legacy Version: https://ebook2me.mind-elixir.com/
 
 If you have used Google NotebookLM, you might have noticed some limitations when processing e-books. This tool is designed to address those pain points, offering a more professional and flexible e-book reading and mind-mapping experience:
 
-| Feature | This Tool (ebook-to-mindmap) | Google NotebookLM |
-| :--- | :--- | :--- |
-| **Mind Map Export & Editing** | 🛠️ **Export for Editing**: Although the online interface is read-only, you can **export the mind map as a data file** and import it into the Mind Elixir Desktop Client or other editors for full editing and modification. | ❌ **No Export or Editing**: Mind maps are only for read-only viewing, cannot be exported, and do not support any post-editing. |
-| **Prompt Flexibility** | 🎯 **Total Customization**: Supports custom prompts and offers a "Use Custom Prompt Only" mode to completely override system prompts. AI fully respects your instructions. | 🚫 **Overpowering System Prompts**: Primarily optimized for retrieval and summarization (RAG). Its built-in system prompts are highly dominant, making it unable to fully follow your own custom instructions. |
+| Feature                       | This Tool (ebook-to-mindmap)                                                                                                                                                                                                | Google NotebookLM                                                                                                                                                                                              |
+| :---------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Mind Map Export & Editing** | 🛠️ **Export for Editing**: Although the online interface is read-only, you can **export the mind map as a data file** and import it into the Mind Elixir Desktop Client or other editors for full editing and modification. | ❌ **No Export or Editing**: Mind maps are only for read-only viewing, cannot be exported, and do not support any post-editing.                                                                                |
+| **Prompt Flexibility**        | 🎯 **Total Customization**: Supports custom prompts and offers a "Use Custom Prompt Only" mode to completely override system prompts. AI fully respects your instructions.                                                  | 🚫 **Overpowering System Prompts**: Primarily optimized for retrieval and summarization (RAG). Its built-in system prompts are highly dominant, making it unable to fully follow your own custom instructions. |
 
 ## ✨ Features
 
@@ -87,12 +87,15 @@ For more information on AI provider options, refer to: [Free and Paid AI API Sel
 #### Option 2: No Key Option (Star Power / 星星算力) 🌟 Recommended
 
 If you don't have your own AI provider's API Key or prefer to skip complex configurations, you can log in with your Mind Elixir account to use the **built-in hosted models (Star Power)**:
+
 - ⚡ **Out-of-the-box**: No API Key configuration required. Simply log in and use.
 - 🪙 **Pay-as-you-go**: Deducted from your Star Power balance.
 - 🔄 **Cross-app Sharing**: Star Power balance is shared across the entire Mind Elixir app ecosystem (e.g., it is also shared in the [M10C Browser Extension](https://github.com/SSShooter/M10C-Video-Summary)).
 - ⏳ **Never Expires**: Star Power balances purchased or obtained remain valid permanently with no time limit.
 
-*To recharge or manage your Star Power, please visit the [Mind Elixir Website](https://app.mind-elixir.com/recharge).*
+_To recharge or manage your Star Power, please visit the [Mind Elixir Website](https://app.mind-elixir.com/recharge)._
+
+[![Mind Elixir Mind Map Ecosystem](https://ssshooter.com/mindelixir_en_dark.png)](https://app.mind-elixir.com/)
 
 ### 2. Upload E-book File
 

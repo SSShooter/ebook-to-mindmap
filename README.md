@@ -94,6 +94,8 @@
 
 *充值或管理星星请访问 [Mind Elixir 官网](https://app.mind-elixir.com/recharge)。*
 
+[![Mind Elixir 思维导图生态](https://ssshooter.com/mindelixir_zh_dark.png)](https://app.mind-elixir.com/)
+
 ### 2. 上传电子书文件
 
 1. 点击「选择 EPUB 或 PDF 文件」按钮
