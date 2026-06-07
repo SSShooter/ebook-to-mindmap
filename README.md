@@ -3,6 +3,7 @@
     <img width="150" src="/public/icon.png" alt="电子书转思维导图 logo">
   </a>
   <h1 align="center">电子书转思维导图</h1>
+  <p align="center"><strong>把厚书读薄，让真知易得</strong></p>
 </p>
 
 [English](README.en.md) | 中文
@@ -36,8 +37,9 @@
 ### 🤖 AI 驱动的内容处理
 
 - **多种 AI 服务**：支持 Google Gemini 和 OpenAI GPT 模型
-- **BYOK 模式**：需要使用您自己的 API Key（Bring Your Own Key），保证数据安全和隐私
-- **本地直连**：所有 AI 请求均由浏览器本地直接连接 AI 供应商，绝不经过任何第三方代理或中转服务器
+- **双重配置模式**：支持配置自有 API Key 使用（BYOK 模式），或直接登录 Mind Elixir 账号使用内置模型（无 Key 方案）
+- **BYOK 模式**：需要使用您自己的 API Key（Bring Your Own Key），所有 AI 请求均由浏览器本地直接连接 AI 供应商，绝不经过任何第三方代理或中转服务器，保证数据安全和隐私
+- **无 Key 方案**：可以直接登录 Mind Elixir 账号使用内置托管模型（扣除星星余额），开箱即用，无需配置 API Key
 - **三种处理模式**：
   - 📝 **文字总结模式**：生成章节总结、分析章节关联、输出全书总结
   - 🧠 **章节思维导图模式**：为每个章节生成独立的思维导图
@@ -60,16 +62,18 @@
 
 ### 1. 配置 AI 服务
 
-首次使用需要配置 AI 服务：
+首次使用需要配置 AI 服务，支持以下两种方案：
 
-> **🔒 隐私保护说明**：本工具采用 BYOK（Bring Your Own Key）模式，您需要使用自己的 API Key。所有 AI 请求均由您的浏览器本地直接连接 AI 供应商（Google 或 OpenAI），绝不经过任何第三方代理或中转服务器，确保您的数据安全和隐私。
+#### 方案一：BYOK 模式 (使用自有 Key)
+
+> **🔒 隐私保护说明**：本工具支持使用自己的 API Key（Bring Your Own Key）。所有 AI 请求均由您的浏览器本地直接连接 AI 供应商（Google 或 OpenAI），绝不经过任何第三方代理或中转服务器，确保您的数据安全和隐私。
 
 1. 点击「配置」按钮
 2. 选择 AI 服务提供商，推荐试用 **Google Gemini**
 3. 输入相应的 API Key
 4. 填写模型
 
-#### 获取 API Key
+##### 获取 API Key
 
 以 **Google Gemini** 为例：
 
@@ -79,6 +83,16 @@
 4. 复制 API Key 到配置中
 
 获取更多 AI 运营商选择资讯，可以参考：[免费和付费 AI API 选择指南](https://ssshooter.com/ai-services-guide/)
+
+#### 方案二：无 Key 方案 (星星算力) 🌟 推荐
+
+如果你没有自己的 AI 服务商 API Key，或者不想进行复杂的配置，可以直接登录 Mind Elixir 账号使用**内置托管模型（星星算力）**：
+- ⚡ **开箱即用**: 无需配置任何 API Key，登录即可直接使用。
+- 🪙 **按需消耗**: 扣除星星余额。
+- 🔄 **跨应用共享**: 星星余额可在 Mind Elixir整个应用生态中通用（例如在 [M10C 浏览器插件](https://github.com/SSShooter/M10C-Video-Summary) 中也通用）。
+- ⏳ **永不过期**: 充值或获取的星星余额永久有效，无时间限制。
+
+*充值或管理星星请访问 [Mind Elixir 官网](https://app.mind-elixir.com/recharge)。*
 
 ### 2. 上传电子书文件
 

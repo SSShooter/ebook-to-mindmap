@@ -3,6 +3,7 @@
     <img width="150" src="/public/icon.png" alt="E-book to Mind Map logo">
   </a>
   <h1 align="center">E-book to Mind Map</h1>
+  <p align="center"><strong>Thick Books Read Thin, True Knowledge Made Easy</strong></p>
 </p>
 
 [中文](README.md) | English
@@ -36,8 +37,9 @@ If you have used Google NotebookLM, you might have noticed some limitations when
 ### 🤖 AI-Powered Content Processing
 
 - **Multiple AI Services**: Support for Google Gemini and OpenAI GPT models
-- **BYOK Mode**: Requires using your own API Key (Bring Your Own Key), ensuring data security and privacy
-- **Direct Local Connection**: All AI requests are made directly from your browser to the AI providers, never through any third-party proxy or intermediary servers
+- **Dual Configuration Modes**: Support for configuring your own API Keys (BYOK Mode), or logging into your Mind Elixir account to use built-in models (No Key Option)
+- **BYOK Mode**: Use your own API Key (Bring Your Own Key), where all AI requests are made directly from your browser to the AI providers, ensuring complete data security and privacy
+- **No Key Option**: Directly log in with a Mind Elixir account to use built-in hosted models (consuming Star Power/星星算力). Out-of-the-box, no API Key configuration required
 - **Three Processing Modes**:
   - 📝 **Text Summary Mode**: Generate chapter summaries, analyze chapter relationships, output complete book summary
   - 🧠 **Chapter Mind Map Mode**: Generate independent mind maps for each chapter
@@ -60,16 +62,18 @@ If you have used Google NotebookLM, you might have noticed some limitations when
 
 ### 1. Configure AI Service
 
-First-time use requires AI service configuration:
+First-time use requires AI service configuration, supporting the following two options:
 
-> **🔒 Privacy Protection Note**: This tool uses the BYOK (Bring Your Own Key) mode, requiring you to use your own API Key. All AI requests are made directly from your browser to the AI providers (Google or OpenAI), never through any third-party proxy or intermediary servers, ensuring your data security and privacy.
+#### Option 1: BYOK Mode (Bring Your Own Key)
+
+> **🔒 Privacy Protection Note**: This tool supports using your own API Key (Bring Your Own Key). All AI requests are made directly from your browser to the AI providers (Google or OpenAI), never through any third-party proxy or intermediary servers, ensuring your data security and privacy.
 
 1. Click the "Configure" button
 2. Select AI service provider, **Google Gemini** is recommended for trial
 3. Enter the corresponding API Key
 4. Fill in the model
 
-#### Getting API Keys
+##### Getting API Keys
 
 Using **Google Gemini** as an example:
 
@@ -79,6 +83,16 @@ Using **Google Gemini** as an example:
 4. Copy the API Key to configuration
 
 For more information on AI provider options, refer to: [Free and Paid AI API Selection Guide](https://ssshooter.com/en/ai-services-guide/)
+
+#### Option 2: No Key Option (Star Power / 星星算力) 🌟 Recommended
+
+If you don't have your own AI provider's API Key or prefer to skip complex configurations, you can log in with your Mind Elixir account to use the **built-in hosted models (Star Power)**:
+- ⚡ **Out-of-the-box**: No API Key configuration required. Simply log in and use.
+- 🪙 **Pay-as-you-go**: Deducted from your Star Power balance.
+- 🔄 **Cross-app Sharing**: Star Power balance is shared across the entire Mind Elixir app ecosystem (e.g., it is also shared in the [M10C Browser Extension](https://github.com/SSShooter/M10C-Video-Summary)).
+- ⏳ **Never Expires**: Star Power balances purchased or obtained remain valid permanently with no time limit.
+
+*To recharge or manage your Star Power, please visit the [Mind Elixir Website](https://app.mind-elixir.com/recharge).*
 
 ### 2. Upload E-book File
 
