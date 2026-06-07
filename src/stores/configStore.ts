@@ -50,13 +50,24 @@ const defaultAIConfig: AIConfig = {
   temperature: 0.7,
 }
 
+const getBrowserLanguage = (): SupportedLanguage => {
+  if (typeof navigator === 'undefined') return 'en'
+  const lang = navigator.language || 'en'
+  const shortLang = lang.split('-')[0].toLowerCase()
+  const supported: SupportedLanguage[] = ['en', 'zh', 'ja', 'fr', 'de', 'es', 'ru']
+  if (supported.includes(shortLang as SupportedLanguage)) {
+    return shortLang as SupportedLanguage
+  }
+  return 'en'
+}
+
 const defaultProcessingOptions: ProcessingOptions = {
   processingMode: 'mindmap',
   bookType: 'non-fiction',
 
   skipNonEssentialChapters: true,
   maxSubChapterDepth: 0,
-  outputLanguage: 'en',
+  outputLanguage: getBrowserLanguage(),
   forceUseSpine: false,
 }
 

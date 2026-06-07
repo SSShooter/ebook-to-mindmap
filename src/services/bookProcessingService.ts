@@ -491,7 +491,6 @@ export class BookProcessingService {
       const rootNode = {
         topic: bookTitle,
         id: '0',
-        tags: ['全书'],
         children: processedChaptersNodes,
       }
 
@@ -521,6 +520,7 @@ export class BookProcessingService {
     fileName: string,
     bookTitle: string,
     chapters: Chapter[],
+    outputLanguage: SupportedLanguage,
     customPrompt: string,
     abortSignal: AbortSignal,
     onStreamUpdate: (data: { mindMap: MindElixirData | null }) => void
@@ -541,6 +541,7 @@ export class BookProcessingService {
             onStreamUpdate({ mindMap: data.mindMap })
           }
         },
+        outputLanguage,
         customPrompt,
         abortSignal
       )

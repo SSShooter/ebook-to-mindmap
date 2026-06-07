@@ -192,9 +192,6 @@ export function SettingsPage() {
                     />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="auto">
-                      {t('config.outputLanguageAuto')}
-                    </SelectItem>
                     <SelectItem value="en">English</SelectItem>
                     <SelectItem value="zh">中文</SelectItem>
                     <SelectItem value="ja">日本語</SelectItem>

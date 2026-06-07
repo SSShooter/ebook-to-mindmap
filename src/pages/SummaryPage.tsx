@@ -501,6 +501,7 @@ export function SummaryPage() {
               file.name,
               bookData.title,
               processedChapters,
+              configStore.processingOptions.outputLanguage,
               customPrompt,
               abortSignal,
               (data) => {

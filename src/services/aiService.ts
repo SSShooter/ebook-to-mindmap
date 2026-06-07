@@ -352,6 +352,7 @@ export class AIService {
   async generateCombinedMindMap(
     bookTitle: string,
     chapters: Chapter[],
+    outputLanguage: SupportedLanguage = 'en',
     customPrompt?: string,
     abortSignal?: AbortSignal
   ) {
@@ -371,7 +372,7 @@ export class AIService {
       const result = await this.generateContentStream(
         prompt,
         () => {},
-        'en',
+        outputLanguage,
         abortSignal
       )
       const mindMapJson = result.content
@@ -391,6 +392,7 @@ export class AIService {
       plaintext: string
       mindMap: MindElixirData | null
     }) => void,
+    outputLanguage: SupportedLanguage = 'en',
     customPrompt?: string,
     abortSignal?: AbortSignal
   ): Promise<MindElixirData> {
@@ -441,7 +443,7 @@ export class AIService {
       const result = await this.generateContentStream(
         prompt,
         handleStreamUpdate,
-        'en',
+        outputLanguage,
         abortSignal
       )
 
@@ -501,8 +503,12 @@ export class AIService {
 
     const messages: Array<{ role: 'system' | 'user'; content: string }> = [
       {
+        role: 'system',
+        content: systemPrompt,
+      },
+      {
         role: 'user',
-        content: prompt + '\n\n' + systemPrompt,
+        content: prompt,
       },
     ]
 
