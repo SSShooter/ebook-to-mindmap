@@ -155,8 +155,17 @@ export class EpubProcessor {
       } catch (tocError) {
         console.warn(`⚠️ [DEBUG] 无法获取EPUB目录:`, tocError)
       }
-      // 应用智能章节检测
-      return chapters
+      // 按 href 去重：保留最后一个出现的条目（章节标题通常比篇/部分标题更具体）
+      const seenHrefs = new Set<string>()
+      const deduplicatedChapters: ChapterData[] = []
+      for (let i = chapters.length - 1; i >= 0; i--) {
+        const ch = chapters[i]
+        if (ch.href && !seenHrefs.has(ch.href)) {
+          seenHrefs.add(ch.href)
+          deduplicatedChapters.unshift(ch)
+        }
+      }
+      return deduplicatedChapters
     } catch (error) {
       console.error(`❌ [DEBUG] 提取章节失败:`, error)
       throw new Error(
