@@ -213,7 +213,9 @@
     "title": "下载思维导图",
     "downloadAs": "下载",
     "downloadAllMarkdown": "下载完整 Markdown",
-    "markdownDownloaded": "Markdown 文件已下载"
+    "markdownDownloaded": "Markdown 文件已下载",
+    "copyPlaintext": "复制为纯文本大纲",
+    "copiedPlaintext": "已复制纯文本大纲到剪贴板"
   },
   "viewContent": {
     "originalText": "原文内容",

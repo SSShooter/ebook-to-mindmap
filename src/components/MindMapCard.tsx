@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Trash2, ExternalLink, BookOpen, Loader2 } from 'lucide-react'
 import { ViewContentDialog } from './ViewContentDialog'
 import { DownloadMindMapButton } from './DownloadMindMapButton'
+import { CopyMindMapPlaintextButton } from './CopyMindMapPlaintextButton'
 import type {
   MindElixirData,
   MindElixirInstance,
@@ -172,11 +173,16 @@ export const MindMapCard: React.FC<MindMapCardProps> = ({
                 />
               )}
               {showDownloadButton && onDownloadMindMap && (
-                <DownloadMindMapButton
-                  mindElixirRef={() => localMindElixirRef.current}
-                  title={title}
-                  downloadMindMap={onDownloadMindMap}
-                />
+                <>
+                  <CopyMindMapPlaintextButton
+                    mindElixirRef={() => localMindElixirRef.current}
+                  />
+                  <DownloadMindMapButton
+                    mindElixirRef={() => localMindElixirRef.current}
+                    title={title}
+                    downloadMindMap={onDownloadMindMap}
+                  />
+                </>
               )}
             </div>
           )}

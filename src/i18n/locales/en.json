@@ -250,7 +250,9 @@
     "title": "Download Mind Map",
     "downloadAllMarkdown": "Download Complete Markdown",
     "markdownDownloaded": "Markdown file downloaded",
-    "downloadAs": "Download"
+    "downloadAs": "Download",
+    "copyPlaintext": "Copy as Plaintext Outline",
+    "copiedPlaintext": "Plaintext outline copied to clipboard"
   },
   "viewContent": {
     "originalText": "Original Content",
