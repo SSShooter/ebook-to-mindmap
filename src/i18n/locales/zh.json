@@ -15,7 +15,7 @@
     "customPrompts": "自定义提示词",
     "cacheManagement": "内容管理",
     "settings": "设置",
-    "chatWithBook": "与书对话 (Beta)"
+    "chatWithBook": "与书对话"
   },
   "upload": {
     "title": "文件上传与配置",

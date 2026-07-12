@@ -121,12 +121,14 @@ export function Sidebar({
                         : 'text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
                     )}>
                     <Icon className="h-5 w-5" />
-                    <span>{item.label}</span>
-                    {item.isBeta && (
-                      <span className="ml-auto text-[10px] font-medium bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">
-                        Beta
-                      </span>
-                    )}
+                    <span className="flex flex-col">
+                      {item.label}
+                      {item.isBeta && (
+                        <span className="text-[10px] font-medium bg-primary/10 text-primary px-1.5 py-0.5 rounded-full self-start mt-0.5">
+                          Beta
+                        </span>
+                      )}
+                    </span>
                   </Link>
                 </li>
               )
