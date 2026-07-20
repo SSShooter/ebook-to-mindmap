@@ -187,6 +187,7 @@
 
 - **前端框架**：React 19 + TypeScript
 - **构建工具**：Vite
+- **桌面端**：Tauri 2（可打包 Windows / macOS / Linux）
 - **样式方案**：Tailwind CSS + shadcn/ui
 - **状态管理**：Zustand
 - **文件解析**：
@@ -196,6 +197,50 @@
 - **AI 服务**：
   - Google Gemini：@google/generative-ai
   - OpenAI：自定义实现
+
+## 💻 本地开发与部署
+
+同一套前端代码同时支持 **网页版** 和 **桌面应用**。
+
+### 环境要求
+
+- Node.js 20+
+- [pnpm](https://pnpm.io/) 9+
+- 桌面端打包还需安装 [Rust](https://www.rust-lang.org/tools/install) 与对应系统的 [Tauri 前置依赖](https://v2.tauri.app/start/prerequisites/)
+
+### 网页版
+
+```bash
+# 安装依赖
+pnpm install
+
+# 开发服务器（http://localhost:5173）
+pnpm dev
+
+# 生产构建（输出到 dist/）
+pnpm build
+
+# 预览生产构建
+pnpm preview
+```
+
+也可用 Docker：
+
+```bash
+docker compose up
+```
+
+### 桌面应用（Tauri）
+
+```bash
+# 开发模式（启动 Vite + 原生窗口）
+pnpm tauri:dev
+
+# 打包安装包（输出到 src-tauri/target/release/bundle/）
+pnpm tauri:build
+```
+
+Windows 下常见产物为 `msi` / `nsis` 安装包；macOS 为 `dmg` / `app`；Linux 为 `deb` / `AppImage` 等。
 
 ## 📄 许可证
 

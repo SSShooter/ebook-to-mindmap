@@ -188,6 +188,7 @@ Depending on the selected processing mode, you can view different types of resul
 
 - **Frontend Framework**: React 19 + TypeScript
 - **Build Tool**: Vite
+- **Desktop**: Tauri 2 (Windows / macOS / Linux packages)
 - **Styling**: Tailwind CSS + shadcn/ui
 - **State Management**: Zustand
 - **File Parsing**:
@@ -197,6 +198,50 @@ Depending on the selected processing mode, you can view different types of resul
 - **AI Services**:
   - Google Gemini: @google/generative-ai
   - OpenAI: Custom implementation
+
+## 💻 Local Development & Deployment
+
+The same frontend supports both **web** and **desktop** builds.
+
+### Requirements
+
+- Node.js 20+
+- [pnpm](https://pnpm.io/) 9+
+- For desktop builds: [Rust](https://www.rust-lang.org/tools/install) and [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/)
+
+### Web
+
+```bash
+# Install dependencies
+pnpm install
+
+# Dev server (http://localhost:5173)
+pnpm dev
+
+# Production build (output: dist/)
+pnpm build
+
+# Preview production build
+pnpm preview
+```
+
+Or with Docker:
+
+```bash
+docker compose up
+```
+
+### Desktop (Tauri)
+
+```bash
+# Development mode (Vite + native window)
+pnpm tauri:dev
+
+# Package installers (output: src-tauri/target/release/bundle/)
+pnpm tauri:build
+```
+
+Typical artifacts: Windows `msi` / `nsis`, macOS `dmg` / `app`, Linux `deb` / `AppImage`.
 
 ## 📄 License
 
