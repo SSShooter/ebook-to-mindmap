@@ -11,7 +11,6 @@ export interface AIModel {
   model: string
   temperature: number
   isDefault: boolean
-  useCorsProxy: boolean
   isFixed?: boolean
   costDescription?: string
 }
@@ -34,7 +33,6 @@ const DEFAULT_FIXED_MODEL: AIModel = {
   model: 'MindElixirStar',
   temperature: 0.7,
   isDefault: true,
-  useCorsProxy: false,
   isFixed: true,
   costDescription: 'models.fixedModelCostHint',
 }

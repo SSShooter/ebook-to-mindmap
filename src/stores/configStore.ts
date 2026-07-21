@@ -167,7 +167,6 @@ export const getDefaultModelFromStorage = (): AIConfig | null => {
         apiUrl: string
         model: string
         temperature: number
-        useCorsProxy?: boolean
       }) => m.isDefault
     )
 
@@ -178,7 +177,6 @@ export const getDefaultModelFromStorage = (): AIConfig | null => {
         apiUrl: defaultModel.apiUrl,
         model: defaultModel.model,
         temperature: defaultModel.temperature,
-        useCorsProxy: defaultModel.useCorsProxy,
       }
     }
   } catch (error) {

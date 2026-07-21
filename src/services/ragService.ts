@@ -1,4 +1,5 @@
 import localforage from 'localforage'
+import { fetch as tauriFetch } from '@tauri-apps/plugin-http'
 
 export interface VoyResource {
   embeddings: Array<{
@@ -96,7 +97,7 @@ export class RagService {
     apiKey: string,
     model: string
   ): Promise<number[][]> {
-    const response = await fetch('https://openrouter.ai/api/v1/embeddings', {
+    const response = await tauriFetch('https://openrouter.ai/api/v1/embeddings', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -265,7 +266,7 @@ ${query}
 
 Answer:`
 
-    const response = await fetch(
+    const response = await tauriFetch(
       'https://openrouter.ai/api/v1/chat/completions',
       {
         method: 'POST',

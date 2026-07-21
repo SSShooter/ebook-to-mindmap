@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
 import {
   Select,
   SelectContent,
@@ -21,6 +20,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Combobox } from '@/components/ui/combobox'
+import { fetch as tauriFetch } from '@tauri-apps/plugin-http'
 import {
   Brain,
   Plus,
@@ -53,7 +53,6 @@ export function ModelsPage() {
     apiUrl: '',
     model: '',
     temperature: 0.7,
-    useCorsProxy: false,
   })
 
   const [availableModels, setAvailableModels] = useState<string[]>([])
@@ -64,12 +63,10 @@ export function ModelsPage() {
     apiUrl?: string
     apiKey?: string
     provider?: string
-    useCorsProxy?: boolean
   }) => {
     const apiUrl = params?.apiUrl ?? formData.apiUrl
     const apiKey = params?.apiKey ?? formData.apiKey
     const provider = params?.provider ?? formData.provider
-    const useCorsProxy = params?.useCorsProxy ?? formData.useCorsProxy
 
     if (!apiUrl || !apiKey) {
       setAvailableModels([])
@@ -93,22 +90,12 @@ export function ModelsPage() {
 
     setIsLoadingModels(true)
     try {
-      let finalApiUrl = apiUrl
       const headers: HeadersInit = {
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       }
 
-      if (useCorsProxy) {
-        const url = new URL(apiUrl)
-        finalApiUrl = `/api/proxy${url.pathname}`
-        headers['X-Target-Url'] = apiUrl
-      }
-
-      const response = await fetch(`${finalApiUrl}/models`, {
-        headers,
-        ...(apiKey === 'mind-elixir' ? { credentials: 'include' } : {}),
-      })
+      const response = await tauriFetch(`${apiUrl}/models`, { headers })
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
@@ -197,7 +184,6 @@ export function ModelsPage() {
         apiUrl: model.apiUrl,
         model: model.model,
         temperature: model.temperature,
-        useCorsProxy: model.useCorsProxy ?? false,
       }
       setFormData(newFormData)
       fetchAvailableModels(newFormData)
@@ -210,7 +196,6 @@ export function ModelsPage() {
         apiUrl: PROVIDER_CONFIGS.gemini.defaultApiUrl,
         model: PROVIDER_CONFIGS.gemini.defaultModel,
         temperature: 0.7,
-        useCorsProxy: false,
       }
       setFormData(newFormData)
       fetchAvailableModels(newFormData)
@@ -288,7 +273,6 @@ export function ModelsPage() {
       apiUrl: model.apiUrl,
       model: model.model,
       temperature: model.temperature,
-      useCorsProxy: model.useCorsProxy ?? false,
     })
     setIsDialogOpen(true)
   }
@@ -345,7 +329,6 @@ export function ModelsPage() {
                           ...formData,
                           provider: value,
                           apiUrl: PROVIDER_CONFIGS[value].defaultApiUrl,
-                          useCorsProxy: false,
                         }
                         setFormData(newFormData)
                         fetchAvailableModels(newFormData)
@@ -527,28 +510,6 @@ export function ModelsPage() {
                   </p>
                 </div>
 
-                {import.meta.env.DEV && (
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label>
-                        {t('models.useCorsProxy', 'Use CORS Proxy')}
-                      </Label>
-                      <Switch
-                        checked={formData.useCorsProxy}
-                        onCheckedChange={(checked) =>
-                          setFormData({ ...formData, useCorsProxy: checked })
-                        }
-                        disabled={isReadOnly}
-                      />
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {t(
-                        'models.useCorsProxyDescription',
-                        'Enable this to bypass browser CORS restrictions. Using local dev server as proxy.'
-                      )}
-                    </p>
-                  </div>
-                )}
               </div>
 
               <DialogFooter>

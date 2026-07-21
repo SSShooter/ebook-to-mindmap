@@ -20,7 +20,6 @@ export interface AIConfig {
   apiUrl?: string
   model?: string
   temperature?: number
-  useCorsProxy?: boolean
 }
 
 /**

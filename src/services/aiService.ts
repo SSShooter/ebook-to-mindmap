@@ -17,6 +17,7 @@ import { getLanguageInstruction, type SupportedLanguage } from './prompts/utils'
 import type { AIConfig } from '../types/ai'
 import { PROVIDER_CONFIGS } from '../types/ai'
 import i18n from '../i18n'
+import { fetch as tauriFetch } from '@tauri-apps/plugin-http'
 
 interface Chapter {
   id: string
@@ -30,7 +31,6 @@ interface ModelConfig {
   apiUrl: string
   apiKey: string
   model: string
-  useCorsProxy?: boolean
 }
 
 export class AIService {
@@ -47,7 +47,6 @@ export class AIService {
       apiUrl: config.apiUrl || providerConfig.defaultApiUrl,
       apiKey: config.apiKey || '',
       model: config.model || providerConfig.defaultModel,
-      useCorsProxy: config.useCorsProxy ?? false,
     }
   }
 
@@ -545,57 +544,17 @@ export class AIService {
         }
       }
 
-      let finalEndpoint = endpoint
       const headers: HeadersInit = {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${modelConfig.apiKey}`,
       }
 
-      if (modelConfig.useCorsProxy) {
-        const url = new URL(endpoint)
-        finalEndpoint = `/api/proxy${url.pathname}${url.search}`
-        headers['X-Target-Url'] = modelConfig.apiUrl
-      }
-
-      const response = await fetch(finalEndpoint, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(requestBody),
-        signal: abortSignal,
-        ...(modelConfig.apiKey === 'mind-elixir'
-          ? { credentials: 'include' }
-          : {}),
-      })
-
-      if (!response.ok) {
-        if (modelConfig.apiKey === 'mind-elixir') {
-          if (response.status === 402) {
-            throw new Error(i18n.t('mindElixir.insufficientBalance'))
-          }
-          if (response.status === 401 || response.status === 403) {
-            throw new Error(i18n.t('mindElixir.loginRequired'))
-          }
-        }
-        const errorBody = await response.text()
-        throw new Error(
-          `Error: ${response.status} ${response.statusText} - ${errorBody}`
-        )
-      }
-
-      if (!response.body) {
-        throw new Error('Response body is null')
-      }
-
-      const reader = response.body.getReader()
       const decoder = new TextDecoder('utf-8')
       let fullContent = ''
       let fullReasoning = ''
       let buffer = ''
 
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-
+      const processChunk = (value: Uint8Array) => {
         buffer += decoder.decode(value, { stream: true })
         const lines = buffer.split('\n')
 
@@ -637,13 +596,52 @@ export class AIService {
         }
       }
 
+      const response = await tauriFetch(endpoint, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(requestBody),
+        signal: abortSignal,
+      })
+
+      if (!response.ok) {
+        if (modelConfig.apiKey === 'mind-elixir') {
+          if (response.status === 402) {
+            throw new Error(i18n.t('mindElixir.insufficientBalance'))
+          }
+          if (response.status === 401 || response.status === 403) {
+            throw new Error(i18n.t('mindElixir.loginRequired'))
+          }
+        }
+        const errorBody = await response.text()
+        throw new Error(
+          `Error: ${response.status} ${response.statusText} - ${errorBody}`
+        )
+      }
+
+      if (!response.body) {
+        throw new Error('Response body is null')
+      }
+
+      const reader = response.body.getReader()
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        processChunk(value)
+      }
+
       return { content: fullContent, reasoning: fullReasoning }
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
         throw error
       }
+      const message =
+        error instanceof Error
+          ? error.message
+          : typeof error === 'string'
+            ? error
+            : JSON.stringify(error)
       throw new Error(
-        `Stream generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+        `Stream generation failed: ${message}`
       )
     }
   }
