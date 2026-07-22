@@ -50,7 +50,6 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
     setApiKey,
     setApiUrl,
     setModel,
-    setTemperature,
   } = useConfigStore()
 
   const {
@@ -73,7 +72,6 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
       setApiKey(model.apiKey)
       setApiUrl(model.apiUrl)
       setModel(model.model)
-      setTemperature(model.temperature)
     }
   }
 

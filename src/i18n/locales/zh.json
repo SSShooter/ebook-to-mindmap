@@ -157,8 +157,6 @@
     "apiUrl": "API 地址",
     "modelName": "模型名称（可选）",
     "modelPlaceholder": "gpt-3.5-turbo, gpt-4 等",
-    "temperature": "Temperature（可选）",
-    "temperatureDescription": "控制AI回答的随机性，范围0-2，值越高越随机，建议0.7",
     "processingMode": "处理模式",
     "selectProcessingMode": "选择处理模式",
     "summaryMode": "文字总结模式",

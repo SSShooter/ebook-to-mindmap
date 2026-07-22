@@ -52,7 +52,6 @@ export function ModelsPage() {
     apiKey: '',
     apiUrl: '',
     model: '',
-    temperature: 0.7,
   })
 
   const [availableModels, setAvailableModels] = useState<string[]>([])
@@ -183,7 +182,6 @@ export function ModelsPage() {
         apiKey: model.apiKey,
         apiUrl: model.apiUrl,
         model: model.model,
-        temperature: model.temperature,
       }
       setFormData(newFormData)
       fetchAvailableModels(newFormData)
@@ -195,7 +193,6 @@ export function ModelsPage() {
         apiKey: '',
         apiUrl: PROVIDER_CONFIGS.gemini.defaultApiUrl,
         model: PROVIDER_CONFIGS.gemini.defaultModel,
-        temperature: 0.7,
       }
       setFormData(newFormData)
       fetchAvailableModels(newFormData)
@@ -272,7 +269,6 @@ export function ModelsPage() {
       apiKey: model.apiKey,
       apiUrl: model.apiUrl,
       model: model.model,
-      temperature: model.temperature,
     })
     setIsDialogOpen(true)
   }
@@ -486,28 +482,6 @@ export function ModelsPage() {
                       </Button>
                     )}
                   </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="temperature">{t('config.temperature')}</Label>
-                  <Input
-                    id="temperature"
-                    type="number"
-                    min="0"
-                    max="2"
-                    step="0.1"
-                    value={formData.temperature}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        temperature: parseFloat(e.target.value) || 0.7,
-                      })
-                    }
-                    readOnly={isReadOnly}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    {t('config.temperatureDescription')}
-                  </p>
                 </div>
 
               </div>

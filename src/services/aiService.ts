@@ -521,8 +521,7 @@ export class AIService {
       let requestBody: unknown = {
         model: modelConfig.model,
         messages,
-        temperature: config.temperature || 0.7,
-        stream: true, // 开启流式传输
+        stream: true,
       }
 
       if (config.provider === 'openai-responses') {
@@ -536,7 +535,6 @@ export class AIService {
               content: prompt,
             },
           ],
-          temperature: config.temperature || 0.7,
           stream: true,
           store: false,
           text: { verbosity: 'medium' },

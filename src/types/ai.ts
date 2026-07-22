@@ -19,7 +19,6 @@ export interface AIConfig {
   apiKey: string
   apiUrl?: string
   model?: string
-  temperature?: number
 }
 
 /**

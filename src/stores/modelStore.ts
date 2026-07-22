@@ -9,7 +9,6 @@ export interface AIModel {
   apiKey: string
   apiUrl: string
   model: string
-  temperature: number
   isDefault: boolean
   isFixed?: boolean
   costDescription?: string
@@ -31,7 +30,6 @@ const DEFAULT_FIXED_MODEL: AIModel = {
   apiKey: 'mind-elixir',
   apiUrl: `${import.meta.env.VITE_API_URL || 'http://localhost:7001'}/api/v1`,
   model: 'MindElixirStar',
-  temperature: 0.7,
   isDefault: true,
   isFixed: true,
   costDescription: 'models.fixedModelCostHint',

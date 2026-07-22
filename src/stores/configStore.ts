@@ -22,7 +22,6 @@ interface ConfigState {
   setApiKey: (apiKey: string) => void
   setApiUrl: (apiUrl: string) => void
   setModel: (model: string) => void
-  setTemperature: (temperature: number) => void
 
   // 处理选项
   processingOptions: ProcessingOptions
@@ -47,7 +46,6 @@ const defaultAIConfig: AIConfig = {
   apiKey: 'mind-elixir',
   apiUrl: `${import.meta.env.VITE_API_URL || 'http://localhost:7001'}/api/v1`,
   model: 'MindElixirStar',
-  temperature: 0.7,
 }
 
 
@@ -93,10 +91,6 @@ export const useConfigStore = create<ConfigState>()(
       setModel: (model) =>
         set((state) => ({
           aiConfig: { ...state.aiConfig, model },
-        })),
-      setTemperature: (temperature) =>
-        set((state) => ({
-          aiConfig: { ...state.aiConfig, temperature },
         })),
 
       // 处理选项
@@ -166,7 +160,6 @@ export const getDefaultModelFromStorage = (): AIConfig | null => {
         apiKey: string
         apiUrl: string
         model: string
-        temperature: number
       }) => m.isDefault
     )
 
@@ -176,7 +169,6 @@ export const getDefaultModelFromStorage = (): AIConfig | null => {
         apiKey: defaultModel.apiKey,
         apiUrl: defaultModel.apiUrl,
         model: defaultModel.model,
-        temperature: defaultModel.temperature,
       }
     }
   } catch (error) {
