@@ -31,6 +31,7 @@ import { toast } from 'sonner'
 import JSZip from 'jszip'
 import { MarkdownCard } from '@/components/MarkdownCard'
 import { MindMapCard } from '@/components/MindMapCard'
+import { openInMindElixir, downloadMindMap } from '@/utils/uiHelpers'
 import type { MindElixirData } from 'mind-elixir'
 
 const cacheService = new CacheService()
@@ -551,9 +552,11 @@ export function CacheManagementPage() {
               isLoading={isLoading}
               showViewContent={false}
               showReadButton={false}
-              showOpenInMindElixir={false}
-              showDownloadButton={false}
+              showOpenInMindElixir={true}
+              showDownloadButton={true}
               onClearCache={() => confirmDelete({ key: entry.key })}
+              onOpenInMindElixir={openInMindElixir}
+              onDownloadMindMap={downloadMindMap}
             />
           )
         })}
@@ -577,11 +580,13 @@ export function CacheManagementPage() {
                 isLoading={loadingKeys.has(combinedMindmap.key)}
                 showViewContent={false}
                 showReadButton={false}
-                showOpenInMindElixir={false}
-                showDownloadButton={false}
+                showOpenInMindElixir={true}
+                showDownloadButton={true}
                 onClearCache={() =>
                   confirmDelete({ key: combinedMindmap!.key })
                 }
+                onOpenInMindElixir={openInMindElixir}
+                onDownloadMindMap={downloadMindMap}
                 className="md:col-span-2"
                 mindMapClassName="w-full h-[400px]"
               />
@@ -607,9 +612,11 @@ export function CacheManagementPage() {
                 isLoading={loadingKeys.has(mergedMindmap.key)}
                 showViewContent={false}
                 showReadButton={false}
-                showOpenInMindElixir={false}
-                showDownloadButton={false}
+                showOpenInMindElixir={true}
+                showDownloadButton={true}
                 onClearCache={() => confirmDelete({ key: mergedMindmap!.key })}
+                onOpenInMindElixir={openInMindElixir}
+                onDownloadMindMap={downloadMindMap}
                 className="md:col-span-2"
                 mindMapClassName="w-full h-[400px]"
               />
