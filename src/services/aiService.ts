@@ -17,7 +17,7 @@ import { getLanguageInstruction, type SupportedLanguage } from './prompts/utils'
 import type { AIConfig } from '../types/ai'
 import { PROVIDER_CONFIGS } from '../types/ai'
 import i18n from '../i18n'
-import { fetch as tauriFetch } from '@tauri-apps/plugin-http'
+import { appFetch } from '@/lib/fetch'
 
 interface Chapter {
   id: string
@@ -594,7 +594,7 @@ export class AIService {
         }
       }
 
-      const response = await tauriFetch(endpoint, {
+      const response = await appFetch(endpoint, {
         method: 'POST',
         headers,
         body: JSON.stringify(requestBody),

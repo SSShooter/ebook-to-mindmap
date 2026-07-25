@@ -6,7 +6,7 @@ import { RagService, type Chunk } from '../services/ragService'
 import { useChatConfigStore } from '../stores/chatConfigStore'
 import { toast } from 'sonner'
 import { getDefaultModelFromStorage, useConfigStore } from '../stores/configStore'
-import { fetch as tauriFetch } from '@tauri-apps/plugin-http'
+import { appFetch } from '@/lib/fetch'
 
 type ChatMessage = {
   id: string
@@ -57,7 +57,7 @@ export function ChatPage() {
     setIsTestingKey(true)
     try {
       // https://openrouter.ai/api/v1/auth/key is the standard endpoint to retrieve key info and limits
-      const response = await tauriFetch('https://openrouter.ai/api/v1/auth/key', {
+      const response = await appFetch('https://openrouter.ai/api/v1/auth/key', {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${openRouterKey.trim()}`,

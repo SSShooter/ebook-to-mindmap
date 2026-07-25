@@ -20,7 +20,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Combobox } from '@/components/ui/combobox'
-import { fetch as tauriFetch } from '@tauri-apps/plugin-http'
+import { appFetch } from '@/lib/fetch'
 import {
   Brain,
   Plus,
@@ -94,7 +94,7 @@ export function ModelsPage() {
         'Content-Type': 'application/json',
       }
 
-      const response = await tauriFetch(`${apiUrl}/models`, { headers })
+      const response = await appFetch(`${apiUrl}/models`, { headers })
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
