@@ -27,11 +27,13 @@ import {
   Pencil,
   Trash2,
   Star,
+  Check,
   ExternalLink,
   Copy,
   RefreshCw,
   Eye,
 } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import { useModelStore, type AIModel } from '../stores/modelStore'
 import { PROVIDER_CONFIGS } from '../types/ai'
@@ -249,6 +251,8 @@ export function ModelsPage() {
   }
 
   const handleSetDefault = (id: string) => {
+    const model = models.find((m) => m.id === id)
+    if (model?.isDefault) return
     setDefaultModel(id)
     toast.success(t('models.defaultSet'))
   }
@@ -509,28 +513,31 @@ export function ModelsPage() {
                 {models.map((model) => (
                   <div
                     key={model.id}
-                    className="p-4 hover:bg-muted/50 transition-colors">
-                    {/* 标题行 - 模型名称和默认星标 */}
+                    onClick={() => handleSetDefault(model.id)}
+                    title={
+                      model.isDefault
+                        ? undefined
+                        : t('models.clickToSetDefault', '点击设为默认模型')
+                    }
+                    className={`p-4 transition-colors cursor-pointer ${
+                      model.isDefault
+                        ? 'bg-primary/5'
+                        : 'hover:bg-muted/50'
+                    }`}>
+                    {/* 标题行 - 模型名称和默认徽章 */}
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleSetDefault(model.id)}
-                          className="p-1 h-6 w-6 flex-shrink-0">
-                          <Star
-                            className={`h-4 w-4 ${
-                              model.isDefault
-                                ? 'fill-yellow-400 text-yellow-400'
-                                : 'text-muted-foreground/70'
-                            }`}
-                          />
-                        </Button>
                         <h3
                           className="font-medium text-foreground truncate"
                           title={model.name}>
                           {model.name}
                         </h3>
+                        {model.isDefault && (
+                          <Badge className="flex-shrink-0 gap-1">
+                            <Check className="h-3 w-3" />
+                            {t('models.default', '默认')}
+                          </Badge>
+                        )}
 
                         {model.costDescription && (
                           <div className="flex items-center gap-1.5 text-[10px] text-amber-700 dark:text-amber-400 font-bold bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-800/50 shadow-sm ml-2">
@@ -544,7 +551,10 @@ export function ModelsPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleCopy(model)}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleCopy(model)
+                            }}
                             className="h-8 w-8 p-0"
                             title={t('models.copy')}>
                              <Copy className="h-4 w-4" />
@@ -554,7 +564,10 @@ export function ModelsPage() {
                            <Button
                              variant="ghost"
                              size="sm"
-                             onClick={() => handleOpenDialog(model, true)}
+                             onClick={(e) => {
+                               e.stopPropagation()
+                               handleOpenDialog(model, true)
+                             }}
                              className="h-8 w-8 p-0"
                              title={t('models.view', '查看详情')}>
                              <Eye className="h-4 w-4" />
@@ -564,7 +577,10 @@ export function ModelsPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleOpenDialog(model)}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleOpenDialog(model)
+                            }}
                             className="h-8 w-8 p-0"
                             title={t('models.edit')}>
                             <Pencil className="h-4 w-4" />
@@ -574,7 +590,10 @@ export function ModelsPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleDelete(model.id)}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleDelete(model.id)
+                            }}
                             disabled={models.length === 1}
                             className="h-8 w-8 p-0"
                             title={t('models.delete')}>

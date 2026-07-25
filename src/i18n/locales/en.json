@@ -298,6 +298,8 @@
     "updateSuccess": "Model updated successfully",
     "deleteSuccess": "Model deleted successfully",
     "defaultSet": "Default model set successfully",
+    "default": "Default",
+    "clickToSetDefault": "Click to set as default model",
     "cannotDeleteLast": "Cannot delete the last model",
     "selectModel": "Select Model for This Request",
     "noModelsConfigured": "No models configured. Please go to Model Management to add models first.",

@@ -268,6 +268,8 @@
     "updateSuccess": "模型更新成功",
     "deleteSuccess": "模型删除成功",
     "defaultSet": "默认模型设置成功",
+    "default": "默认",
+    "clickToSetDefault": "点击设为默认模型",
     "cannotDeleteLast": "不能删除最后一个模型",
     "selectModel": "选择本次请求的模型",
     "noModelsConfigured": "暂无配置的模型。请先前往模型管理添加模型。",
