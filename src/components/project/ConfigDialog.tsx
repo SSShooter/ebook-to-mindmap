@@ -137,7 +137,7 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
                     {models.map((model) => (
                       <SelectItem key={model.id} value={model.id}>
                         <div className="flex items-center gap-2">
-                          {model.name} {model.isDefault && '⭐'}
+                          {model.name}
                           {model.costDescription && (
                             <Star className="h-3 w-3 text-amber-500 fill-amber-500" />
                           )}
