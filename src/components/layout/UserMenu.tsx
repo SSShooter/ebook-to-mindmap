@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useAuthStore } from '@/stores/authStore'
+import { startLogin } from '@/lib/auth'
 import {
   Dialog,
   DialogContent,
@@ -18,10 +19,13 @@ export function UserMenu() {
   const { user, isLoading, logout } = useAuthStore()
   const [isLoginLoading, setIsLoginLoading] = useState(false)
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     setIsLoginLoading(true)
-    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:7001'
-    window.location.href = `${baseUrl}/oauth/authme/login/eb2me`
+    try {
+      await startLogin()
+    } finally {
+      setIsLoginLoading(false)
+    }
   }
 
   if (isLoading) {

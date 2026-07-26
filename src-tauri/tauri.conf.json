@@ -12,6 +12,7 @@
   "app": {
     "windows": [
       {
+        "label": "main",
         "title": "电子书转思维导图",
         "width": 1280,
         "height": 800,
@@ -25,6 +26,13 @@
     ],
     "security": {
       "csp": null
+    }
+  },
+  "plugins": {
+    "deep-link": {
+      "desktop": {
+        "schemes": ["eb2mm"]
+      }
     }
   },
   "bundle": {

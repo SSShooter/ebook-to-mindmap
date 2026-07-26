@@ -8,6 +8,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Star, ExternalLink, Sparkles, User as UserIcon, LogIn } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
+import { startLogin } from '@/lib/auth'
 
 interface MindElixirStarModalProps {
   open: boolean
@@ -22,11 +23,6 @@ export function MindElixirStarModal({
   const { user } = useAuthStore()
 
   const rechargeUrl = 'https://app.mind-elixir.com/recharge'
-
-  const handleLogin = () => {
-    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:7001'
-    window.location.href = `${baseUrl}/oauth/authme/login/eb2me`
-  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -96,7 +92,7 @@ export function MindElixirStarModal({
           ) : (
             <Button
               className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-6 text-base shadow-lg"
-              onClick={handleLogin}
+              onClick={startLogin}
             >
               <LogIn className="h-5 w-5 mr-2" />
               {t('models.login', 'Login / Sign up')}

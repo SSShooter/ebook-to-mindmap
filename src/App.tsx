@@ -12,6 +12,7 @@ import { ChatPage } from './pages/ChatPage'
 import { Menu } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useAuthStore } from './stores/authStore'
+import { initDeepLinkAuth } from './lib/auth'
 
 function App() {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
@@ -20,6 +21,8 @@ function App() {
   useEffect(() => {
     // Fetch user data on app mount
     fetchUser()
+    // Tauri 桌面端：监听 OAuth deep link 回调（eb2mm://auth?token=xxx）
+    initDeepLinkAuth()
   }, [])
 
   return (
