@@ -62,6 +62,8 @@ jobs:
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # 生产后端地址，Vite 构建时内联进前端产物（在仓库 Settings → Secrets and variables → Actions → Variables 配置）
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
           # macOS signing: Tauri auto-creates a temporary keychain when APPLE_CERTIFICATE is set.
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
