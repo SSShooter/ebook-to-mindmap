@@ -1,6 +1,6 @@
 [package]
 name = "ebook-to-mindmap"
-version = "0.1.1"
+version = "0.1.2"
 description = "AI-powered ebook to mind map converter"
 authors = ["Mind Elixir"]
 license = "MIT"
