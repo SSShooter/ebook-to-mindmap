@@ -228,6 +228,7 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
                     <SelectItem value="de">Deutsch</SelectItem>
                     <SelectItem value="es">Español</SelectItem>
                     <SelectItem value="ru">Русский</SelectItem>
+                    <SelectItem value="ko">한국어</SelectItem>
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground">

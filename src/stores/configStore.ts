@@ -53,7 +53,7 @@ const getBrowserLanguage = (): SupportedLanguage => {
   if (typeof navigator === 'undefined') return 'en'
   const lang = navigator.language || 'en'
   const shortLang = lang.split('-')[0].toLowerCase()
-  const supported: SupportedLanguage[] = ['en', 'zh', 'ja', 'fr', 'de', 'es', 'ru']
+  const supported: SupportedLanguage[] = ['en', 'zh', 'ja', 'fr', 'de', 'es', 'ru', 'ko']
   if (supported.includes(shortLang as SupportedLanguage)) {
     return shortLang as SupportedLanguage
   }

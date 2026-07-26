@@ -9,15 +9,25 @@ import {
 import { Languages } from 'lucide-react'
 
 const languages = [
-  { code: 'zh', name: '中文', flag: '🇨🇳' },
   { code: 'en', name: 'English', flag: '🇺🇸' },
+  { code: 'zh', name: '简体中文', flag: '🇨🇳' },
+  { code: 'zh-TW', name: '繁體中文', flag: '🇭🇰' },
+  { code: 'ja', name: '日本語', flag: '🇯🇵' },
+  { code: 'es', name: 'Español', flag: '🇪🇸' },
+  { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
+  { code: 'ko', name: '한국어', flag: '🇰🇷' },
 ]
 
 export function LanguageSwitcher() {
   const { i18n } = useTranslation()
 
+  const getBaseLanguage = (lang: string) =>
+    lang.split('-')[0].toLowerCase()
+
   const currentLanguage =
-    languages.find((lang) => lang.code === i18n.language) || languages[0]
+    languages.find((lang) => lang.code === i18n.language) ||
+    languages.find((lang) => lang.code === getBaseLanguage(i18n.language)) ||
+    languages[0]
 
   const changeLanguage = (languageCode: string) => {
     i18n.changeLanguage(languageCode)
@@ -43,7 +53,10 @@ export function LanguageSwitcher() {
             key={language.code}
             onClick={() => changeLanguage(language.code)}
             className={`flex items-center gap-2 cursor-pointer ${
-              i18n.language === language.code ? 'bg-accent' : ''
+              i18n.language === language.code ||
+              getBaseLanguage(i18n.language) === getBaseLanguage(language.code)
+                ? 'bg-accent'
+                : ''
             }`}>
             <span>{language.flag}</span>
             <span>{language.name}</span>

@@ -36,10 +36,11 @@ export function SettingsPage() {
     forceUseSpine,
   } = processingOptions
 
-  // Normalize language to 'en' or 'zh' for the select component
+  // Normalize language to one of the supported language codes
   const getCurrentLanguage = () => {
     const lang = i18n.language || 'zh'
-    return lang.startsWith('zh') ? 'zh' : 'en'
+    if (lang === 'zh-TW') return 'zh-TW'
+    return lang.startsWith('zh') ? 'zh' : lang.split('-')[0]
   }
 
   const handleExportConfig = () => {
@@ -123,7 +124,12 @@ export function SettingsPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="en">English</SelectItem>
-                    <SelectItem value="zh">中文</SelectItem>
+                    <SelectItem value="zh">简体中文</SelectItem>
+                    <SelectItem value="zh-TW">繁體中文</SelectItem>
+                    <SelectItem value="ja">日本語</SelectItem>
+                    <SelectItem value="es">Español</SelectItem>
+                    <SelectItem value="de">Deutsch</SelectItem>
+                    <SelectItem value="ko">한국어</SelectItem>
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground">
@@ -199,6 +205,7 @@ export function SettingsPage() {
                     <SelectItem value="de">Deutsch</SelectItem>
                     <SelectItem value="es">Español</SelectItem>
                     <SelectItem value="ru">Русский</SelectItem>
+                    <SelectItem value="ko">한국어</SelectItem>
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground">

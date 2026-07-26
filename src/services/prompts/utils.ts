@@ -6,16 +6,18 @@
  * @returns 对应语言的指令文本
  */
 export const getLanguageInstruction = (
-  language: 'en' | 'zh' | 'ja' | 'fr' | 'de' | 'es' | 'ru' = 'en'
+  language: 'en' | 'zh' | 'ja' | 'fr' | 'de' | 'es' | 'ru' | 'ko' = 'en'
 ): string => {
   const languageNames: Record<string, string> = {
     zh: 'Simplified Chinese (简体中文)',
+    'zh-TW': 'Traditional Chinese (繁體中文)',
     en: 'English',
     ja: 'Japanese',
     fr: 'French',
     de: 'German',
     es: 'Spanish',
     ru: 'Russian',
+    ko: 'Korean',
   }
 
   const targetName = languageNames[language] || languageNames.en
@@ -40,3 +42,4 @@ export type SupportedLanguage =
   | 'de'
   | 'es'
   | 'ru'
+  | 'ko'
