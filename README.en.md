@@ -84,6 +84,14 @@ Using **Google Gemini** as an example:
 
 For more information on AI provider options, refer to: [Free and Paid AI API Selection Guide](https://ssshooter.com/en/ai-services-guide/)
 
+##### About CORS (Cross-Origin) Issues
+
+Since BYOK mode makes all AI requests directly from your browser to the AI providers, some providers may not configure Cross-Origin Resource Sharing (CORS) response headers. This causes requests to be blocked by the browser's same-origin policy, making them unusable on the web version.
+
+**How to identify**: Press `F12` to open the browser developer tools. If you see red errors like `CORS policy` or `blocked by CORS` in the Console or Network panel, this is the issue.
+
+**Solution**: When this happens, switch to the **desktop app**. The desktop app does not enforce the browser's same-origin policy and is not subject to CORS restrictions, so it can connect to all providers normally.
+
 #### Option 2: No Key Option (Star Power / 星星算力) 🌟 Recommended
 
 If you don't have your own AI provider's API Key or prefer to skip complex configurations, you can log in with your Mind Elixir account to use the **built-in hosted models (Star Power)**:
