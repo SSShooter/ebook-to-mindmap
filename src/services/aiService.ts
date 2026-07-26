@@ -542,9 +542,16 @@ export class AIService {
         }
       }
 
+      // 内置 MindElixirStar 模型：apiKey 只是占位符，实际鉴权走 go 服务的 JWT
+      // - 桌面端：deep link 登录后 JWT 存在 localStorage.auth_token，作为 Bearer 传递
+      // - 网页版：登录态在 cookie 里，需要 credentials: 'include' 携带
+      const isMindElixirModel = modelConfig.apiKey === 'mind-elixir'
+      const authToken = isMindElixirModel
+        ? localStorage.getItem('auth_token')
+        : null
       const headers: HeadersInit = {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${modelConfig.apiKey}`,
+        Authorization: `Bearer ${authToken ?? modelConfig.apiKey}`,
       }
 
       const decoder = new TextDecoder('utf-8')
@@ -599,6 +606,8 @@ export class AIService {
         headers,
         body: JSON.stringify(requestBody),
         signal: abortSignal,
+        // 仅对自家服务携带 cookie，避免向第三方 API 发送凭据
+        credentials: isMindElixirModel ? 'include' : 'same-origin',
       })
 
       if (!response.ok) {
