@@ -9,6 +9,12 @@
     "star": "我的星星",
     "profile": "個人中心 (Mind Elixir)"
   },
+  "desktopAuth": {
+    "title": "登入成功",
+    "description": "正在為你開啟桌面應用程式，如果沒有反應，請點擊下方按鈕。",
+    "openApp": "開啟桌面應用程式",
+    "missingToken": "缺少登入憑證，請回到桌面應用程式重新發起登入。"
+  },
   "nav": {
     "summary": "AI 總結",
     "models": "模型管理",

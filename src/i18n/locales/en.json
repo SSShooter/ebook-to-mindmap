@@ -9,6 +9,12 @@
     "star": "My star",
     "profile": "Profile (Mind Elixir)"
   },
+  "desktopAuth": {
+    "title": "Login successful",
+    "description": "We are opening the desktop app for you. If nothing happens, click the button below.",
+    "openApp": "Open Desktop App",
+    "missingToken": "Login token is missing. Please try logging in from the desktop app again."
+  },
   "nav": {
     "summary": "AI Summary",
     "models": "Models",

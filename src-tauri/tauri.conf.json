@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "ebook-to-mindmap",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "identifier": "com.mind-elixir.ebook-to-mindmap",
   "build": {
     "frontendDist": "../dist",

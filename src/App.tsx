@@ -9,6 +9,7 @@ import { ModelsPage } from './pages/ModelsPage'
 import { CustomPromptsPage } from './pages/CustomPromptsPage'
 import { CacheManagementPage } from './pages/CacheManagementPage'
 import { ChatPage } from './pages/ChatPage'
+import { DesktopAuthPage } from './pages/DesktopAuthPage'
 import { Menu } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useAuthStore } from './stores/authStore'
@@ -69,6 +70,7 @@ function App() {
               <Route path="/custom-prompts" component={CustomPromptsPage} />
               <Route path="/cache" component={CacheManagementPage} />
               {import.meta.env.DEV && <Route path="/chat" component={ChatPage} />}
+              <Route path="/desktop-auth" component={DesktopAuthPage} />
               <Route path="/settings" component={SettingsPage} />
             </Switch>
           </div>

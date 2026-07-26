@@ -9,6 +9,12 @@
     "star": "Mis estrellas",
     "profile": "Perfil (Mind Elixir)"
   },
+  "desktopAuth": {
+    "title": "Inicio de sesión exitoso",
+    "description": "Estamos abriendo la aplicación de escritorio. Si no sucede nada, haz clic en el botón de abajo.",
+    "openApp": "Abrir aplicación de escritorio",
+    "missingToken": "Falta el token de inicio de sesión. Vuelve a iniciar sesión desde la aplicación de escritorio."
+  },
   "nav": {
     "summary": "Resumen IA",
     "models": "Modelos",

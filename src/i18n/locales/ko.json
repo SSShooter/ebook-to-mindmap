@@ -9,6 +9,12 @@
     "star": "내 별",
     "profile": "프로필 (Mind Elixir)"
   },
+  "desktopAuth": {
+    "title": "로그인 성공",
+    "description": "데스크톱 앱을 여는 중입니다. 반응이 없으면 아래 버튼을 클릭하세요.",
+    "openApp": "데스크톱 앱 열기",
+    "missingToken": "로그인 토큰이 없습니다. 데스크톱 앱에서 다시 로그인해 주세요."
+  },
   "nav": {
     "summary": "AI 요약",
     "models": "모델 관리",

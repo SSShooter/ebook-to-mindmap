@@ -9,6 +9,12 @@
     "star": "Meine Sterne",
     "profile": "Profil (Mind Elixir)"
   },
+  "desktopAuth": {
+    "title": "Anmeldung erfolgreich",
+    "description": "Wir öffnen die Desktop-App für dich. Falls nichts passiert, klicke auf die Schaltfläche unten.",
+    "openApp": "Desktop-App öffnen",
+    "missingToken": "Anmelde-Token fehlt. Bitte starte die Anmeldung erneut aus der Desktop-App."
+  },
   "nav": {
     "summary": "KI-Zusammenfassung",
     "models": "Modelle",

@@ -11,16 +11,24 @@ const DEEP_LINK_SCHEME = 'eb2mm'
 /**
  * 发起登录
  * - 网页版：整页跳转到 OAuth 登录页，登录后由后端 redirect 回来
- * - Tauri 桌面版：在系统浏览器打开登录页（带 client=desktop 标记），
- *   后端登录成功后 redirect 到 eb2mm://auth?token=xxx，由 deep link 接收
+ * - Tauri 桌面版：在系统浏览器打开登录页（?type=desktop 会作为 OAuth state 透传），
+ *   后端登录成功后 redirect 到网页版 /desktop-auth 中转页，
+ *   由该页面通过 eb2mm://auth?token=xxx 唤醒桌面端
  */
 export async function startLogin() {
   if (isTauri()) {
     const { openUrl } = await import('@tauri-apps/plugin-opener')
-    await openUrl(`${LOGIN_URL}?client=desktop`)
+    await openUrl(`${LOGIN_URL}?type=desktop`)
   } else {
     window.location.href = LOGIN_URL
   }
+}
+
+/**
+ * 生成唤醒桌面端的 deep link 地址（/desktop-auth 中转页使用）
+ */
+export function buildDesktopAuthUrl(token: string) {
+  return `${DEEP_LINK_SCHEME}://auth?token=${encodeURIComponent(token)}`
 }
 
 function handleAuthUrls(urls: string[]) {
