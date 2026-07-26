@@ -36,6 +36,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import { useModelStore, type AIModel } from '../stores/modelStore'
+import { useAuthStore } from '../stores/authStore'
 import { PROVIDER_CONFIGS } from '../types/ai'
 import { MindElixirStarModal } from '@/components/MindElixirStarModal'
 
@@ -43,6 +44,7 @@ export function ModelsPage() {
   const { t } = useTranslation()
   const { models, addModel, updateModel, deleteModel, setDefaultModel } =
     useModelStore()
+  const { user } = useAuthStore()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingModel, setEditingModel] = useState<AIModel | null>(null)
   const [isReadOnly, setIsReadOnly] = useState(false)
@@ -311,7 +313,7 @@ export function ModelsPage() {
                 </DialogTitle>
               </DialogHeader>
 
-              {isReadOnly && editingModel?.costDescription && (
+              {isReadOnly && !user && editingModel?.costDescription && (
                 <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/30 rounded-lg text-amber-700 dark:text-amber-400 text-sm font-medium">
                   <Star className="h-4 w-4 fill-current" />
                   {t(editingModel.costDescription)}
@@ -539,7 +541,7 @@ export function ModelsPage() {
                           </Badge>
                         )}
 
-                        {model.costDescription && (
+                        {!user && model.costDescription && (
                           <div className="flex items-center gap-1.5 text-[10px] text-amber-700 dark:text-amber-400 font-bold bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-800/50 shadow-sm ml-2">
                             <Star className="h-3 w-3 fill-current" />
                             {t(model.costDescription)}

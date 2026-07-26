@@ -150,10 +150,12 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
 
               {selectedModel?.costDescription && (
                 <div className="mt-3 space-y-2">
-                  <div className="flex items-center gap-1.5 text-xs font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2.5 py-1.5 rounded-lg border border-amber-200/50 dark:border-amber-800/30">
-                    <Star className="h-3.5 w-3.5 fill-current" />
-                    {t(selectedModel.costDescription)}
-                  </div>
+                  {!user && (
+                    <div className="flex items-center gap-1.5 text-xs font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2.5 py-1.5 rounded-lg border border-amber-200/50 dark:border-amber-800/30">
+                      <Star className="h-3.5 w-3.5 fill-current" />
+                      {t(selectedModel.costDescription)}
+                    </div>
+                  )}
 
                   {user && (
                     <div className="flex items-center justify-between px-2.5 py-1.5 bg-muted/30 rounded-lg border border-border/50">
