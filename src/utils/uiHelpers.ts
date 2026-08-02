@@ -2,6 +2,7 @@ import { toast } from 'sonner'
 import { launchMindElixir } from '@mind-elixir/open-desktop'
 import { downloadMethodList } from '@mind-elixir/export-mindmap'
 import type { MindElixirData, MindElixirInstance } from 'mind-elixir'
+import i18n from '@/i18n'
 
 /**
  * 滚动到页面顶部
@@ -25,15 +26,24 @@ export const openInMindElixir = async (
   mindmapData: MindElixirData,
   title: string
 ) => {
+  const loadingToast = toast.loading(i18n.t('mindElixir.launching'), {
+    position: 'top-center',
+  })
+
   try {
     await launchMindElixir(mindmapData)
-    toast.success(`已成功发送"${title}"到 Mind Elixir Desktop`, {
-      duration: 3000,
-      position: 'top-center',
-    })
+    toast.dismiss(loadingToast)
+    toast.success(
+      i18n.t('mindElixir.launchSuccess', { title }),
+      {
+        duration: 3000,
+        position: 'top-center',
+      }
+    )
   } catch (error) {
     console.error('启动 Mind Elixir 失败:', error)
-    toast.error('启动 Mind Elixir 失败', {
+    toast.dismiss(loadingToast)
+    toast.error(i18n.t('mindElixir.launchError'), {
       duration: 5000,
       position: 'top-center',
     })

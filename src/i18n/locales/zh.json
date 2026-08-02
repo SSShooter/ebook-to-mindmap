@@ -251,6 +251,7 @@
     }
   },
   "mindElixir": {
+    "launching": "正在启动 Mind Elixir Desktop...",
     "launchSuccess": "已成功发送到 Mind Elixir Desktop",
     "launchError": "启动 Mind Elixir Desktop 失败",
     "exportError": "导出思维导图失败",

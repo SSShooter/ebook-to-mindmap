@@ -118,6 +118,7 @@
     }
   },
   "mindElixir": {
+    "launching": "Mind Elixir Desktop を起動しています...",
     "launchSuccess": "「{{title}}」を Mind Elixir Desktop に送信しました",
     "launchError": "Mind Elixir Desktop の起動に失敗しました。アプリがインストールされていることを確認してください",
     "exportSuccess": "「{{title}}」を {{format}} 形式でエクスポートしました",

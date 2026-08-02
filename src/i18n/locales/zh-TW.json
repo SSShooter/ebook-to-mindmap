@@ -118,6 +118,7 @@
     }
   },
   "mindElixir": {
+    "launching": "正在啟動 Mind Elixir Desktop...",
     "launchSuccess": "已成功將「{{title}}」傳送至 Mind Elixir Desktop",
     "launchError": "啟動 Mind Elixir Desktop 失敗",
     "exportSuccess": "「{{title}}」已成功匯出為 {{format}} 格式",

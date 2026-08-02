@@ -34,7 +34,10 @@ interface MindMapCardProps {
   /** 阅读章节的回调函数 */
   onReadChapter?: () => void
   /** 在MindElixir中打开的回调函数 */
-  onOpenInMindElixir?: (mindmapData: MindElixirData, title: string) => void
+  onOpenInMindElixir?: (
+    mindmapData: MindElixirData,
+    title: string
+  ) => void | Promise<void>
   /** 下载思维导图的回调函数 */
   onDownloadMindMap?: (
     mindElixirInstance: MindElixirInstance,
@@ -103,6 +106,18 @@ export const MindMapCard: React.FC<MindMapCardProps> = ({
 }) => {
   const { t } = useTranslation()
   const localMindElixirRef = React.useRef<MindMapRef | null>(null)
+  const [isOpeningInMindElixir, setIsOpeningInMindElixir] =
+    React.useState(false)
+
+  const handleOpenInMindElixir = async () => {
+    if (!onOpenInMindElixir || isOpeningInMindElixir) return
+    setIsOpeningInMindElixir(true)
+    try {
+      await onOpenInMindElixir(mindMapData, title)
+    } finally {
+      setIsOpeningInMindElixir(false)
+    }
+  }
 
   // Auto-scroll to last node when mindMapData changes (for streaming updates)
   React.useEffect(() => {
@@ -146,9 +161,14 @@ export const MindMapCard: React.FC<MindMapCardProps> = ({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => onOpenInMindElixir(mindMapData, title)}
+                  onClick={handleOpenInMindElixir}
+                  disabled={isOpeningInMindElixir}
                   title={t('common.openInMindElixir')}>
-                  <ExternalLink className="h-4 w-4 mr-1" />
+                  {isOpeningInMindElixir ? (
+                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                  ) : (
+                    <ExternalLink className="h-4 w-4 mr-1" />
+                  )}
                 </Button>
               )}
               {showClearCache && onClearCache && (

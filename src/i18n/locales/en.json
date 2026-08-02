@@ -118,6 +118,7 @@
     }
   },
   "mindElixir": {
+    "launching": "Launching Mind Elixir Desktop...",
     "launchSuccess": "Successfully sent \"{{title}}\" to Mind Elixir Desktop",
     "launchError": "Failed to launch Mind Elixir Desktop, please ensure Mind Elixir Desktop app is installed",
     "exportSuccess": "{{title}} successfully exported as {{format}} format",
