@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -39,6 +39,9 @@ import { useModelStore, type AIModel } from '../stores/modelStore'
 import { useAuthStore } from '../stores/authStore'
 import { PROVIDER_CONFIGS } from '../types/ai'
 import { MindElixirStarModal } from '@/components/MindElixirStarModal'
+import { TokenDanceWallet } from '@/components/TokenDanceWallet'
+import { TokenDanceConnectButton } from '@/components/TokenDanceConnectButton'
+import { useTokenDanceOAuthStore } from '@/stores/tokenDanceOAuthStore'
 
 export function ModelsPage() {
   const { t } = useTranslation()
@@ -49,6 +52,43 @@ export function ModelsPage() {
   const [editingModel, setEditingModel] = useState<AIModel | null>(null)
   const [isReadOnly, setIsReadOnly] = useState(false)
   const [isStarModalOpen, setIsStarModalOpen] = useState(false)
+
+  const pendingOAuthResult = useTokenDanceOAuthStore((s) => s.pendingResult)
+  const consumeOAuthResult = useTokenDanceOAuthStore((s) => s.consumeResult)
+
+  // TokenDance OAuth 授权回跳后：把换到的新 Key 写入目标模型
+  //  - 编辑既有模型 → updateModel(id, { apiKey })
+  //  - 新建模型草稿 → 用带 Key 的草稿重开「新增模型」弹窗
+  useEffect(() => {
+    if (!pendingOAuthResult) return
+    const result = consumeOAuthResult()
+    if (!result) return
+    const { key, target } = result
+
+    if (target.editingModelId) {
+      const existing = models.find((m) => m.id === target.editingModelId)
+      if (existing) {
+        updateModel(existing.id, { apiKey: key })
+        toast.success(t('models.oauthKeyWritten', { name: existing.name }))
+        return
+      }
+    }
+
+    // 新建模型草稿：填充 Key 后重开弹窗，让用户核对名称/模型后保存
+    const draft = target.draft
+    const restored: typeof formData = {
+      name: draft?.name ?? '',
+      provider: (draft?.provider as AIModel['provider']) ?? 'tokendance',
+      apiKey: key,
+      apiUrl: draft?.apiUrl || PROVIDER_CONFIGS.tokendance.defaultApiUrl,
+      model: draft?.model || PROVIDER_CONFIGS.tokendance.defaultModel,
+    }
+    setEditingModel(null)
+    setFormData(restored)
+    fetchAvailableModels(restored)
+    setIsDialogOpen(true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingOAuthResult])
 
   const [formData, setFormData] = useState({
     name: '',
@@ -71,7 +111,10 @@ export function ModelsPage() {
     const apiKey = params?.apiKey ?? formData.apiKey
     const provider = params?.provider ?? formData.provider
 
-    if (!apiUrl || !apiKey) {
+    // TokenDance 的模型目录是公开的，未填 API Key 也能拉取，方便先选模型再填密钥
+    const isPublicCatalog = provider === 'tokendance'
+
+    if (!apiUrl || (!apiKey && !isPublicCatalog)) {
       setAvailableModels([])
       return
     }
@@ -85,6 +128,7 @@ export function ModelsPage() {
         '302.ai',
         'gemini',
         'openrouter',
+        'tokendance',
       ].includes(provider)
     ) {
       setAvailableModels([])
@@ -94,8 +138,8 @@ export function ModelsPage() {
     setIsLoadingModels(true)
     try {
       const headers: HeadersInit = {
-        Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
+        ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
       }
 
       const response = await appFetch(`${apiUrl}/models`, { headers })
@@ -167,6 +211,13 @@ export function ModelsPage() {
       apiUrlPlaceholder: PROVIDER_CONFIGS.openrouter.defaultApiUrl,
       modelPlaceholder: t('config.modelPlaceholder'),
       url: PROVIDER_CONFIGS.openrouter.websiteUrl,
+    },
+    tokendance: {
+      apiKeyLabel: 'TokenDance API Key',
+      apiKeyPlaceholder: t('config.enterTokenDanceApiKey'),
+      apiUrlPlaceholder: PROVIDER_CONFIGS.tokendance.defaultApiUrl,
+      modelPlaceholder: t('config.modelPlaceholder'),
+      url: PROVIDER_CONFIGS.tokendance.websiteUrl,
     },
   }
 
@@ -350,6 +401,7 @@ export function ModelsPage() {
                         <SelectItem value="ollama">Ollama</SelectItem>
                         <SelectItem value="302.ai">302.AI</SelectItem>
                         <SelectItem value="openrouter">OpenRouter</SelectItem>
+                        <SelectItem value="tokendance">TokenDance</SelectItem>
                       </SelectContent>
                     </Select>
                     <Button
@@ -399,13 +451,42 @@ export function ModelsPage() {
                     }}
                     readOnly={isReadOnly}
                   />
+                  {formData.provider === 'tokendance' && !isReadOnly && (
+                    <div className="pt-0.5">
+                      <TokenDanceConnectButton
+                        target={
+                          editingModel
+                            ? { editingModelId: editingModel.id }
+                            : {
+                                draft: {
+                                  name: formData.name,
+                                  provider: formData.provider,
+                                  apiKey: formData.apiKey,
+                                  apiUrl: formData.apiUrl,
+                                  model: formData.model,
+                                },
+                              }
+                        }
+                        hasKey={!!formData.apiKey.trim()}
+                        disabled={isReadOnly}
+                      />
+                      <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
+                        {t('tokendance.oauth.connectDesc')}
+                      </p>
+                    </div>
+                  )}
                 </div>
+
+                {formData.provider === 'tokendance' && (
+                  <TokenDanceWallet apiKey={formData.apiKey} compact />
+                )}
 
                 {(formData.provider === 'openai' ||
                   formData.provider === 'openai-responses' ||
                   formData.provider === 'ollama' ||
                   formData.provider === '302.ai' ||
                   formData.provider === 'gemini' ||
+                  formData.provider === 'tokendance' ||
                   formData.provider === 'openrouter') && (
                   <div className="space-y-2">
                     <Label htmlFor="api-url">{t('config.apiUrl')}</Label>
@@ -428,6 +509,7 @@ export function ModelsPage() {
                       disabled={
                         formData.provider === 'gemini' ||
                         formData.provider === '302.ai' ||
+                        formData.provider === 'tokendance' ||
                         formData.provider === 'openrouter'
                       }
                     />
@@ -473,7 +555,9 @@ export function ModelsPage() {
                         />
                       )}
                     </div>
-                    {formData.apiUrl && formData.apiKey && (
+                    {formData.apiUrl &&
+                      (formData.apiKey ||
+                        formData.provider === 'tokendance') && (
                       <Button
                         type="button"
                         variant="outline"

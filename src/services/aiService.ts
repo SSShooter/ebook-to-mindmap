@@ -15,9 +15,13 @@ import type { MindElixirData } from 'mind-elixir'
 import { plaintextToMindElixir } from 'mind-elixir/plaintextConverter'
 import { getLanguageInstruction, type SupportedLanguage } from './prompts/utils'
 import type { AIConfig } from '../types/ai'
-import { PROVIDER_CONFIGS } from '../types/ai'
+import { PROVIDER_CONFIGS, TOKENDANCE_APP_URL } from '../types/ai'
 import i18n from '../i18n'
 import { appFetch } from '@/lib/fetch'
+import {
+  TokenDanceRecoveryError,
+  parseRecoveryAction,
+} from './tokendanceWallet'
 
 interface Chapter {
   id: string
@@ -549,9 +553,14 @@ export class AIService {
       const authToken = isMindElixirModel
         ? localStorage.getItem('auth_token')
         : null
-      const headers: HeadersInit = {
+      const headers: Record<string, string> = {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${authToken ?? modelConfig.apiKey}`,
+      }
+
+      // TokenDance 应用归因：可选参数，用于让平台统计哪些调用来自本应用
+      if (config.provider === 'tokendance') {
+        headers['X-App-URL'] = TOKENDANCE_APP_URL
       }
 
       const decoder = new TextDecoder('utf-8')
@@ -611,6 +620,18 @@ export class AIService {
       })
 
       if (!response.ok) {
+        // TokenDance 在明确判断出恢复路径时会带上 TokenDance-Recovery-Action 响应头，
+        // 据此把「余额不足 / Key 失效 / 周期额度用尽」翻译成可操作的提示，而不是裸 HTTP 错误
+        if (config.provider === 'tokendance') {
+          const action = parseRecoveryAction(response)
+          if (action) {
+            throw new TokenDanceRecoveryError(
+              action,
+              i18n.t(`tokendance.recovery.${action}`)
+            )
+          }
+        }
+
         if (modelConfig.apiKey === 'mind-elixir') {
           if (response.status === 402) {
             throw new Error(i18n.t('mindElixir.insufficientBalance'))

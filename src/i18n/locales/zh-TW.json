@@ -244,7 +244,8 @@
     "exportConfig": "匯出設定",
     "importSuccess": "設定匯入成功",
     "exportSuccess": "設定匯出成功",
-    "importError": "匯入設定檔失敗,請檢查檔案格式"
+    "importError": "匯入設定檔失敗,請檢查檔案格式",
+    "enterTokenDanceApiKey": "請輸入 TokenDance API Key"
   },
   "theme": {
     "title": "主題",
@@ -332,7 +333,8 @@
     "starDescription": "使用星星存取進階 AI 模型",
     "rechargeStars": "儲值星星",
     "rechargeHint": "點擊上方按鈕前往儲值頁面",
-    "loginRequired": "請先登入以查看星星餘額並儲值"
+    "loginRequired": "請先登入以查看星星餘額並儲值",
+    "oauthKeyWritten": "OAuth 授權成功，已為「{{name}}」寫入新 Key"
   },
   "customPrompts": {
     "title": "自訂提示詞",
@@ -428,5 +430,65 @@
     "send": "傳送",
     "retrieving": "正在擷取上下文...",
     "generating": "正在產生回答..."
+  },
+  "tokendance": {
+    "wallet": "TokenDance 錢包",
+    "walletDescription": "餘額來自 TokenDance 開放平台，與模型呼叫使用同一個 API Key",
+    "balance": "剩餘額度",
+    "totalCredits": "總額度",
+    "usedCredits": "已消耗",
+    "refresh": "重新整理餘額",
+    "redeemCode": "兌換碼",
+    "redeemCodePlaceholder": "輸入兌換碼",
+    "redeem": "兌換",
+    "redeemSuccess": "兌換成功，獲得 {{amount}}",
+    "redeemFailed": "兌換失敗",
+    "fetchFailed": "取得餘額失敗",
+    "noKey": "請先填寫 TokenDance API Key",
+    "error": {
+      "invalid_request": "兌換碼無效、已使用或已過期",
+      "unauthorized": "API Key 缺失、無效或已過期",
+      "forbidden": "帳號已被封鎖",
+      "internal_error": "TokenDance 服務內部錯誤",
+      "network_error": "網路請求失敗，請檢查網路連線",
+      "unknown": "請求失敗，請稍後再試"
+    },
+    "topUp": "儲值",
+    "topUpTitle": "TokenDance 儲值",
+    "topUpDescription": "儲值將進入目前 API Key 所屬的 TokenDance 帳戶，付款需由你確認",
+    "amount": "儲值金額（元）",
+    "amountPlaceholder": "請輸入 1 - 100000 之間的整數",
+    "createOrder": "建立儲值訂單",
+    "creating": "建立中...",
+    "payWithAlipay": "使用支付寶付款",
+    "openPaymentPage": "在瀏覽器中開啟付款頁",
+    "copyPaymentLink": "複製付款連結",
+    "linkCopied": "付款連結已複製",
+    "waitingPayment": "等待付款結果，每 3 秒自動查詢...",
+    "paymentPaid": "儲值已到帳",
+    "paymentFailed": "本次付款未完成，可重新建立訂單",
+    "paymentExpired": "付款工作階段已過期，請重新建立訂單",
+    "retry": "重新建立訂單",
+    "invalidAmount": "請輸入 1 - 100000 之間的整數金額",
+    "paymentHint": "喚起支付寶或返回頁面都不代表付款成功，請以本頁自動查詢結果為準。",
+    "recovery": {
+      "top_up_balance": "TokenDance 帳戶餘額不足，請先儲值",
+      "reauthorize_api_key": "TokenDance API Key 已失效，請重新授權",
+      "api_key_quota": "TokenDance API Key 已達週期額度上限，請等待刷新或重新授權"
+    },
+    "scanToPay": "使用微信或支付寶掃碼付款",
+    "mobileAlipayMissing": "本次工作階段不支援行動端付款，請改用 PC 端掃碼或稍後再試",
+    "oauth": {
+      "connect": "連接 TokenDance 帳號",
+      "connectDesc": "授權後自動建立 Key 並寫入本模型，無需手動複製",
+      "reauthorize": "重新授權",
+      "connecting": "正在跳轉 TokenDance 授權頁...",
+      "connected": "TokenDance 帳號已連線，API Key 已寫入模型",
+      "exchangeFailed": "授權交換失敗：{{reason}}",
+      "missingCode": "授權回呼缺少 code",
+      "sessionLost": "授權工作階段已失效，請重新發起",
+      "openInBrowser": "沒有自動開啟？請在瀏覽器中手動開啟授權頁",
+      "help": "Key 在授權完成時一次性簽發，僅寫入本機，請勿洩漏。"
+    }
   }
 }

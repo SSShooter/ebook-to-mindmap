@@ -244,7 +244,8 @@
     "exportConfig": "Export Configuration",
     "importSuccess": "Configuration imported successfully",
     "exportSuccess": "Configuration exported successfully",
-    "importError": "Failed to import configuration file, please check the file format"
+    "importError": "Failed to import configuration file, please check the file format",
+    "enterTokenDanceApiKey": "Enter your TokenDance API Key"
   },
   "theme": {
     "title": "Theme",
@@ -332,7 +333,8 @@
     "starDescription": "Use stars to access premium AI models",
     "rechargeStars": "Recharge Stars",
     "rechargeHint": "Click the button above to visit the recharge page",
-    "loginRequired": "Please login to view your star balance and recharge"
+    "loginRequired": "Please login to view your star balance and recharge",
+    "oauthKeyWritten": "OAuth authorized — a new Key was written to \"{{name}}\""
   },
   "customPrompts": {
     "title": "Custom Prompts",
@@ -428,5 +430,65 @@
     "send": "Send",
     "retrieving": "Retrieving context...",
     "generating": "Generating answer..."
+  },
+  "tokendance": {
+    "wallet": "TokenDance Wallet",
+    "walletDescription": "Balance from the TokenDance open API, using the same API Key as model calls",
+    "balance": "Remaining balance",
+    "totalCredits": "Total credits",
+    "usedCredits": "Used",
+    "refresh": "Refresh balance",
+    "redeemCode": "Redemption code",
+    "redeemCodePlaceholder": "Enter redemption code",
+    "redeem": "Redeem",
+    "redeemSuccess": "Redeemed successfully, {{amount}} added",
+    "redeemFailed": "Redemption failed",
+    "fetchFailed": "Failed to fetch balance",
+    "noKey": "Please enter your TokenDance API Key first",
+    "error": {
+      "invalid_request": "The redemption code is invalid, already used, or expired",
+      "unauthorized": "API Key is missing, invalid, or expired",
+      "forbidden": "This account has been suspended",
+      "internal_error": "TokenDance internal server error",
+      "network_error": "Network request failed, please check your connection",
+      "unknown": "Request failed, please try again later"
+    },
+    "topUp": "Top up",
+    "topUpTitle": "Top up TokenDance",
+    "topUpDescription": "The top-up goes to the TokenDance account that owns this API Key. Payment must be confirmed by you.",
+    "amount": "Amount (CNY)",
+    "amountPlaceholder": "Enter an integer between 1 and 100000",
+    "createOrder": "Create top-up order",
+    "creating": "Creating...",
+    "payWithAlipay": "Pay with Alipay",
+    "openPaymentPage": "Open payment page in browser",
+    "copyPaymentLink": "Copy payment link",
+    "linkCopied": "Payment link copied",
+    "waitingPayment": "Waiting for payment, checking every 3 seconds...",
+    "paymentPaid": "Top-up received",
+    "paymentFailed": "Payment was not completed, you can create a new order",
+    "paymentExpired": "The payment session has expired, please create a new order",
+    "retry": "Create a new order",
+    "invalidAmount": "Please enter an integer amount between 1 and 100000",
+    "paymentHint": "Launching Alipay or returning to this page does not mean the payment succeeded — rely on the automatic status check shown here.",
+    "recovery": {
+      "top_up_balance": "Your TokenDance balance is insufficient, please top up",
+      "reauthorize_api_key": "The TokenDance API Key is invalid, please re-authorize",
+      "api_key_quota": "The TokenDance API Key has reached its quota limit, wait for it to refresh or re-authorize"
+    },
+    "scanToPay": "Scan with WeChat or Alipay",
+    "mobileAlipayMissing": "This session does not support mobile payment. Please scan the QR code on PC or try again later.",
+    "oauth": {
+      "connect": "Connect TokenDance account",
+      "connectDesc": "Authorizes and writes a freshly issued API Key into this model",
+      "reauthorize": "Re-authorize",
+      "connecting": "Redirecting to the TokenDance authorization page...",
+      "connected": "TokenDance account connected, API Key written to the model",
+      "exchangeFailed": "Authorization exchange failed: {{reason}}",
+      "missingCode": "The callback is missing a code",
+      "sessionLost": "The authorization session has expired, please start over",
+      "openInBrowser": "Didn't open automatically? Open the authorization page manually in your browser.",
+      "help": "The Key is issued once at the end of authorization and only stored on this device. Do not share it."
+    }
   }
 }

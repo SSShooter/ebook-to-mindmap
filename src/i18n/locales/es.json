@@ -244,7 +244,8 @@
     "exportConfig": "Exportar configuración",
     "importSuccess": "Configuración importada con éxito",
     "exportSuccess": "Configuración exportada con éxito",
-    "importError": "Error al importar el archivo de configuración, por favor verifique el formato"
+    "importError": "Error al importar el archivo de configuración, por favor verifique el formato",
+    "enterTokenDanceApiKey": "Introduce tu API Key de TokenDance"
   },
   "theme": {
     "title": "Tema",
@@ -332,7 +333,8 @@
     "starDescription": "Use estrellas para acceder a modelos de IA premium",
     "rechargeStars": "Recargar estrellas",
     "rechargeHint": "Haga clic en el botón de arriba para ir a la página de recarga",
-    "loginRequired": "Inicie sesión para ver su saldo de estrellas y recargar"
+    "loginRequired": "Inicie sesión para ver su saldo de estrellas y recargar",
+    "oauthKeyWritten": "Autorización OAuth correcta: se escribió una clave nueva en \"{{name}}\""
   },
   "customPrompts": {
     "title": "Prompts personalizados",
@@ -428,5 +430,65 @@
     "send": "Enviar",
     "retrieving": "Recuperando contexto...",
     "generating": "Generando respuesta..."
+  },
+  "tokendance": {
+    "wallet": "Billetera TokenDance",
+    "walletDescription": "Saldo de la API abierta de TokenDance, usa la misma API Key que las llamadas al modelo",
+    "balance": "Saldo restante",
+    "totalCredits": "Créditos totales",
+    "usedCredits": "Consumidos",
+    "refresh": "Actualizar saldo",
+    "redeemCode": "Código de canje",
+    "redeemCodePlaceholder": "Introduce el código de canje",
+    "redeem": "Canjear",
+    "redeemSuccess": "Canje correcto, has obtenido {{amount}}",
+    "redeemFailed": "El canje ha fallado",
+    "fetchFailed": "No se pudo obtener el saldo",
+    "noKey": "Introduce primero tu API Key de TokenDance",
+    "error": {
+      "invalid_request": "El código de canje no es válido, ya se usó o ha caducado",
+      "unauthorized": "La API Key falta, no es válida o ha caducado",
+      "forbidden": "La cuenta está suspendida",
+      "internal_error": "Error interno del servicio TokenDance",
+      "network_error": "Error de red, comprueba tu conexión",
+      "unknown": "La solicitud ha fallado, inténtalo de nuevo más tarde"
+    },
+    "topUp": "Recargar",
+    "topUpTitle": "Recargar TokenDance",
+    "topUpDescription": "La recarga se acredita en la cuenta TokenDance a la que pertenece esta API Key. El pago debe confirmarlo tú.",
+    "amount": "Importe (CNY)",
+    "amountPlaceholder": "Introduce un número entero entre 1 y 100000",
+    "createOrder": "Crear orden de recarga",
+    "creating": "Creando...",
+    "payWithAlipay": "Pagar con Alipay",
+    "openPaymentPage": "Abrir la página de pago en el navegador",
+    "copyPaymentLink": "Copiar enlace de pago",
+    "linkCopied": "Enlace de pago copiado",
+    "waitingPayment": "Esperando el resultado del pago, se consulta cada 3 segundos...",
+    "paymentPaid": "Recarga acreditada",
+    "paymentFailed": "El pago no se completó, puedes crear una nueva orden",
+    "paymentExpired": "La sesión de pago ha caducado, crea una nueva orden",
+    "retry": "Crear una nueva orden",
+    "invalidAmount": "Introduce un importe entero entre 1 y 100000",
+    "paymentHint": "Abrir Alipay o volver a esta página no significa que el pago se haya realizado: ten en cuenta la consulta automática que se muestra aquí.",
+    "recovery": {
+      "top_up_balance": "El saldo de TokenDance es insuficiente, recarga primero",
+      "reauthorize_api_key": "La API Key de TokenDance no es válida, vuelve a autorizarla",
+      "api_key_quota": "La API Key de TokenDance ha alcanzado su cuota, espera a que se renueve o vuelve a autorizarla"
+    },
+    "scanToPay": "Escanea con WeChat o Alipay",
+    "mobileAlipayMissing": "Esta sesión no admite pago móvil. Escanea el código QR en PC o inténtalo más tarde.",
+    "oauth": {
+      "connect": "Conectar cuenta TokenDance",
+      "connectDesc": "Autoriza y escribe una clave API recién emitida en este modelo",
+      "reauthorize": "Volver a autorizar",
+      "connecting": "Redirigiendo a la página de autorización de TokenDance...",
+      "connected": "Cuenta TokenDance conectada; la clave API se escribió en el modelo",
+      "exchangeFailed": "Falló el intercambio de autorización: {{reason}}",
+      "missingCode": "La respuesta no incluye code",
+      "sessionLost": "La sesión de autorización caducó, vuelve a empezar",
+      "openInBrowser": "¿No se abrió automáticamente? Abre la página de autorización manualmente en el navegador.",
+      "help": "La clave se emite una sola vez al autorizar y solo se guarda en este dispositivo. No la compartas."
+    }
   }
 }

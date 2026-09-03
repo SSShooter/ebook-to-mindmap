@@ -244,7 +244,8 @@
     "exportConfig": "Konfiguration exportieren",
     "importSuccess": "Konfiguration erfolgreich importiert",
     "exportSuccess": "Konfiguration erfolgreich exportiert",
-    "importError": "Import der Konfigurationsdatei fehlgeschlagen, bitte überprüfen Sie das Dateiformat"
+    "importError": "Import der Konfigurationsdatei fehlgeschlagen, bitte überprüfen Sie das Dateiformat",
+    "enterTokenDanceApiKey": "TokenDance API-Schlüssel eingeben"
   },
   "theme": {
     "title": "Design",
@@ -332,7 +333,8 @@
     "starDescription": "Verwenden Sie Sterne, um auf Premium-KI-Modelle zuzugreifen",
     "rechargeStars": "Sterne aufladen",
     "rechargeHint": "Klicken Sie auf die Schaltfläche oben, um zur Aufladeseite zu gelangen",
-    "loginRequired": "Bitte melden Sie sich an, um Ihr Stern-Guthaben anzuzeigen und aufzuladen"
+    "loginRequired": "Bitte melden Sie sich an, um Ihr Stern-Guthaben anzuzeigen und aufzuladen",
+    "oauthKeyWritten": "OAuth autorisiert – ein neuer Schlüssel wurde in „{{name}}\" geschrieben"
   },
   "customPrompts": {
     "title": "Eigene Prompts",
@@ -428,5 +430,65 @@
     "send": "Senden",
     "retrieving": "Kontext wird abgerufen...",
     "generating": "Antwort wird generiert..."
+  },
+  "tokendance": {
+    "wallet": "TokenDance-Wallet",
+    "walletDescription": "Guthaben von der offenen TokenDance-API, verwendet denselben API-Schlüssel wie Modellaufrufe",
+    "balance": "Verbleibendes Guthaben",
+    "totalCredits": "Gesamtguthaben",
+    "usedCredits": "Verbraucht",
+    "refresh": "Guthaben aktualisieren",
+    "redeemCode": "Einlösecode",
+    "redeemCodePlaceholder": "Einlösecode eingeben",
+    "redeem": "Einlösen",
+    "redeemSuccess": "Erfolgreich eingelöst, {{amount}} gutgeschrieben",
+    "redeemFailed": "Einlösen fehlgeschlagen",
+    "fetchFailed": "Guthaben konnte nicht abgerufen werden",
+    "noKey": "Bitte zuerst den TokenDance API-Schlüssel eingeben",
+    "error": {
+      "invalid_request": "Der Einlösecode ist ungültig, bereits verwendet oder abgelaufen",
+      "unauthorized": "Der API-Schlüssel fehlt, ist ungültig oder abgelaufen",
+      "forbidden": "Dieses Konto wurde gesperrt",
+      "internal_error": "Interner TokenDance-Serverfehler",
+      "network_error": "Netzwerkfehler, bitte Verbindung prüfen",
+      "unknown": "Anfrage fehlgeschlagen, bitte später erneut versuchen"
+    },
+    "topUp": "Aufladen",
+    "topUpTitle": "TokenDance aufladen",
+    "topUpDescription": "Die Aufladung wird dem TokenDance-Konto gutgeschrieben, zu dem dieser API-Schlüssel gehört. Die Zahlung musst du bestätigen.",
+    "amount": "Betrag (CNY)",
+    "amountPlaceholder": "Ganze Zahl zwischen 1 und 100000 eingeben",
+    "createOrder": "Aufladeauftrag erstellen",
+    "creating": "Wird erstellt...",
+    "payWithAlipay": "Mit Alipay bezahlen",
+    "openPaymentPage": "Zahlungsseite im Browser öffnen",
+    "copyPaymentLink": "Zahlungslink kopieren",
+    "linkCopied": "Zahlungslink kopiert",
+    "waitingPayment": "Warte auf das Zahlungsergebnis, alle 3 Sekunden wird geprüft...",
+    "paymentPaid": "Aufladung gutgeschrieben",
+    "paymentFailed": "Die Zahlung wurde nicht abgeschlossen, du kannst einen neuen Auftrag erstellen",
+    "paymentExpired": "Die Zahlungssitzung ist abgelaufen, bitte neuen Auftrag erstellen",
+    "retry": "Neuen Auftrag erstellen",
+    "invalidAmount": "Bitte einen ganzzahligen Betrag zwischen 1 und 100000 eingeben",
+    "paymentHint": "Das Öffnen von Alipay oder das Zurückkehren zu dieser Seite bedeutet keinen Zahlungserfolg – maßgeblich ist die hier automatisch abgefragte Statusprüfung.",
+    "recovery": {
+      "top_up_balance": "Das TokenDance-Guthaben ist unzureichend, bitte zuerst aufladen",
+      "reauthorize_api_key": "Der TokenDance-API-Schlüssel ist ungültig, bitte erneut autorisieren",
+      "api_key_quota": "Der TokenDance-API-Schlüssel hat sein Kontingent erreicht, warte auf die Erneuerung oder autorisiere ihn erneut"
+    },
+    "scanToPay": "Mit WeChat oder Alipay scannen",
+    "mobileAlipayMissing": "Diese Sitzung unterstützt keine mobile Zahlung. Bitte scanne den QR-Code am PC oder versuche es später erneut.",
+    "oauth": {
+      "connect": "TokenDance-Konto verbinden",
+      "connectDesc": "Autorisiert und schreibt einen neu ausgestellten API-Schlüssel in dieses Modell",
+      "reauthorize": "Erneut autorisieren",
+      "connecting": "Weiterleitung zur TokenDance-Autorisierungsseite...",
+      "connected": "TokenDance-Konto verbunden, API-Schlüssel ins Modell geschrieben",
+      "exchangeFailed": "Autorisierungsaustausch fehlgeschlagen: {{reason}}",
+      "missingCode": "Der Callback enthält keinen code",
+      "sessionLost": "Die Autorisierungssitzung ist abgelaufen, bitte neu starten",
+      "openInBrowser": "Nicht automatisch geöffnet? Öffne die Autorisierungsseite manuell im Browser.",
+      "help": "Der Schlüssel wird bei der Autorisierung nur einmal ausgestellt und nur auf diesem Gerät gespeichert. Nicht weitergeben."
+    }
   }
 }

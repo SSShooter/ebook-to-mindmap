@@ -244,7 +244,8 @@
     "exportConfig": "設定をエクスポート",
     "importSuccess": "設定のインポートに成功しました",
     "exportSuccess": "設定のエクスポートに成功しました",
-    "importError": "設定ファイルのインポートに失敗しました。ファイル形式を確認してください"
+    "importError": "設定ファイルのインポートに失敗しました。ファイル形式を確認してください",
+    "enterTokenDanceApiKey": "TokenDance API キーを入力"
   },
   "theme": {
     "title": "テーマ",
@@ -332,7 +333,8 @@
     "starDescription": "スターを使用してプレミアム AI モデルにアクセス",
     "rechargeStars": "スターをチャージ",
     "rechargeHint": "上のボタンをクリックしてチャージページへ",
-    "loginRequired": "スター残高の確認とチャージにはログインが必要です"
+    "loginRequired": "スター残高の確認とチャージにはログインが必要です",
+    "oauthKeyWritten": "OAuth 認証に成功し、「{{name}}」に新しいキーを書き込みました"
   },
   "customPrompts": {
     "title": "カスタムプロンプト",
@@ -428,5 +430,65 @@
     "send": "送信",
     "retrieving": "コンテキストを取得中...",
     "generating": "回答を生成中..."
+  },
+  "tokendance": {
+    "wallet": "TokenDance ウォレット",
+    "walletDescription": "残高は TokenDance オープン API から取得します。モデル呼び出しと同じ API キーを使用します",
+    "balance": "残高",
+    "totalCredits": "総クレジット",
+    "usedCredits": "消費済み",
+    "refresh": "残高を更新",
+    "redeemCode": "ギフトコード",
+    "redeemCodePlaceholder": "ギフトコードを入力",
+    "redeem": "交換",
+    "redeemSuccess": "交換に成功しました。{{amount}} を獲得",
+    "redeemFailed": "交換に失敗しました",
+    "fetchFailed": "残高の取得に失敗しました",
+    "noKey": "先に TokenDance API キーを入力してください",
+    "error": {
+      "invalid_request": "ギフトコードが無効、使用済み、または期限切れです",
+      "unauthorized": "API キーが存在しない、無効、または期限切れです",
+      "forbidden": "このアカウントは停止されています",
+      "internal_error": "TokenDance サーバー内部エラー",
+      "network_error": "ネットワークエラーが発生しました。接続を確認してください",
+      "unknown": "リクエストに失敗しました。後でもう一度お試しください"
+    },
+    "topUp": "チャージ",
+    "topUpTitle": "TokenDance チャージ",
+    "topUpDescription": "チャージはこの API キーに紐づく TokenDance アカウントに反映されます。支払いはご本人の確認が必要です",
+    "amount": "チャージ金額（元）",
+    "amountPlaceholder": "1〜100000 の整数を入力",
+    "createOrder": "チャージ注文を作成",
+    "creating": "作成中...",
+    "payWithAlipay": "Alipay で支払う",
+    "openPaymentPage": "ブラウザで支払いページを開く",
+    "copyPaymentLink": "支払いリンクをコピー",
+    "linkCopied": "支払いリンクをコピーしました",
+    "waitingPayment": "支払い結果を待っています。3 秒ごとに自動確認します...",
+    "paymentPaid": "チャージが反映されました",
+    "paymentFailed": "支払いが完了しませんでした。新しい注文を作成できます",
+    "paymentExpired": "支払いセッションの有効期限が切れました。新しい注文を作成してください",
+    "retry": "新しい注文を作成",
+    "invalidAmount": "1〜100000 の整数金額を入力してください",
+    "paymentHint": "Alipay の起動やページへの復帰は支払い完了を意味しません。このページの自動照会結果を基準にしてください。",
+    "recovery": {
+      "top_up_balance": "TokenDance の残高が不足しています。チャージしてください",
+      "reauthorize_api_key": "TokenDance API キーが無効です。再認可してください",
+      "api_key_quota": "TokenDance API キーが期間上限に達しました。リセットを待つか再認可してください"
+    },
+    "scanToPay": "WeChat または Alipay でスキャンして支払う",
+    "mobileAlipayMissing": "このセッションはモバイル支払いに対応していません。PC で QR コードをスキャンするか、後でもう一度お試しください",
+    "oauth": {
+      "connect": "TokenDance アカウントに接続",
+      "connectDesc": "認証後、新規発行された API キーをこのモデルに自動で書き込みます",
+      "reauthorize": "再認証",
+      "connecting": "TokenDance 認証ページへ移動しています...",
+      "connected": "TokenDance アカウントを接続し、API キーをモデルに書き込みました",
+      "exchangeFailed": "認証の交換に失敗しました：{{reason}}",
+      "missingCode": "コールバックに code がありません",
+      "sessionLost": "認証セッションが期限切れです。やり直してください",
+      "openInBrowser": "自動で開かない場合は、ブラウザで認証ページを手動で開いてください",
+      "help": "キーは認証完了時に一度だけ発行され、この端末にのみ保存されます。共有しないでください。"
+    }
   }
 }
