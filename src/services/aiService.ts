@@ -50,7 +50,7 @@ export class AIService {
     return {
       apiUrl: config.apiUrl || providerConfig.defaultApiUrl,
       apiKey: config.apiKey || '',
-      model: config.model || providerConfig.defaultModel,
+      model: config.model || '',
     }
   }
 

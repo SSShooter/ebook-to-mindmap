@@ -44,45 +44,37 @@ export const TOKENDANCE_APP_NAME = '电子书转思维导图'
  */
 export interface ProviderConfig {
   defaultApiUrl: string
-  defaultModel: string
   websiteUrl: string
 }
 
 export const PROVIDER_CONFIGS: Record<AIProvider, ProviderConfig> = {
   gemini: {
     defaultApiUrl: 'https://generativelanguage.googleapis.com/v1beta/openai',
-    defaultModel: 'gemini-1.5-flash',
     websiteUrl: 'https://aistudio.google.com/',
   },
   openai: {
     defaultApiUrl: 'https://api.openai.com/v1',
-    defaultModel: 'gpt-3.5-turbo',
     websiteUrl: 'https://platform.openai.com/',
   },
   'openai-responses': {
     defaultApiUrl: 'https://api.openai.com/v1',
-    defaultModel: 'gpt-4o',
     websiteUrl: 'https://platform.openai.com/docs/api-reference/responses',
   },
   ollama: {
     defaultApiUrl: 'http://localhost:11434/v1',
-    defaultModel: 'llama2',
     websiteUrl: 'https://ollama.com/',
   },
   '302.ai': {
     defaultApiUrl: 'https://api.302.ai/v1',
-    defaultModel: 'gpt-3.5-turbo',
     websiteUrl: 'https://share.302.ai/BJ7iSL',
   },
   openrouter: {
     defaultApiUrl: 'https://openrouter.ai/api/v1',
-    defaultModel: 'openai/gpt-3.5-turbo',
     websiteUrl: 'https://openrouter.ai/',
   },
   // TokenDance（词元跳动）多模型网关，兼容 OpenAI Chat Completions 协议
   tokendance: {
     defaultApiUrl: 'https://tokendance.space/gateway/v1',
-    defaultModel: 'deepseek-v3.2',
     websiteUrl: 'https://tokendance.space/',
   },
 }

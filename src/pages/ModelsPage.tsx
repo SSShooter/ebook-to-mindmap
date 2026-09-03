@@ -81,7 +81,7 @@ export function ModelsPage() {
       provider: (draft?.provider as AIModel['provider']) ?? 'tokendance',
       apiKey: key,
       apiUrl: draft?.apiUrl || PROVIDER_CONFIGS.tokendance.defaultApiUrl,
-      model: draft?.model || PROVIDER_CONFIGS.tokendance.defaultModel,
+      model: draft?.model || '',
     }
     setEditingModel(null)
     setFormData(restored)
@@ -247,7 +247,7 @@ export function ModelsPage() {
         provider: 'gemini',
         apiKey: '',
         apiUrl: PROVIDER_CONFIGS.gemini.defaultApiUrl,
-        model: PROVIDER_CONFIGS.gemini.defaultModel,
+        model: '',
       }
       setFormData(newFormData)
       fetchAvailableModels(newFormData)
@@ -382,12 +382,13 @@ export function ModelsPage() {
                           ...formData,
                           provider: value,
                           apiUrl: PROVIDER_CONFIGS[value].defaultApiUrl,
+                          model: '',
                         }
                         setFormData(newFormData)
                         fetchAvailableModels(newFormData)
                       }}
                       disabled={isReadOnly}>
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
