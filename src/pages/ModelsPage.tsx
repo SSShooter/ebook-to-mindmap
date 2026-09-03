@@ -353,7 +353,7 @@ export function ModelsPage() {
                 {t('models.addModel')}
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
               <DialogHeader>
                 <DialogTitle>
                   {isReadOnly
@@ -371,7 +371,9 @@ export function ModelsPage() {
                 </div>
               )}
 
-              <div className="space-y-4 py-4">
+              {/* 中间内容区独立滚动，标题与底部按钮始终可见；隐藏滚动条 */}
+              <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                <div className="space-y-4 py-4">
                 <div className="space-y-2">
                   <Label htmlFor="provider">{t('config.aiProvider')}</Label>
                   <div className="flex flex-col items-start gap-2">
@@ -392,17 +394,17 @@ export function ModelsPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="gemini">Google Gemini</SelectItem>
                         <SelectItem value="openai">
                           {t('config.openaiCompatible')}
                         </SelectItem>
-                        <SelectItem value="openai-responses">
-                          OpenAI Responses API
-                        </SelectItem>
-                        <SelectItem value="ollama">Ollama</SelectItem>
-                        <SelectItem value="302.ai">302.AI</SelectItem>
                         <SelectItem value="openrouter">OpenRouter</SelectItem>
                         <SelectItem value="tokendance">TokenDance</SelectItem>
+                        <SelectItem value="openai-responses">
+                          {t('config.openaiCompatible')} Responses
+                        </SelectItem>
+                        <SelectItem value="gemini">Google Gemini</SelectItem>
+                        <SelectItem value="ollama">Ollama</SelectItem>
+                        <SelectItem value="302.ai">302.AI</SelectItem>
                       </SelectContent>
                     </Select>
                     <Button
@@ -576,8 +578,9 @@ export function ModelsPage() {
                 </div>
 
               </div>
+              </div>
 
-              <DialogFooter>
+              <DialogFooter className="border-t border-border pt-4 shrink-0">
                 <Button
                   variant="outline"
                   onClick={() => setIsDialogOpen(false)}>
