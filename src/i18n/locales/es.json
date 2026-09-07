@@ -318,6 +318,7 @@
     "selectModelPlaceholder": "Seleccionar un modelo",
     "fetchModelsFailed": "Error al obtener la lista de modelos",
     "searchModels": "Buscar modelos...",
+    "searchProvider": "Buscar proveedor...",
     "refreshModels": "Actualizar lista de modelos",
     "fixed": "Fijo",
     "cannotDeleteFixed": "No se puede eliminar un modelo fijo",
@@ -334,7 +335,8 @@
     "rechargeStars": "Recargar estrellas",
     "rechargeHint": "Haga clic en el botón de arriba para ir a la página de recarga",
     "loginRequired": "Inicie sesión para ver su saldo de estrellas y recargar",
-    "oauthKeyWritten": "Autorización OAuth correcta: se escribió una clave nueva en \"{{name}}\""
+    "oauthKeyWritten": "Autorización OAuth correcta: se escribió una clave nueva en \"{{name}}\"",
+    "noProviderFound": "No se encontró ningún proveedor coincidente."
   },
   "customPrompts": {
     "title": "Prompts personalizados",

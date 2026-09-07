@@ -318,6 +318,7 @@
     "selectModelPlaceholder": "모델 선택",
     "fetchModelsFailed": "모델 목록 가져오기 실패",
     "searchModels": "모델 검색...",
+    "searchProvider": "공급자 검색...",
     "refreshModels": "모델 목록 새로 고침",
     "fixed": "고정",
     "cannotDeleteFixed": "고정 모델은 삭제할 수 없습니다",
@@ -334,7 +335,8 @@
     "rechargeStars": "별 충전",
     "rechargeHint": "위 버튼을 클릭하여 충전 페이지로 이동",
     "loginRequired": "별 잔액 확인 및 충전을 위해 로그인하세요",
-    "oauthKeyWritten": "OAuth 인증 성공, \"{{name}}\"에 새 키가 기록되었습니다"
+    "oauthKeyWritten": "OAuth 인증 성공, \"{{name}}\"에 새 키가 기록되었습니다",
+    "noProviderFound": "일치하는 공급자를 찾을 수 없습니다."
   },
   "customPrompts": {
     "title": "커스텀 프롬프트",

@@ -318,6 +318,7 @@
     "selectModelPlaceholder": "選擇一個模型",
     "fetchModelsFailed": "取得模型列表失敗",
     "searchModels": "搜尋模型...",
+    "searchProvider": "搜尋供應商...",
     "refreshModels": "重新整理模型列表",
     "fixed": "固定",
     "cannotDeleteFixed": "不能刪除固定模型",
@@ -334,7 +335,8 @@
     "rechargeStars": "儲值星星",
     "rechargeHint": "點擊上方按鈕前往儲值頁面",
     "loginRequired": "請先登入以查看星星餘額並儲值",
-    "oauthKeyWritten": "OAuth 授權成功，已為「{{name}}」寫入新 Key"
+    "oauthKeyWritten": "OAuth 授權成功，已為「{{name}}」寫入新 Key",
+    "noProviderFound": "未找到符合的供應商。"
   },
   "customPrompts": {
     "title": "自訂提示詞",

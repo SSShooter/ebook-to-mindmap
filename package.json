@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
-    "tauri:build": "tauri build"
+    "tauri:build": "tauri build",
+    "update:providers": "node scripts/sync-providers.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",

@@ -318,6 +318,7 @@
     "selectModelPlaceholder": "モデルを選択",
     "fetchModelsFailed": "モデル一覧の取得に失敗しました",
     "searchModels": "モデルを検索...",
+    "searchProvider": "プロバイダーを検索...",
     "refreshModels": "モデル一覧を更新",
     "fixed": "固定",
     "cannotDeleteFixed": "固定モデルは削除できません",
@@ -334,7 +335,8 @@
     "rechargeStars": "スターをチャージ",
     "rechargeHint": "上のボタンをクリックしてチャージページへ",
     "loginRequired": "スター残高の確認とチャージにはログインが必要です",
-    "oauthKeyWritten": "OAuth 認証に成功し、「{{name}}」に新しいキーを書き込みました"
+    "oauthKeyWritten": "OAuth 認証に成功し、「{{name}}」に新しいキーを書き込みました",
+    "noProviderFound": "一致するプロバイダーが見つかりません。"
   },
   "customPrompts": {
     "title": "カスタムプロンプト",

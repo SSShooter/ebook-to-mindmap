@@ -318,6 +318,7 @@
     "selectModelPlaceholder": "Select a model",
     "fetchModelsFailed": "Failed to fetch models",
     "searchModels": "Search models...",
+    "searchProvider": "Search provider...",
     "refreshModels": "Refresh models",
     "fixed": "Fixed",
     "cannotDeleteFixed": "Cannot delete fixed model",
@@ -334,7 +335,8 @@
     "rechargeStars": "Recharge Stars",
     "rechargeHint": "Click the button above to visit the recharge page",
     "loginRequired": "Please login to view your star balance and recharge",
-    "oauthKeyWritten": "OAuth authorized — a new Key was written to \"{{name}}\""
+    "oauthKeyWritten": "OAuth authorized — a new Key was written to \"{{name}}\"",
+    "noProviderFound": "No matching provider found."
   },
   "customPrompts": {
     "title": "Custom Prompts",

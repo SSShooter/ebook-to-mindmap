@@ -318,6 +318,7 @@
     "selectModelPlaceholder": "Ein Modell auswählen",
     "fetchModelsFailed": "Modellliste konnte nicht abgerufen werden",
     "searchModels": "Modelle suchen...",
+    "searchProvider": "Anbieter suchen...",
     "refreshModels": "Modellliste aktualisieren",
     "fixed": "Fest",
     "cannotDeleteFixed": "Festes Modell kann nicht gelöscht werden",
@@ -334,7 +335,8 @@
     "rechargeStars": "Sterne aufladen",
     "rechargeHint": "Klicken Sie auf die Schaltfläche oben, um zur Aufladeseite zu gelangen",
     "loginRequired": "Bitte melden Sie sich an, um Ihr Stern-Guthaben anzuzeigen und aufzuladen",
-    "oauthKeyWritten": "OAuth autorisiert – ein neuer Schlüssel wurde in „{{name}}\" geschrieben"
+    "oauthKeyWritten": "OAuth autorisiert – ein neuer Schlüssel wurde in „{{name}}\" geschrieben",
+    "noProviderFound": "Kein passender Anbieter gefunden."
   },
   "customPrompts": {
     "title": "Eigene Prompts",

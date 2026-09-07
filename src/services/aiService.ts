@@ -15,7 +15,7 @@ import type { MindElixirData } from 'mind-elixir'
 import { plaintextToMindElixir } from 'mind-elixir/plaintextConverter'
 import { getLanguageInstruction, type SupportedLanguage } from './prompts/utils'
 import type { AIConfig } from '../types/ai'
-import { PROVIDER_CONFIGS, TOKENDANCE_APP_URL } from '../types/ai'
+import { getProviderConfig, TOKENDANCE_APP_URL } from '../types/ai'
 import i18n from '../i18n'
 import { appFetch } from '@/lib/fetch'
 import {
@@ -45,7 +45,7 @@ export class AIService {
   }
 
   private getModelConfig(config: AIConfig): ModelConfig {
-    const providerConfig = PROVIDER_CONFIGS[config.provider]
+    const providerConfig = getProviderConfig(config.provider)
 
     return {
       apiUrl: config.apiUrl || providerConfig.defaultApiUrl,
@@ -678,6 +678,6 @@ export class AIService {
 // 保持向后兼容性
 export class AiService extends AIService {
   constructor(apiKey: string) {
-    super({ provider: 'gemini', apiKey })
+    super({ provider: 'google', apiKey })
   }
 }

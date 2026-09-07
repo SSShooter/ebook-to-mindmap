@@ -28,6 +28,7 @@ import { useConfigStore, useProcessingOptions } from '../../stores/configStore'
 import { useModelStore } from '../../stores/modelStore'
 import { useAuthStore } from '../../stores/authStore'
 import type { SupportedLanguage } from '../../services/prompts/utils'
+import { getProviderLabel } from '../../types/ai'
 import { useState, useEffect, useEffectEvent } from 'react'
 
 interface ConfigDialogProps {
@@ -192,7 +193,7 @@ export function ConfigDialog({ processing }: ConfigDialogProps) {
                     <span className="font-medium">
                       {t('config.aiProvider')}:
                     </span>{' '}
-                    {selectedModel.provider}
+                    {getProviderLabel(selectedModel.provider)}
                   </div>
                   <div>
                     <span className="font-medium">
