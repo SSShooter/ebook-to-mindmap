@@ -211,7 +211,6 @@ export const MindMapCard: React.FC<MindMapCardProps> = ({
       <CardContent>
         {isLoading && !reasoning && !mindMapData?.nodeData?.topic ? (
           <div className="text-center text-muted-foreground py-8 aspect-square">
-            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
             <p>{t('common.generatingMindMap')}</p>
           </div>
         ) : (
