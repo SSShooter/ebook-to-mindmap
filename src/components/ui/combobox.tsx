@@ -62,14 +62,20 @@ export function Combobox({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+      <PopoverContent
+        className="w-[var(--radix-popover-trigger-width)] p-0"
+        align="start"
+        // Dialog 的滚动锁（react-remove-scroll）会拦截下拉列表的 wheel 事件导致无法滚动，
+        // 在捕获阶段阻断传播，让列表恢复原生滚动（https://github.com/radix-ui/primitives/issues/1155）
+        onWheelCapture={(e) => e.stopPropagation()}
+      >
         <Command>
           <CommandInput
             placeholder={searchPlaceholder}
             value={inputValue}
             onValueChange={setInputValue}
           />
-          <CommandList>
+          <CommandList className="overscroll-contain [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             <CommandEmpty>
               {allowCustomInput ? (
                 <div

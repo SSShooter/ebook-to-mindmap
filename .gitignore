@@ -15,6 +15,9 @@ dist-ssr
 # Tauri
 src-tauri/target
 
+# WorkBuddy local workspace data (daily logs etc.), not part of the product
+.workbuddy/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -1,15 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Dialog,
@@ -37,8 +30,18 @@ import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import { useModelStore, type AIModel } from '../stores/modelStore'
 import { useAuthStore } from '../stores/authStore'
-import { PROVIDER_CONFIGS } from '../types/ai'
+import {
+  getProviderConfig,
+  getProviderOptions,
+  isApiUrlEditable,
+} from '../types/ai'
+import type { AIProvider } from '../types/ai'
+import { MODELS_DEV_PROVIDER_MAP } from '../config/ai-providers'
 import { MindElixirStarModal } from '@/components/MindElixirStarModal'
+import { ProviderSelector } from '@/components/ProviderSelector'
+import { TokenDanceWallet } from '@/components/TokenDanceWallet'
+import { TokenDanceConnectButton } from '@/components/TokenDanceConnectButton'
+import { useTokenDanceOAuthStore } from '@/stores/tokenDanceOAuthStore'
 
 export function ModelsPage() {
   const { t } = useTranslation()
@@ -50,13 +53,52 @@ export function ModelsPage() {
   const [isReadOnly, setIsReadOnly] = useState(false)
   const [isStarModalOpen, setIsStarModalOpen] = useState(false)
 
+  const pendingOAuthResult = useTokenDanceOAuthStore((s) => s.pendingResult)
+  const consumeOAuthResult = useTokenDanceOAuthStore((s) => s.consumeResult)
+
+  // TokenDance OAuth 授权回跳后：把换到的新 Key 写入目标模型
+  //  - 编辑既有模型 → updateModel(id, { apiKey })
+  //  - 新建模型草稿 → 用带 Key 的草稿重开「新增模型」弹窗
+  useEffect(() => {
+    if (!pendingOAuthResult) return
+    const result = consumeOAuthResult()
+    if (!result) return
+    const { key, target } = result
+
+    if (target.editingModelId) {
+      const existing = models.find((m) => m.id === target.editingModelId)
+      if (existing) {
+        updateModel(existing.id, { apiKey: key })
+        toast.success(t('models.oauthKeyWritten', { name: existing.name }))
+        return
+      }
+    }
+
+    // 新建模型草稿：填充 Key 后重开弹窗，让用户核对名称/模型后保存
+    const draft = target.draft
+    const restored: typeof formData = {
+      name: draft?.name ?? '',
+      provider: (draft?.provider as AIProvider) ?? 'tokendance',
+      apiKey: key,
+      apiUrl: draft?.apiUrl || getProviderConfig('tokendance').defaultApiUrl,
+      model: draft?.model || '',
+    }
+    setEditingModel(null)
+    setFormData(restored)
+    fetchAvailableModels(restored)
+    setIsDialogOpen(true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingOAuthResult])
+
   const [formData, setFormData] = useState({
     name: '',
-    provider: 'gemini' as AIModel['provider'],
+    provider: 'openai' as AIProvider,
     apiKey: '',
     apiUrl: '',
     model: '',
   })
+
+  const providerOptions = getProviderOptions(t)
 
   const [availableModels, setAvailableModels] = useState<string[]>([])
   const [isLoadingModels, setIsLoadingModels] = useState(false)
@@ -71,22 +113,10 @@ export function ModelsPage() {
     const apiKey = params?.apiKey ?? formData.apiKey
     const provider = params?.provider ?? formData.provider
 
-    if (!apiUrl || !apiKey) {
-      setAvailableModels([])
-      return
-    }
+    // TokenDance 的模型目录是公开的，未填 API Key 也能拉取，方便先选模型再填密钥
+    const isPublicCatalog = provider === 'tokendance'
 
-    // Only fetch for openai compatible providers
-    if (
-      ![
-        'openai',
-        'openai-responses',
-        'ollama',
-        '302.ai',
-        'gemini',
-        'openrouter',
-      ].includes(provider)
-    ) {
+    if (!apiUrl || (!apiKey && !isPublicCatalog)) {
       setAvailableModels([])
       return
     }
@@ -94,8 +124,8 @@ export function ModelsPage() {
     setIsLoadingModels(true)
     try {
       const headers: HeadersInit = {
-        Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
+        ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
       }
 
       const response = await appFetch(`${apiUrl}/models`, { headers })
@@ -116,59 +146,55 @@ export function ModelsPage() {
     }
   }
 
-  const providerSettings: Record<
-    AIModel['provider'],
-    {
-      apiKeyLabel: string
-      apiKeyPlaceholder: string
-      apiUrlPlaceholder: string
-      modelPlaceholder: string
-      url: string
-    }
-  > = {
-    gemini: {
-      apiKeyLabel: 'Gemini API Key',
-      apiKeyPlaceholder: t('config.enterGeminiApiKey'),
-      modelPlaceholder: t('config.modelPlaceholder'),
-      apiUrlPlaceholder: PROVIDER_CONFIGS.gemini.defaultApiUrl,
-      url: PROVIDER_CONFIGS.gemini.websiteUrl,
-    },
+  interface ProviderFormSettings {
+    apiKeyLabel: string
+    apiKeyPlaceholder: string
+    apiUrlPlaceholder: string
+    modelPlaceholder: string
+    url: string
+  }
+
+  /** 内置供应商的专属文案；其余（models.dev / 自定义）走通用兜底 */
+  const builtInSettings: Partial<Record<AIProvider, ProviderFormSettings>> = {
     openai: {
       apiKeyLabel: 'API Token',
       apiKeyPlaceholder: t('config.enterApiToken'),
-      apiUrlPlaceholder: PROVIDER_CONFIGS.openai.defaultApiUrl,
+      apiUrlPlaceholder: getProviderConfig('openai').defaultApiUrl,
       modelPlaceholder: t('config.modelPlaceholder'),
-      url: PROVIDER_CONFIGS.openai.websiteUrl,
+      url: getProviderConfig('openai').websiteUrl,
     },
     'openai-responses': {
       apiKeyLabel: 'API Token',
       apiKeyPlaceholder: t('config.enterApiToken'),
-      apiUrlPlaceholder: PROVIDER_CONFIGS['openai-responses'].defaultApiUrl,
+      apiUrlPlaceholder: getProviderConfig('openai-responses').defaultApiUrl,
       modelPlaceholder: t('config.modelPlaceholder'),
-      url: PROVIDER_CONFIGS['openai-responses'].websiteUrl,
+      url: getProviderConfig('openai-responses').websiteUrl,
     },
-    ollama: {
-      apiKeyLabel: 'API Token',
-      apiKeyPlaceholder: 'API Token',
-      apiUrlPlaceholder: PROVIDER_CONFIGS.ollama.defaultApiUrl,
+    tokendance: {
+      apiKeyLabel: 'TokenDance API Key',
+      apiKeyPlaceholder: t('config.enterTokenDanceApiKey'),
+      apiUrlPlaceholder: getProviderConfig('tokendance').defaultApiUrl,
       modelPlaceholder: t('config.modelPlaceholder'),
-      url: PROVIDER_CONFIGS.ollama.websiteUrl,
-    },
-    '302.ai': {
-      apiKeyLabel: 'API Token',
-      apiKeyPlaceholder: t('config.enterApiToken'),
-      apiUrlPlaceholder: PROVIDER_CONFIGS['302.ai'].defaultApiUrl,
-      modelPlaceholder: t('config.modelPlaceholder'),
-      url: PROVIDER_CONFIGS['302.ai'].websiteUrl,
-    },
-    openrouter: {
-      apiKeyLabel: 'OpenRouter API Key',
-      apiKeyPlaceholder: t('config.enterOpenRouterApiKey'),
-      apiUrlPlaceholder: PROVIDER_CONFIGS.openrouter.defaultApiUrl,
-      modelPlaceholder: t('config.modelPlaceholder'),
-      url: PROVIDER_CONFIGS.openrouter.websiteUrl,
+      url: getProviderConfig('tokendance').websiteUrl,
     },
   }
+
+  const getProviderSettings = (provider: AIProvider): ProviderFormSettings => {
+    const builtIn = builtInSettings[provider]
+    if (builtIn) return builtIn
+
+    const config = getProviderConfig(provider)
+    const meta = MODELS_DEV_PROVIDER_MAP[provider]
+    return {
+      apiKeyLabel: meta ? `${meta.name} API Key` : 'API Token',
+      apiKeyPlaceholder: meta?.env?.[0] || t('config.enterApiToken'),
+      apiUrlPlaceholder: config.defaultApiUrl || 'https://api.example.com/v1',
+      modelPlaceholder: t('config.modelPlaceholder'),
+      url: config.websiteUrl,
+    }
+  }
+
+  const providerSettings = getProviderSettings(formData.provider)
 
   const handleOpenDialog = (model?: AIModel, readOnly = false) => {
     // Open custom modal for MindElixirStar
@@ -193,10 +219,10 @@ export function ModelsPage() {
       setEditingModel(null)
       const newFormData: typeof formData = {
         name: '',
-        provider: 'gemini',
+        provider: 'openai',
         apiKey: '',
-        apiUrl: PROVIDER_CONFIGS.gemini.defaultApiUrl,
-        model: PROVIDER_CONFIGS.gemini.defaultModel,
+        apiUrl: getProviderConfig('openai').defaultApiUrl,
+        model: '',
       }
       setFormData(newFormData)
       fetchAvailableModels(newFormData)
@@ -302,7 +328,7 @@ export function ModelsPage() {
                 {t('models.addModel')}
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
               <DialogHeader>
                 <DialogTitle>
                   {isReadOnly
@@ -320,50 +346,49 @@ export function ModelsPage() {
                 </div>
               )}
 
-              <div className="space-y-4 py-4">
+              {/* 中间内容区独立滚动，标题与底部按钮始终可见；隐藏滚动条 */}
+              <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                <div className="space-y-4 py-4">
                 <div className="space-y-2">
                   <Label htmlFor="provider">{t('config.aiProvider')}</Label>
                   <div className="flex flex-col items-start gap-2">
-                    <Select
+                    <ProviderSelector
                       value={formData.provider}
-                      onValueChange={(value: AIModel['provider']) => {
+                      options={providerOptions}
+                      onChange={(value: string) => {
                         const newFormData = {
                           ...formData,
-                          provider: value,
-                          apiUrl: PROVIDER_CONFIGS[value].defaultApiUrl,
+                          provider: value as AIProvider,
+                          apiUrl: getProviderConfig(value).defaultApiUrl,
+                          model: '',
                         }
                         setFormData(newFormData)
                         fetchAvailableModels(newFormData)
                       }}
-                      disabled={isReadOnly}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="gemini">Google Gemini</SelectItem>
-                        <SelectItem value="openai">
-                          {t('config.openaiCompatible')}
-                        </SelectItem>
-                        <SelectItem value="openai-responses">
-                          OpenAI Responses API
-                        </SelectItem>
-                        <SelectItem value="ollama">Ollama</SelectItem>
-                        <SelectItem value="302.ai">302.AI</SelectItem>
-                        <SelectItem value="openrouter">OpenRouter</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Button
-                      variant="link"
-                      className="p-0 h-auto text-xs"
-                      asChild>
-                      <a
-                        href={providerSettings[formData.provider].url}
-                        target="_blank"
-                        rel="noopener noreferrer">
-                        {t('config.visitSite')}
-                        <ExternalLink className="h-3 w-3 ml-1" />
-                      </a>
-                    </Button>
+                      searchPlaceholder={t(
+                        'models.searchProvider',
+                        'Search provider...'
+                      )}
+                      emptyText={t(
+                        'models.noProviderFound',
+                        'No matching provider found.'
+                      )}
+                      disabled={isReadOnly}
+                    />
+                    {providerSettings.url && (
+                      <Button
+                        variant="link"
+                        className="p-0 h-auto text-xs"
+                        asChild>
+                        <a
+                          href={providerSettings.url}
+                          target="_blank"
+                          rel="noopener noreferrer">
+                          {t('config.visitSite')}
+                          <ExternalLink className="h-3 w-3 ml-1" />
+                        </a>
+                      </Button>
+                    )}
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -380,13 +405,13 @@ export function ModelsPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="api-key">
-                    {providerSettings[formData.provider].apiKeyLabel}
+                    {providerSettings.apiKeyLabel}
                   </Label>
                   <Input
                     id="api-key"
                     type="password"
                     placeholder={
-                      providerSettings[formData.provider].apiKeyPlaceholder
+                      providerSettings.apiKeyPlaceholder
                     }
                     value={formData.apiKey}
                     onChange={(e) => {
@@ -399,21 +424,43 @@ export function ModelsPage() {
                     }}
                     readOnly={isReadOnly}
                   />
+                  {formData.provider === 'tokendance' && !isReadOnly && (
+                    <div className="pt-0.5">
+                      <TokenDanceConnectButton
+                        target={
+                          editingModel
+                            ? { editingModelId: editingModel.id }
+                            : {
+                                draft: {
+                                  name: formData.name,
+                                  provider: formData.provider,
+                                  apiKey: formData.apiKey,
+                                  apiUrl: formData.apiUrl,
+                                  model: formData.model,
+                                },
+                              }
+                        }
+                        hasKey={!!formData.apiKey.trim()}
+                        disabled={isReadOnly}
+                      />
+                      <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
+                        {t('tokendance.oauth.connectDesc')}
+                      </p>
+                    </div>
+                  )}
                 </div>
 
-                {(formData.provider === 'openai' ||
-                  formData.provider === 'openai-responses' ||
-                  formData.provider === 'ollama' ||
-                  formData.provider === '302.ai' ||
-                  formData.provider === 'gemini' ||
-                  formData.provider === 'openrouter') && (
-                  <div className="space-y-2">
+                {formData.provider === 'tokendance' && (
+                  <TokenDanceWallet apiKey={formData.apiKey} compact />
+                )}
+
+                <div className="space-y-2">
                     <Label htmlFor="api-url">{t('config.apiUrl')}</Label>
                     <Input
                       id="api-url"
                       type="url"
                       placeholder={
-                        providerSettings[formData.provider].apiUrlPlaceholder ||
+                        providerSettings.apiUrlPlaceholder ||
                         'https://api.example.com/v1'
                       }
                       value={formData.apiUrl}
@@ -425,14 +472,10 @@ export function ModelsPage() {
                         setFormData(newFormData)
                         fetchAvailableModels(newFormData)
                       }}
-                      disabled={
-                        formData.provider === 'gemini' ||
-                        formData.provider === '302.ai' ||
-                        formData.provider === 'openrouter'
-                      }
+                      // 官方域名锁定，防止误改；需要自定义端点请用「OpenAI 兼容」
+                      disabled={!isApiUrlEditable(formData.provider)}
                     />
                   </div>
-                )}
 
                 <div className="space-y-2">
                   <Label htmlFor="model-id">{t('models.modelId')}</Label>
@@ -446,7 +489,7 @@ export function ModelsPage() {
                             setFormData({ ...formData, model: value })
                           }
                           placeholder={
-                            providerSettings[formData.provider].modelPlaceholder
+                            providerSettings.modelPlaceholder
                           }
                           searchPlaceholder={t(
                             'models.searchModels',
@@ -463,7 +506,7 @@ export function ModelsPage() {
                         <Input
                           id="model-id"
                           placeholder={
-                            providerSettings[formData.provider].modelPlaceholder
+                            providerSettings.modelPlaceholder
                           }
                           value={formData.model}
                           onChange={(e) =>
@@ -473,7 +516,9 @@ export function ModelsPage() {
                         />
                       )}
                     </div>
-                    {formData.apiUrl && formData.apiKey && (
+                    {formData.apiUrl &&
+                      (formData.apiKey ||
+                        formData.provider === 'tokendance') && (
                       <Button
                         type="button"
                         variant="outline"
@@ -491,8 +536,9 @@ export function ModelsPage() {
                 </div>
 
               </div>
+              </div>
 
-              <DialogFooter>
+              <DialogFooter className="border-t border-border pt-4 shrink-0">
                 <Button
                   variant="outline"
                   onClick={() => setIsDialogOpen(false)}>

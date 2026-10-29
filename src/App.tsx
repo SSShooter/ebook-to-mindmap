@@ -14,6 +14,7 @@ import { Menu } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useAuthStore } from './stores/authStore'
 import { initDeepLinkAuth } from './lib/auth'
+import { TokenDanceOAuthBridge } from './components/TokenDanceOAuthBridge'
 
 function App() {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
@@ -31,6 +32,7 @@ function App() {
       <TooltipProvider>
         <div className="flex h-screen overflow-hidden bg-background">
           <Toaster />
+          <TokenDanceOAuthBridge />
 
           {/* Desktop Sidebar */}
           <div className="hidden lg:block">
