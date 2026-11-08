@@ -15,8 +15,8 @@ importers:
         specifier: ^0.0.3
         version: 0.0.3
       '@mind-elixir/open-desktop':
-        specifier: ^0.0.4
-        version: 0.0.4
+        specifier: ^0.0.5
+        version: 0.0.5
       '@radix-ui/react-accordion':
         specifier: ^1.2.11
         version: 1.2.11(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -894,8 +894,8 @@ packages:
   '@mind-elixir/export-mindmap@0.0.3':
     resolution: {integrity: sha512-fRs0t/WQ3m8Dys0zBeG3ITq+/C50tLXnuOscLftsrbNKtOJaCyZGt6gLaNbKjt6h/ZV43R3kDMSVJ8KstxixeA==}
 
-  '@mind-elixir/open-desktop@0.0.4':
-    resolution: {integrity: sha512-7G/uj45HaePCrWYGZt7Vtqlant7gWl3ImorwEp+s1zy7e9Z6i4QpJbCBRptiWqPmmEeqfpJUyhZvVWmvUQ3Blw==}
+  '@mind-elixir/open-desktop@0.0.5':
+    resolution: {integrity: sha512-Aag8c05V95fufSZM152GiX3xeUeMSg1I56W3T5UkaCBryWK2taCnPMi6s6brdBaJTEFOnuuErbjjacOeaCHERg==}
 
   '@napi-rs/canvas-android-arm64@0.1.74':
     resolution: {integrity: sha512-aq5ode+9Z/ZR0H485dI2jdRdttg/hl9Ob+iPCt0nj+QFiirpxDrbUHKeTZWQWEtkWyC7vI5R2dMTbDINBfl9eg==}
@@ -4800,7 +4800,7 @@ snapshots:
       fast-xml-parser: 4.5.3
       jszip: 3.10.1
 
-  '@mind-elixir/open-desktop@0.0.4': {}
+  '@mind-elixir/open-desktop@0.0.5': {}
 
   '@napi-rs/canvas-android-arm64@0.1.74':
     optional: true
