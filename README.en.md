@@ -6,7 +6,7 @@
   <p align="center"><strong>Thick Books Read Thin, True Knowledge Made Easy</strong></p>
 </p>
 
-[中文](README.md) | English
+[中文](README.md) | English | [日本語](README.ja.md)
 
 ![E-book to Mind Map Screenshot1](/img/screenshot2.png)
 

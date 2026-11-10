@@ -6,7 +6,7 @@
   <p align="center"><strong>把厚书读薄，让真知易得</strong></p>
 </p>
 
-[English](README.en.md) | 中文
+[English](README.en.md) | 中文 | [日本語](README.ja.md)
 
 ![电子书转思维导图 next 截图](/img/screenshot2.png)
 
